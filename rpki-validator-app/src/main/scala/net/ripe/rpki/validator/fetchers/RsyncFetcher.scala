@@ -34,6 +34,10 @@ import java.net.URI
 
 import org.slf4j.{Logger, LoggerFactory}
 
+/**
+  * downloads data from the rir
+  * @param config
+  */
 class RsyncFetcher(config: FetcherConfig) extends Fetcher with RsyncSupport {
 
   import net.ripe.rpki.validator.fetchers.Fetcher._
