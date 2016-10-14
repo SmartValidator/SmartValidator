@@ -1,6 +1,14 @@
 RIPE NCC RPKI Validator
 =======================
 
+This application allows operators to download and validate the global Resource 
+Public Key Infrastructure (RPKI) data set for use in their BGP decision making 
+process and router configuration. To learn more about RPKI and BGP Origin Validation, 
+please visit:
+
+  https://www.ripe.net/certification/
+
+
 Source Code
 -----------
 
@@ -317,6 +325,15 @@ Known Issues
 
 Version History
 ---------------
+
+2.23 - 28 September 2016
+= Performance and stability improvements, bugfixes
+= Add Trust Anchor name as additional column in export files
+= Fallback to plain HTTP if HTTPS connection fails
+= Improve error reporting
+= Parse and validate Ghostbusters Records
+= Support multiple TA certificate URLs in TAL
+= Support HTTP URLs in TAL
 
 2.22 - 25 May 2016
 = Multiple improvements in RRDP support
