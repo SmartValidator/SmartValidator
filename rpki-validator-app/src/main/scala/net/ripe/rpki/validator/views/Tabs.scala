@@ -46,6 +46,6 @@ object Tabs {
   val RtrLogTab = Tab(Text("rpki-rtr log"), "/rtr-log")
   val ValidationDetailsTab = Tab(Text("Validation Details"), "/validation-details")
   val UserPreferencesTab = Tab(<img src="/images/cogs.png" width="15" height="17" alt="Settings"/>, "/user-preferences")
-
-  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BgpPreviewTab, ExportTab, RtrSessionsTab, UserPreferencesTab)
+  val BlockView = Tab(Text("BlockView"), "/blockView")
+  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockView, BgpPreviewTab, ExportTab, RtrSessionsTab, UserPreferencesTab)
 }
