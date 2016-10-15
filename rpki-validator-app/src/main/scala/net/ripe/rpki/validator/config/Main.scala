@@ -35,7 +35,6 @@ import java.util.EnumSet
 import javax.servlet.DispatcherType
 
 import grizzled.slf4j.Logging
-import net.ripe.rpki.commons.crypto.CertificateRepositoryObject
 import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.bgp.preview._
 import net.ripe.rpki.validator.config.health.HealthServlet
@@ -47,7 +46,6 @@ import net.ripe.rpki.validator.rtr.{Pdu, RTRServer}
 import net.ripe.rpki.validator.store.{CacheStore, DurableCaches}
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 import org.apache.commons.io.FileUtils
-import org.apache.http.client.methods.HttpGet
 import org.eclipse.jetty.server.Server
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
@@ -104,7 +102,7 @@ class Main extends Http with Logging { main =>
   val bgpRisDumpDownloader = new BgpRisDumpDownloader(http)
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList))
 
   var store : CacheStore = _
 
@@ -262,6 +260,10 @@ class Main extends Http with Logging { main =>
       override protected def addWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.addWhitelistEntry(entry)) }
       override protected def removeWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeWhitelistEntry(entry)) }
 
+      override protected def blockList = memoryImage.single.get.blockList
+      override protected def addBlockListEntry(entry: RtrPrefix): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlocklistEntry(entry)) }
+      override protected def removeBlockListEntry(entry: RtrPrefix): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlocklistEntry(entry)) }
+
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements
 
@@ -283,6 +285,8 @@ class Main extends Http with Logging { main =>
       override protected def updateTrustAnchorState(locator: TrustAnchorLocator, enabled: Boolean) = updateAndPersist { implicit transaction =>
         memoryImage.transform(_.updateTrustAnchorState(locator, enabled))
       }
+
+
     }
 
     val restApiServlet = new RestApi() {

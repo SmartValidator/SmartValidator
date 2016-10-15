@@ -51,6 +51,9 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def whitelist = sys.error("TODO")
     override protected def addWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
     override protected def removeWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
+    override protected def blockList: BlockList = sys.error("TODO")
+    override protected def addBlockListEntry(entry: RtrPrefix) = sys.error("TODO")
+    override protected def removeBlockListEntry(entry: RtrPrefix) = sys.error("TODO")
     override protected def bgpAnnouncementSet = sys.error("TODO")
     override protected def validatedAnnouncements = sys.error("TODO")
     override protected def getRtrPrefixes = sys.error("TODO")
@@ -62,6 +65,8 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override def newVersionDetailFetcher = sys.error("TODO")
     override def updateUserPreferences(userPreferences: UserPreferences) = sys.error("TODO")
     override protected def updateTrustAnchorState(locator: TrustAnchorLocator, enabled: Boolean) {}
+
+
   }, "/*")
 
   addServlet(new RestApi {

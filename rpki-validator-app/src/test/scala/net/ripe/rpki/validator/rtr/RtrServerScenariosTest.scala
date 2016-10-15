@@ -78,7 +78,7 @@ class RtrServerScenariosTest extends ValidatorTestCase with BeforeAndAfterAll wi
       status = Idle(new DateTime, None),
       enabled = true)))
     val validatedObjects: ValidatedObjects = new ValidatedObjects(Map.empty)
-    cache = scala.concurrent.stm.Ref(MemoryImage(Filters(), Whitelist(), trustAnchors, validatedObjects))
+    cache = scala.concurrent.stm.Ref(MemoryImage(Filters(), Whitelist(), trustAnchors, validatedObjects, BlockList()))
     server = new RTRServer(
       port = port,
       closeOnError = true,
@@ -102,7 +102,7 @@ class RtrServerScenariosTest extends ValidatorTestCase with BeforeAndAfterAll wi
 
   after {
     cache.single.transform {
-      db => MemoryImage(Filters(), Whitelist(), new TrustAnchors(Seq.empty), new ValidatedObjects(Map.empty))
+      db => MemoryImage(Filters(), Whitelist(), new TrustAnchors(Seq.empty), new ValidatedObjects(Map.empty), BlockList())
     }
     client.close()
   }

@@ -39,6 +39,7 @@ case class MemoryImage(filters: Filters,
                        whitelist: Whitelist,
                        trustAnchors: TrustAnchors,
                        validatedObjects: ValidatedObjects,
+                       blockList: BlockList,
                        version: Int = 0) {
 
   private lazy val distinctRtrPrefixes =
@@ -58,6 +59,10 @@ case class MemoryImage(filters: Filters,
         this
     }
   }
+
+  def addBlocklistEntry(entry: RtrPrefix) = copy(version = version + 1, blockList = blockList.addBlockListEntry(entry))
+
+  def removeBlocklistEntry(entry: RtrPrefix) = copy(version = version + 1, blockList = blockList.removeBlockListEntry(entry))
 
   def addWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, whitelist = whitelist.addEntry(entry))
 

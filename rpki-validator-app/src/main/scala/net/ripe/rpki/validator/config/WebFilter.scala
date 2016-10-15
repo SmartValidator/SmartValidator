@@ -43,10 +43,12 @@ abstract class WebFilter extends ScalatraFilter
   with TrustAnchorsController
   with FiltersController
   with WhitelistController
+  with BlockListController
   with BgpPreviewController
   with ExportController
   with RtrSessionsController
-  with UserPreferencesController {
+  with UserPreferencesController
+  {
 
   private def isAjaxRequest: Boolean = "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"))
 

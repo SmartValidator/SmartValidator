@@ -45,7 +45,7 @@ class PersistentDataTest extends ValidatorTestCase {
   val data_empty: PersistentData = PersistentData()
   val json_empty: String = """{"schemaVersion":0,"filters":{"entries":[]},"whitelist":{"entries":[]},"userPreferences":{"updateAlertActive":true,"maxStaleDays":0},"trustAnchorData":{}}"""
   val data_some: PersistentData = PersistentData(0,
-      Filters(Set(IgnoreFilter(IpRange.parse("192.168.0.0/16")))),
+      Filters(Set(IgnoreFilter(IpRange.parse("192.168.0.0/16")))), BlockList(),
       Whitelist(Set(RtrPrefix(Asn.parse("AS65530"), IpRange.parse("10.0.0.0/8"), None))))
   val json_some: String = """{"schemaVersion":0,"filters":{"entries":[{"prefix":"192.168.0.0/16"}]},"whitelist":{"entries":[{"asn":65530,"prefix":"10.0.0.0/8"}]},"userPreferences":{"updateAlertActive":true,"maxStaleDays":0},"trustAnchorData":{}}"""
 
@@ -60,7 +60,7 @@ class PersistentDataTest extends ValidatorTestCase {
   }
 
   test("serialise Whitelist with maxPrefixLength") {
-    val data: PersistentData = PersistentData(0, Filters(), Whitelist(Set(RtrPrefix.validate(Asn.parse("AS65530"),
+    val data: PersistentData = PersistentData(0, Filters(), BlockList(),Whitelist(Set(RtrPrefix.validate(Asn.parse("AS65530"),
       IpRange.parse("10.0.0.0/8"), Some(16)).toOption.get)))
     val json: String = """{"schemaVersion":0,"filters":{"entries":[]},"whitelist":{"entries":[{"asn":65530,"prefix":"10.0.0.0/8","maxPrefixLength":16}]},"userPreferences":{"updateAlertActive":true,"maxStaleDays":0},"trustAnchorData":{}}"""
     serialiser.serialise(data) should equal(json)
@@ -86,7 +86,7 @@ class PersistentDataTest extends ValidatorTestCase {
   }
 
   test("serialise Whitelist, maxPrefixLength, preferences and disabled trust anchors list") {
-    val data: PersistentData = PersistentData(0, Filters(), Whitelist(Set(RtrPrefix.validate(Asn.parse("AS65530"),
+    val data: PersistentData = PersistentData(0, Filters(), BlockList(), Whitelist(Set(RtrPrefix.validate(Asn.parse("AS65530"),
       IpRange.parse("10.0.0.0/8"), Some(16)).toOption.get)), UserPreferences(updateAlertActive = false, maxStaleDays = 5), trustAnchorData = Map("AfriNIC RPKI Root" -> TrustAnchorData(enabled = true)))
     val json: String = """{"schemaVersion":0,"filters":{"entries":[]},"whitelist":{"entries":[{"asn":65530,"prefix":"10.0.0.0/8","maxPrefixLength":16}]},"userPreferences":{"updateAlertActive":false,"maxStaleDays":5},"trustAnchorData":{"AfriNIC RPKI Root":{"enabled":true}}}"""
     serialiser.serialise(data) should equal(json)
