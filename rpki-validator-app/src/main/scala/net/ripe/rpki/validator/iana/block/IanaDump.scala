@@ -46,7 +46,7 @@ object IanaDump extends Logging {
   }
 
   private val IanaEntryRegex = """^\s*([0-9]+)\s+([0-9a-fA-F.:/]+)\s+([0-9]+)\s*$""".r
-  private[preview] def parseLine(content: String): Option[IanaEntry] = {
+  private[block] def parseLine(content: String): Option[IanaEntry] = {
     content match {
       case IanaEntryRegex(asn, ipprefix, visibility) =>
         try {
