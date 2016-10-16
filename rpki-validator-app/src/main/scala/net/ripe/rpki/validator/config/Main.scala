@@ -39,6 +39,7 @@ import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.bgp.preview._
 import net.ripe.rpki.validator.config.health.HealthServlet
 import net.ripe.rpki.validator.fetchers.FetcherConfig
+import net.ripe.rpki.validator.iana.block.{IanaAnnouncementSet, IanaDumpDownloader}
 import net.ripe.rpki.validator.lib.{UserPreferences, _}
 import net.ripe.rpki.validator.models.validation._
 import net.ripe.rpki.validator.models.{Idle, IgnoreFilter, TrustAnchorData, _}
@@ -87,6 +88,9 @@ class Main extends Http with Logging { main =>
     BgpAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv4.gz"),
     BgpAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv6.gz")))
 
+  val ianaSets = Ref(Seq(
+    IanaAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv4.gz")))
+
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
 
   val dataFile = ApplicationOptions.dataFileLocation
@@ -100,6 +104,9 @@ class Main extends Http with Logging { main =>
   val userPreferences = Ref(data.userPreferences)
 
   val bgpRisDumpDownloader = new BgpRisDumpDownloader(http)
+
+  val ianaDumpDownloader = new IanaDumpDownloader(http)
+
 
   val memoryImage = Ref(
     MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList))
@@ -146,6 +153,14 @@ class Main extends Http with Logging { main =>
       }
     }
   }
+
+  private def refreshIanaDumps() {
+    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.download) foreach { dumps =>
+//      atomic { implicit transaction =>
+//        bgpAnnouncementSets() = dumps
+//        bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
+      }
+    }
 
   private def runValidator(forceNewFetch: Boolean) {
     import lib.DateAndTime._
