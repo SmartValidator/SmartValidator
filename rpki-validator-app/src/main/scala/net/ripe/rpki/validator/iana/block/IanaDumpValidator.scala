@@ -1,5 +1,7 @@
 package net.ripe.rpki.validator.iana.block
 
+import java.text.SimpleDateFormat
+
 import grizzled.slf4j.Logging
 import net.ripe.ipresource.{Asn, IpRange}
 import net.ripe.rpki.validator.lib.DateAndTime
@@ -11,8 +13,7 @@ import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
 //TODO: currently copied fully from bgpDumpValidator.scala
 case class IanaAnnouncementSet(url: String, entries: Seq[IanaAnnouncement] = Seq.empty)
 
-case class IanaAnnouncement(asn: Asn, prefix: IpRange) {
-  def interval = NumberResourceInterval(prefix.getStart, prefix.getEnd)
+case class IanaAnnouncement(prefix: IpRange, designation: String, date: SimpleDateFormat, status: String) {
 }
 
 object IanaValidatedAnnouncement {
@@ -26,8 +27,6 @@ object IanaValidatedAnnouncement {
 case class IanaValidatedAnnouncement(announced: IanaAnnouncement, prefixes: Seq[(RouteValidity, RtrPrefix)] = List.empty) {
   require(!invalidsAsn.exists(_.asn == announced.asn), "invalidsAsn must not contain the announced ASN")
   require(!invalidsLength.exists(_.asn != announced.asn), "invalidsLength must only contain VRPs that refer to the same ASN")
-
-  def asn = announced.asn
 
   def prefix = announced.prefix
 
