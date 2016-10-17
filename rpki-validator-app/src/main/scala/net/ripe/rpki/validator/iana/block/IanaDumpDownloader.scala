@@ -1,25 +1,25 @@
 package net.ripe.rpki.validator.iana.block
 
+import java.net.URL
+
 import grizzled.slf4j.Logging
-import org.apache.http.client.HttpClient
 
 import scala.concurrent._
-import scala.xml.XML
 
 /**
   * Created by fimka on 16/10/16.
   */
-class IanaDumpDownloader(httpClient: HttpClient) extends Logging {
+class IanaDumpDownloader() extends Logging {
+
   /**
-    * Refreshes the given IanaRisDump. If the source information was not modified or could not be retrieved the input dump is returned.
+    * Refreshes the given IanaRisDump. If the source information was not modified or could not be retrieved the input
+    * dump is returned.
     */
-  def download(dump: IanaAnnouncementSet)(implicit ec: ExecutionContext): Future[Any] = Future {
+  def download(dump: IanaAnnouncementSet)(implicit ec: ExecutionContext): Future[IanaAnnouncementSet] = Future {
     try {
-      val get = XML.load(dump.url)
-//      dump.lastModified foreach { lastModified =>
-//        get.addHeader("If-Modified-Since", formatAsRFC2616(lastModified))
-//      }
-//      val responseHandler = makeResponseHandler(dump)
+
+      val xmlHandler = makeXmlParser(dump.url, dump)
+      blocking{ xmlHandler}
     } catch {
       case e: Exception =>
         error("error retrieving IANA entries from " + dump.url, e)
@@ -27,6 +27,16 @@ class IanaDumpDownloader(httpClient: HttpClient) extends Logging {
     }
 
   }
+
+  protected[preview] def makeXmlParser(get: String, dump: IanaAnnouncementSet): IanaAnnouncementSet =
+  {
+
+    var a = scala.xml.XML.load(new URL(get))
+
+
+    dump
+  }
+
 
 //  protected[preview] def makeResponseHandler(dump: IanaAnnouncementSet): ResponseHandler[IanaAnnouncementSet] = {
 //    val responseHandler = new ResponseHandler[IanaAnnouncementSet]() {

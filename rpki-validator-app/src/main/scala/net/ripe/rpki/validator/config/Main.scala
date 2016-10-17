@@ -89,7 +89,7 @@ class Main extends Http with Logging { main =>
     BgpAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv6.gz")))
 
   val ianaSets = Ref(Seq(
-    IanaAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv4.gz")))
+    IanaAnnouncementSet("http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.xml")))
 
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
 
@@ -105,7 +105,7 @@ class Main extends Http with Logging { main =>
 
   val bgpRisDumpDownloader = new BgpRisDumpDownloader(http)
 
-  val ianaDumpDownloader = new IanaDumpDownloader(http)
+  val ianaDumpDownloader = new IanaDumpDownloader()
 
 
   val memoryImage = Ref(
@@ -139,6 +139,8 @@ class Main extends Http with Logging { main =>
 
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshIanaDumps() }
+
 
   private def loadTrustAnchors(): TrustAnchors = {
     val tals = FileUtils.listFiles(ApplicationOptions.talDirLocation, Array("tal"), false)
@@ -155,11 +157,12 @@ class Main extends Http with Logging { main =>
   }
 
   private def refreshIanaDumps() {
-    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.download) foreach { dumps =>
-//      atomic { implicit transaction =>
-//        bgpAnnouncementSets() = dumps
-//        bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
+    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.downloada) foreach { dumps =>
+      atomic { implicit transaction =>
+            ianaSets() = dumps
+        //        bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
       }
+    }
     }
 
   private def runValidator(forceNewFetch: Boolean) {

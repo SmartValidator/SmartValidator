@@ -8,7 +8,7 @@ import net.ripe.rpki.validator.models.RouteValidity._
 import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
 
 
-//TODO: cuurrently copied fully from bgpDumpValidator.scala
+//TODO: currently copied fully from bgpDumpValidator.scala
 case class IanaAnnouncementSet(url: String, entries: Seq[IanaAnnouncement] = Seq.empty)
 
 case class IanaAnnouncement(asn: Asn, prefix: IpRange) {
