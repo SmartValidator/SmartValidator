@@ -1,8 +1,10 @@
 package net.ripe.rpki.validator.iana.block
 
 import java.net.URL
+import java.text.SimpleDateFormat
 
 import grizzled.slf4j.Logging
+import net.ripe.ipresource.IpRange
 
 import scala.concurrent._
 
@@ -19,7 +21,7 @@ class IanaDumpDownloader() extends Logging {
     try {
 
       val xmlHandler = makeXmlParser(dump.url, dump)
-      blocking{ xmlHandler}
+      xmlHandler
     } catch {
       case e: Exception =>
         error("error retrieving IANA entries from " + dump.url, e)
@@ -28,15 +30,16 @@ class IanaDumpDownloader() extends Logging {
 
   }
 
-  protected[preview] def makeXmlParser(get: String, dump: IanaAnnouncementSet): IanaAnnouncementSet =
+  protected[block] def makeXmlParser(get: String, dump: IanaAnnouncementSet): IanaAnnouncementSet =
   {
 
-    var a = scala.xml.XML.load(new URL(get))
-    val recordRoot = (a \\ "registry")
-    for(record <- recordRoot \\ "record"){
-      //ex
+    var ianaRawData = scala.xml.XML.load(new URL(get))
+    val ianaRecords = Set[IanaAnnouncement]()
+    val recordRoot = (ianaRawData \\ "registry")
+    for(record <- (recordRoot \\ "record")){
+      ianaRecords + new IanaAnnouncement(IpRange.parse("10.0.0.0/8"), (record \\ "designation").text, new SimpleDateFormat(),  (record \\ "status").text)
     }
-
+    dump
   }
 
 }

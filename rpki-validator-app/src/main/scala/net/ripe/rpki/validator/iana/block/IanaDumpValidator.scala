@@ -25,8 +25,8 @@ object IanaValidatedAnnouncement {
 
 
 case class IanaValidatedAnnouncement(announced: IanaAnnouncement, prefixes: Seq[(RouteValidity, RtrPrefix)] = List.empty) {
-  require(!invalidsAsn.exists(_.asn == announced.asn), "invalidsAsn must not contain the announced ASN")
-  require(!invalidsLength.exists(_.asn != announced.asn), "invalidsLength must only contain VRPs that refer to the same ASN")
+//  require(!invalidsAsn.exists(_.asn == announced.asn), "invalidsAsn must not contain the announced ASN")
+//  require(!invalidsLength.exists(_.asn != announced.asn), "invalidsLength must only contain VRPs that refer to the same ASN")
 
   def prefix = announced.prefix
 
@@ -45,49 +45,49 @@ case class IanaValidatedAnnouncement(announced: IanaAnnouncement, prefixes: Seq[
 }
 
 object IanaAnnouncementValidator {
-  val VISIBILITY_THRESHOLD = 5
+//  val VISIBILITY_THRESHOLD = 5
+//
+//  def validate(announcement: IanaAnnouncement, prefixes: Seq[RtrPrefix]): IanaValidatedAnnouncement =
+//    validate(announcement, NumberResourceIntervalTree(prefixes: _*))
 
-  def validate(announcement: IanaAnnouncement, prefixes: Seq[RtrPrefix]): IanaValidatedAnnouncement =
-    validate(announcement, NumberResourceIntervalTree(prefixes: _*))
+//  def validate(announcement: IanaAnnouncement, prefixTree: NumberResourceIntervalTree[RtrPrefix]): IanaValidatedAnnouncement = {
+////    val matchingPrefixes = prefixTree.findExactAndAllLessSpecific(announcement.interval)
+////    val groupedByValidity = matchingPrefixes.map { prefix =>
+////      val validity = if (hasInvalidAsn(prefix, announcement))
+////        InvalidAsn
+////      else if (hasInvalidPrefixLength(prefix, announcement)) InvalidLength else Valid
+////      (validity, prefix)
+////    }
+////    IanaValidatedAnnouncement(announcement, groupedByValidity)
+//  }
 
-  def validate(announcement: IanaAnnouncement, prefixTree: NumberResourceIntervalTree[RtrPrefix]): IanaValidatedAnnouncement = {
-    val matchingPrefixes = prefixTree.findExactAndAllLessSpecific(announcement.interval)
-    val groupedByValidity = matchingPrefixes.map { prefix =>
-      val validity = if (hasInvalidAsn(prefix, announcement))
-        InvalidAsn
-      else if (hasInvalidPrefixLength(prefix, announcement)) InvalidLength else Valid
-      (validity, prefix)
-    }
-    IanaValidatedAnnouncement(announcement, groupedByValidity)
-  }
+//  private def hasInvalidAsn(prefix: RtrPrefix, announced: IanaAnnouncement) =
+//    prefix.asn != announced.asn
 
-  private def hasInvalidAsn(prefix: RtrPrefix, announced: IanaAnnouncement) =
-    prefix.asn != announced.asn
-
-  private def hasInvalidPrefixLength(prefix: RtrPrefix, announced: IanaAnnouncement) =
-    prefix.maxPrefixLength.getOrElse(prefix.prefix.getPrefixLength) < announced.prefix.getPrefixLength
+//  private def hasInvalidPrefixLength(prefix: RtrPrefix, announced: IanaAnnouncement) =
+//    prefix.maxPrefixLength.getOrElse(prefix.prefix.getPrefixLength) < announced.prefix.getPrefixLength
 }
 
 class IanaAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) extends Logging {
 
-  import scala.concurrent.stm._
-
-  private val _validatedAnnouncements = Ref(IndexedSeq.empty[IanaValidatedAnnouncement])
-
-  def validatedAnnouncements: IndexedSeq[IanaValidatedAnnouncement] = _validatedAnnouncements.single.get
-
-  def startUpdate(announcements: Seq[IanaAnnouncement], prefixes: Seq[RtrPrefix]) = {
-    val v = validate(announcements, prefixes)
-    _validatedAnnouncements.single.set(v)
-  }
-
-  private def validate(announcements: Seq[IanaAnnouncement], prefixes: Seq[RtrPrefix]): IndexedSeq[IanaValidatedAnnouncement] = {
-    info("Started validating " + announcements.size + " Iana announcements with " + prefixes.size + " RTR prefixes.")
-    val prefixTree = NumberResourceIntervalTree(prefixes: _*)
-    val (result, time) = DateAndTime.timed {
-      announcements.par.map(IanaAnnouncementValidator.validate(_, prefixTree)).seq.toIndexedSeq
-    }
-    info(s"Completed validating ${result.size} Iana announcements with ${prefixes.size} RTR prefixes in ${time / 1000.0} seconds")
-    result
-  }
+//  import scala.concurrent.stm._
+//
+//  private val _validatedAnnouncements = Ref(IndexedSeq.empty[IanaValidatedAnnouncement])
+//
+//  def validatedAnnouncements: IndexedSeq[IanaValidatedAnnouncement] = _validatedAnnouncements.single.get
+//
+//  def startUpdate(announcements: Seq[IanaAnnouncement], prefixes: Seq[RtrPrefix]) = {
+//    val v = validate(announcements, prefixes)
+//    _validatedAnnouncements.single.set(v)
+//  }
+//
+//  private def validate(announcements: Seq[IanaAnnouncement], prefixes: Seq[RtrPrefix]): IndexedSeq[IanaValidatedAnnouncement] = {
+//    info("Started validating " + announcements.size + " Iana announcements with " + prefixes.size + " RTR prefixes.")
+//    val prefixTree = NumberResourceIntervalTree(prefixes: _*)
+//    val (result, time) = DateAndTime.timed {
+//      announcements.par.map(IanaAnnouncementValidator.validate(_, prefixTree)).seq.toIndexedSeq
+//    }
+//    info(s"Completed validating ${result.size} Iana announcements with ${prefixes.size} RTR prefixes in ${time / 1000.0} seconds")
+//    result
+//  }
 }

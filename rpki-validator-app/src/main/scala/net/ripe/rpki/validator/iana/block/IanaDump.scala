@@ -18,13 +18,13 @@ case class IanaDump(url: String, lastModified: Option[DateTime] = None, entries:
 
 object IanaDump extends Logging {
   def toAnnouncedRoutes(entries: Seq[IanaEntry]) = {
-    val (r, t) = DateAndTime.timed {
-      entries.par.
-        filter(e => e.visibility >= IanaAnnouncementValidator.VISIBILITY_THRESHOLD).
-        map(e => IanaAnnouncement(e.origin, e.prefix)).distinct.seq
-    }
-    info(s"toAnnouncedRoutes time ${t/1000.0} seconds")
-    r
+//    val (r, t) = DateAndTime.timed {
+//      entries.par.
+//        filter(e => e.visibility >= IanaAnnouncementValidator.VISIBILITY_THRESHOLD).
+//        map(e => IanaAnnouncement(e.origin, e.prefix)).distinct.seq
+//    }
+//    info(s"toAnnouncedRoutes time ${t/1000.0} seconds")
+//    r
   }
 
   def parse(is: InputStream): Either[Exception, IndexedSeq[IanaEntry]] = {

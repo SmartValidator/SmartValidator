@@ -157,7 +157,7 @@ class Main extends Http with Logging { main =>
   }
 
   private def refreshIanaDumps() {
-    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.downloada) foreach { dumps =>
+    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.download) foreach { dumps =>
       atomic { implicit transaction =>
             ianaSets() = dumps
         //        bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
