@@ -32,6 +32,10 @@ class IanaDumpDownloader() extends Logging {
   {
 
     var a = scala.xml.XML.load(new URL(get))
+    val recordRoot = (a \\ "registry")
+    for(record <- recordRoot \\ "record"){
+      //ex
+    }
 
 
     dump
