@@ -39,7 +39,7 @@ import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.bgp.preview._
 import net.ripe.rpki.validator.config.health.HealthServlet
 import net.ripe.rpki.validator.fetchers.FetcherConfig
-import net.ripe.rpki.validator.iana.block.{IanaAnnouncementSet, IanaDumpDownloader}
+import net.ripe.rpki.validator.iana.block.{IanaAnnouncementSet, IanaAnnouncementValidator, IanaDumpDownloader}
 import net.ripe.rpki.validator.lib.{UserPreferences, _}
 import net.ripe.rpki.validator.models.validation._
 import net.ripe.rpki.validator.models.{Idle, IgnoreFilter, TrustAnchorData, _}
@@ -92,6 +92,7 @@ class Main extends Http with Logging { main =>
     IanaAnnouncementSet("http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.xml")))
 
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
+  val ianaAnnouncementValidator = new IanaAnnouncementValidator
 
   val dataFile = ApplicationOptions.dataFileLocation
   val data = PersistentDataSerialiser.read(dataFile).getOrElse(PersistentData())
@@ -137,9 +138,9 @@ class Main extends Http with Logging { main =>
 
   runWebServer()
 
+  actorSystem.scheduler.schedule(initialDelay = 5.seconds, interval = 10.seconds) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
-  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshIanaDumps() }
 
 
   private def loadTrustAnchors(): TrustAnchors = {
@@ -160,10 +161,11 @@ class Main extends Http with Logging { main =>
     Future.traverse(ianaSets.single.get)(ianaDumpDownloader.download) foreach { dumps =>
       atomic { implicit transaction =>
             ianaSets() = dumps
-        //        bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
+//            ianaAnnouncementValidator.startUpdate(ianaSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
       }
     }
     }
+val musicElem = scala.xml.XML.loadFile("/tmp/music.xml")
 
   private def runValidator(forceNewFetch: Boolean) {
     import lib.DateAndTime._

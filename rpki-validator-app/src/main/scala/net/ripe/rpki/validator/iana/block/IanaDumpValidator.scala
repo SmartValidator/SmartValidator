@@ -1,11 +1,9 @@
 package net.ripe.rpki.validator.iana.block
 
-import java.text.SimpleDateFormat
+import java.util.Date
 
 import grizzled.slf4j.Logging
-import net.ripe.ipresource.{Asn, IpRange}
-import net.ripe.rpki.validator.lib.DateAndTime
-import net.ripe.rpki.validator.lib.NumberResources.{NumberResourceInterval, NumberResourceIntervalTree}
+import net.ripe.ipresource.IpRange
 import net.ripe.rpki.validator.models.RouteValidity._
 import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
 
@@ -13,7 +11,7 @@ import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
 //TODO: currently copied fully from bgpDumpValidator.scala
 case class IanaAnnouncementSet(url: String, entries: Seq[IanaAnnouncement] = Seq.empty)
 
-case class IanaAnnouncement(prefix: IpRange, designation: String, date: SimpleDateFormat, status: String) {
+case class IanaAnnouncement(prefix: IpRange, designation: String, date: Date, status: String) {
 }
 
 object IanaValidatedAnnouncement {

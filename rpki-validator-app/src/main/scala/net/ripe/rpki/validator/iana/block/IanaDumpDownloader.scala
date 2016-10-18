@@ -7,6 +7,7 @@ import grizzled.slf4j.Logging
 import net.ripe.ipresource.IpRange
 
 import scala.concurrent._
+import scala.xml.XML
 
 /**
   * Created by fimka on 16/10/16.
@@ -19,9 +20,8 @@ class IanaDumpDownloader() extends Logging {
     */
   def download(dump: IanaAnnouncementSet)(implicit ec: ExecutionContext): Future[IanaAnnouncementSet] = Future {
     try {
-
       val xmlHandler = makeXmlParser(dump.url, dump)
-      xmlHandler
+      blocking {xmlHandler}
     } catch {
       case e: Exception =>
         error("error retrieving IANA entries from " + dump.url, e)
@@ -33,13 +33,19 @@ class IanaDumpDownloader() extends Logging {
   protected[block] def makeXmlParser(get: String, dump: IanaAnnouncementSet): IanaAnnouncementSet =
   {
 
-    var ianaRawData = scala.xml.XML.load(new URL(get))
-    val ianaRecords = Set[IanaAnnouncement]()
-    val recordRoot = (ianaRawData \\ "registry")
-    for(record <- (recordRoot \\ "record")){
-      ianaRecords + new IanaAnnouncement(IpRange.parse("10.0.0.0/8"), (record \\ "designation").text, new SimpleDateFormat(),  (record \\ "status").text)
+    val ianaRawData = XML.load(new URL(get))
+    var ianaRecords = Set[IanaAnnouncement]()
+    val dateFormat = new SimpleDateFormat("yyyy-MM")
+    (ianaRawData \\"record").foreach{ record =>
+      val ip = IpRange.parse((record \\ "prefix").text)
+      val designation = (record \\ "designation").text
+      val date = dateFormat.parse((record \\ "date").text)
+      val status = (record \\ "status").text
+      ianaRecords += new IanaAnnouncement(ip, designation, date, status)
     }
-    dump
+    val a = Seq(ianaRecords)
+
+    dump.copy(entries = ianaRecords.toSeq)
   }
 
 }
