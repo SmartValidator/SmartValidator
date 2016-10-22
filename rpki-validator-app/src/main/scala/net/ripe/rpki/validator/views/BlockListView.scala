@@ -20,12 +20,6 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
     <div>{ renderMessages(messages, fieldNameToText) }</div>
       <div class="alert-message block-message info" data-alert="alert">
         <a class="close" href="#">×</a>
-        <p>
-          add info
-        </p>
-        <p>
-          add info
-        </p>
       </div>
       <h2>Add entry</h2>
       <div class="well">
@@ -60,9 +54,8 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
               for (entry <- blockList.entries) yield {
                 <tr>
                   <td>{ entry.prefix }</td>
-
                   <td>
-                    <form method="POST" action="/filters" style="padding:0;margin:0;">
+                    <form method="POST" action="/blocklist" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ entry.prefix.toString }/>
                       <input type="submit" class="btn" value="delete"/>
@@ -77,11 +70,7 @@ $(document).ready(function() {
   $('#blocklist-table').dataTable({
       "sPaginationType": "full_numbers",
       "aoColumns": [
-        { "sType": "numeric" },
         null,
-        { "sType": "numeric" },
-        { "bSortable": false },
-        { "bSortable": false },
         { "bSortable": false }
       ]
     }).show();
