@@ -11,6 +11,7 @@ import scalaz.{Failure, Success}
 
 trait BlockListController extends ApplicationController {
   protected def blockList: BlockList
+
   protected def addBlockListEntry(entry: BlockFilter): Unit
   protected def removeBlockListEntry(entry: BlockFilter): Unit
   protected def blockListEntryExists(entry: BlockFilter): Boolean = blockList.entries.contains(entry)

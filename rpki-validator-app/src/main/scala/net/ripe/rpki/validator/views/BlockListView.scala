@@ -9,7 +9,8 @@ import scala.xml.Text
 /**
   * Created by fimka on 14/10/16.
   */
-class BlockListView(blockList: BlockList, params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
+  empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
   //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
@@ -31,17 +32,11 @@ class BlockListView(blockList: BlockList, params: Map[String, String] = Map.empt
         <form method="POST" class="form-stacked">
           <fieldset>
             <div>
-              <div class="span4"><label for="announcement-asn">Origin</label></div>
+              <div class="span4"><label for="block-prefix">Prefix</label></div>
               <div class="span4"></div>
             </div>
             <div class="span4">
-              <input id="announcement-asn" type="text" name="asn" value={ params.getOrElse("asn", "") } placeholder="ASN (required)"/>
-            </div>
-            <div class="span4">
-              <input id="announcement-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") } placeholder="IPv4 or IPv6 prefix (required)"/>
-            </div>
-            <div class="span4">
-              <input id="announcement-maxprefixlen" type="text" name="maxPrefixLength" value={ params.getOrElse("maxPrefixLength", "") } placeholder="Number (optional)"/>
+              <input id="block-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") } placeholder="IPv4 or IPv6 prefix (required)"/>
             </div>
             <div class="span2">
               <input type="submit" class="btn primary" value="Add"/>
