@@ -89,7 +89,8 @@ class Main extends Http with Logging { main =>
     BgpAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv6.gz")))
 
   val ianaSets = Ref(Seq(
-    IanaAnnouncementSet("http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.xml")))
+    IanaAnnouncementSet("http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.xml"),
+    IanaAnnouncementSet("http://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xml")))
 
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
   val ianaAnnouncementValidator = new IanaAnnouncementValidator
