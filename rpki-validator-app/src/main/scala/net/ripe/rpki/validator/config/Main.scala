@@ -287,6 +287,7 @@ val musicElem = scala.xml.XML.loadFile("/tmp/music.xml")
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements
+      override protected def validatedIanaSets = ianaSets.single.get
 
       override protected def getRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
 

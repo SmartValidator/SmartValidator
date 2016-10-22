@@ -2,6 +2,8 @@
 package net.ripe.rpki.validator
 package controllers
 
+import net.ripe.rpki.validator.iana.block.IanaAnnouncement
+import net.ripe.rpki.validator.iana.block.IanaAnnouncementSet
 import net.ripe.rpki.validator.lib.Validation._
 import net.ripe.rpki.validator.models.{BlockList, _}
 import net.ripe.rpki.validator.views.BlockListView
@@ -11,7 +13,7 @@ import scalaz.{Failure, Success}
 
 trait BlockListController extends ApplicationController {
   protected def blockList: BlockList
-
+  protected def validatedIanaSets: Seq[IanaAnnouncementSet]
   protected def addBlockListEntry(entry: BlockFilter): Unit
   protected def removeBlockListEntry(entry: BlockFilter): Unit
   protected def blockListEntryExists(entry: BlockFilter): Boolean = blockList.entries.contains(entry)
@@ -19,20 +21,20 @@ trait BlockListController extends ApplicationController {
 
 
   get(baseUrl) {
-    new BlockListView(blockList, messages = feedbackMessages)
+    new BlockListView(blockList,validatedIanaSets, messages = feedbackMessages)
   }
 
   post(baseUrl) {
     submittedBlocker match {
       case Success(entry) =>
         if (blockListEntryExists(entry))
-          new BlockListView(blockList, params, Seq(ErrorMessage("filter already exists")))
+          new BlockListView(blockList, validatedIanaSets,params, Seq(ErrorMessage("filter already exists")))
         else {
           addBlockListEntry(entry)
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been added to the filters.")))
         }
       case Failure(errors) =>
-        new BlockListView(blockList, params, errors)
+       new BlockListView(blockList,validatedIanaSets, params, errors)
     }
   }
 
