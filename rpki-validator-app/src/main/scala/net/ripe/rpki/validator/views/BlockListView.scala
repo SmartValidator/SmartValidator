@@ -12,7 +12,7 @@ import scala.xml.Text
 class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
   empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
-  //  val currentRtrPrefixes = getCurrentRtrPrefixes()
+  //val currentRtrPrefixes = getCurrentRtrPrefixes()
 
   def tab = Tabs.BlockListTab
   def title = Text("Blocklist")
@@ -47,7 +47,7 @@ class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
       <div>
         <h2>Current entries</h2>{
         if (blockList.entries.isEmpty)
-          <div class="alert-message block-message"><p>No whitelist entries defined.</p></div>
+          <div class="alert-message block-message"><p>No blocklist entries defined.</p></div>
         else {
           <table id="whitelist-table" class="zebra-striped" style="display: none;">
             <thead>
