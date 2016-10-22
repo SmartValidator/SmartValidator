@@ -1,6 +1,5 @@
 package net.ripe.rpki.validator.views
 
-import net.ripe.rpki.validator.iana.block.IanaAnnouncement
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
 import net.ripe.rpki.validator.models.BlockList
 
@@ -12,7 +11,7 @@ import scala.xml.Text
 class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
   empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
-  //val currentRtrPrefixes = getCurrentRtrPrefixes()
+//  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
   def tab = Tabs.BlockListTab
   def title = Text("Blocklist")
@@ -36,7 +35,8 @@ class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
               <div class="span4"></div>
             </div>
             <div class="span4">
-              <input id="block-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") } placeholder="IPv4 or IPv6 prefix (required)"/>
+              <input id="block-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") }
+                     placeholder="IPv4 or IPv6 prefix (required)"/>
             </div>
             <div class="span2">
               <input type="submit" class="btn primary" value="Add"/>
@@ -57,35 +57,19 @@ class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
             </thead>
             <tbody>{
               for (entry <- blockList.entries) yield {
-
-
-                def makeDetailsTable(announcements: Seq[IanaAnnouncement]) = {
-                  <table>
-                    <thead>
-                      <tr><th>Prefix</th></tr>
-                    </thead>
-                    {
-                    for { announcement <- announcements } yield {
-                      <tr>
-                        <td> { announcement.prefix.toString } </td>
-                      </tr>
-                    }
-                    }
-                  </table>
-                }
-
                 <tr>
                   <td>{ entry.prefix }</td>
+
                   <td>
-                    <form method="POST" action="/blocklist" style="padding:0;margin:0;">
+                    <form method="POST" action="/filters" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ entry.prefix.toString }/>
                       <input type="submit" class="btn" value="delete"/>
                     </form>
                   </td>
                 </tr>
-              }
-              }</tbody>
+                }
+              } </tbody>
           </table>
             <script><!--
 $(document).ready(function() {
