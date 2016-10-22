@@ -1,7 +1,22 @@
+
 package net.ripe.rpki.validator
 package models
 
-case class BlockList(entries: Set[RtrPrefix] = Set.empty[RtrPrefix]) {
-  def addBlockListEntry(entry: RtrPrefix) = copy(entries + entry)
-  def removeBlockListEntry(entry: RtrPrefix) = copy(entries - entry)
+import net.ripe.ipresource.IpRange
+
+
+case class BlockFilter(prefix: IpRange) {
+  def shouldBlock(rtrPrefix: RtrPrefix): Boolean = prefix.overlaps(rtrPrefix.prefix)
+}
+
+case class BlockList(entries: Set[BlockFilter] = Set.empty) {
+  def addBlockListEntry(entry: BlockFilter) = copy(entries + entry)
+  def removeBlockListEntry(entry: BlockFilter) = copy(entries - entry)
+
+  def filter(input: Iterable[RtrPrefix]): Iterable[RtrPrefix] =
+    if (entries.isEmpty) input
+    else input.filterNot(shouldBlock)
+
+  private def shouldBlock(rtrPrefix: RtrPrefix) = entries.exists(_.shouldBlock(rtrPrefix))
+
 }

@@ -2,16 +2,16 @@ package net.ripe.rpki.validator.views
 
 import net.ripe.rpki.validator.iana.block.IanaAnnouncement
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
-import net.ripe.rpki.validator.models.{BlockList, RouteValidity}
+import net.ripe.rpki.validator.models.BlockList
 
-import scala.xml.{Text, Xhtml}
+import scala.xml.Text
 
 /**
   * Created by fimka on 14/10/16.
   */
-class BlockListView(blockList: BlockList, validatedAnnouncements: Seq[IanaAnnouncement], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class BlockListView(blockList: BlockList, params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
-//  val currentRtrPrefixes = getCurrentRtrPrefixes()
+  //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
   def tab = Tabs.BlockListTab
   def title = Text("Blocklist")
@@ -57,7 +57,7 @@ class BlockListView(blockList: BlockList, validatedAnnouncements: Seq[IanaAnnoun
           <table id="whitelist-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-               <th>Prefix</th><th>&nbsp;</th>
+                <th>Prefix</th><th>&nbsp;</th>
               </tr>
             </thead>
             <tbody>{

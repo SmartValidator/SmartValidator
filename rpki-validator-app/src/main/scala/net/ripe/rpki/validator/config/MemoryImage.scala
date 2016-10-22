@@ -60,9 +60,9 @@ case class MemoryImage(filters: Filters,
     }
   }
 
-  def addBlocklistEntry(entry: RtrPrefix) = copy(version = version + 1, blockList = blockList.addBlockListEntry(entry))
+  def addBlocklistEntry(filter: BlockFilter) = copy(version = version + 1, blockList = blockList.addBlockListEntry(filter))
 
-  def removeBlocklistEntry(entry: RtrPrefix) = copy(version = version + 1, blockList = blockList.removeBlockListEntry(entry))
+  def removeBlocklistEntry(filter: BlockFilter) = copy(version = version + 1, blockList = blockList.removeBlockListEntry(filter))
 
   def addWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, whitelist = whitelist.addEntry(entry))
 

@@ -138,7 +138,7 @@ class Main extends Http with Logging { main =>
 
   runWebServer()
 
-  actorSystem.scheduler.schedule(initialDelay = 5.seconds, interval = 10.seconds) { refreshIanaDumps() }
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.seconds) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
 
@@ -281,8 +281,8 @@ val musicElem = scala.xml.XML.loadFile("/tmp/music.xml")
       override protected def removeWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeWhitelistEntry(entry)) }
 
       override protected def blockList = memoryImage.single.get.blockList
-      override protected def addBlockListEntry(entry: RtrPrefix): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlocklistEntry(entry)) }
-      override protected def removeBlockListEntry(entry: RtrPrefix): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlocklistEntry(entry)) }
+      override protected def addBlockListEntry(entry: BlockFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlocklistEntry(entry)) }
+      override protected def removeBlockListEntry(entry: BlockFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlocklistEntry(entry)) }
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements

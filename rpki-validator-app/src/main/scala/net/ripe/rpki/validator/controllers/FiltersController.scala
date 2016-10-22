@@ -30,8 +30,11 @@
 package net.ripe.rpki.validator
 package controllers
 
-import net.ripe.rpki.validator.models._
-import net.ripe.rpki.validator.views.FiltersView
+import scalaz._
+import Scalaz._
+import lib.Validation._
+import models._
+import views.FiltersView
 
 trait FiltersController extends ApplicationController {
   
@@ -50,7 +53,36 @@ trait FiltersController extends ApplicationController {
   }
 
   post(baseUrl) {
+    submittedFilter match {
+      case Success(entry) =>
+        if (filterExists(entry))
+          new FiltersView(filters, getCurrentRtrPrefixes, params, Seq(ErrorMessage("filter already exists")))
+        else {
+          addFilter(entry)
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been added to the filters.")))
+        }
+      case Failure(errors) =>
+        new FiltersView(filters, getCurrentRtrPrefixes, params, errors)
+    }
   }
 
-  
+  delete(baseUrl) {
+    submittedFilter match {
+      case Success(entry) =>
+        if (filterExists(entry)) {
+          removeFilter(entry)
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been removed from the filters.")))
+        } else {
+          new FiltersView(filters, getCurrentRtrPrefixes, params, Seq(ErrorMessage("filter no longer exists")))
+        }
+      case Failure(errors) =>
+        // go away hacker!
+        new FiltersView(filters, getCurrentRtrPrefixes, params, errors)
+    }
+  }
+
+  private def submittedFilter: ValidationNEL[FeedbackMessage, IgnoreFilter] = {
+    validateParameter("prefix", required(parseIpPrefix)) map IgnoreFilter
+  }
+
 }
