@@ -49,7 +49,7 @@ class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
         if (blockList.entries.isEmpty)
           <div class="alert-message block-message"><p>No blocklist entries defined.</p></div>
         else {
-          <table id="whitelist-table" class="zebra-striped" style="display: none;">
+          <table id="blocklist-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
                 <th>Prefix</th><th>&nbsp;</th>
@@ -89,7 +89,7 @@ class BlockListView(blockList: BlockList, params: Map[String, String] = Map.
           </table>
             <script><!--
 $(document).ready(function() {
-  $('#whitelist-table').dataTable({
+  $('#blocklist-table').dataTable({
       "sPaginationType": "full_numbers",
       "aoColumns": [
         { "sType": "numeric" },
