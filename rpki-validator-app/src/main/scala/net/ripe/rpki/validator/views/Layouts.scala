@@ -49,7 +49,7 @@ object Layouts {
     <html lang="en">
       <head>
         <meta charset="utf-8"/>
-        <title>RPKI Validator - { view.title }</title>
+        <title>BGPSafe - { view.title }</title>
         <link rel="stylesheet" href="/stylesheets/bootstrap/1.3.0/bootstrap.css"/>
         <link rel="stylesheet" href="/stylesheets/application.css"/>
         <script src="/javascript/datatables/1.8.2/jquery.js"/>
@@ -73,7 +73,7 @@ object Layouts {
         <div class="topbar">
           <div class="fill">
             <div class="container">
-              <a class="brand" href="/">RPKI Validator</a>
+              <a class="brand" href="/">BGPSafe</a>
               <ul class="nav">
                 {
                   for (tab <- Tabs.visibleTabs) yield {
@@ -107,15 +107,7 @@ object Layouts {
             <h1>{ view.title }</h1>
           </div>
           { view.body }
-          <footer>
-            <div class="copyright">
-              <img src="/images/ncc-logo.png" align="middle"/>
-              &nbsp;
 
-              Copyright &copy;{ List(2009, (new DateTime).getYear).mkString("-") }
-              the Réseaux IP Européens Network Coordination Centre RIPE NCC. All rights restricted. Version&nbsp;{ ReleaseInfo.version }
-            </div>
-          </footer>
         </div>
         <div id="feedbackButton">
           <a href="mailto:certification@ripe.net?subject=RPKI Validator Feedback"><img src="/images/feedback.png" width="41" height="111" alt="Feedback"/></a>
