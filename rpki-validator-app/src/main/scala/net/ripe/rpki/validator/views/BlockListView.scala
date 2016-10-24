@@ -21,6 +21,32 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
       <div class="alert-message block-message info" data-alert="alert">
         <a class="close" href="#">×</a>
       </div>
+      <div>
+        <h2>Iana Prefix</h2>
+        <table id="ianaSets-table" class="zebra-striped" style="display: none;" data-search={ params.getOrElse("search", "") }>
+          <thead>
+            <tr>
+              <th>ASN</th>
+              <th>Prefix</th>
+              <th>Maximum Length</th>
+              <th>Trust Anchor</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        <script><!--
+$(document).ready(function() {
+  $('#ianaSets-table').dataTable({
+        "oSearch": {"sSearch": $('#ianaSets-table').attr('data-search')},
+        "sPaginationType": "full_numbers",
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": "iana-data"
+    }).show();
+});
+// --></script>
+      </div>
       <h2>Add entry</h2>
       <div class="well">
         <form method="POST" class="form-stacked">
