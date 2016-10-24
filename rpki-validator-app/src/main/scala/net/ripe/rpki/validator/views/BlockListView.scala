@@ -50,10 +50,31 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
               </tr>
             </thead>
             <tbody>{
+              val a = validatedIanaSets(0).entries
+              for (entry1 <- a) yield {
+                <tr>
+                  <td>
+                    {entry1.prefix}
+                  </td>
+                  <td>
+                    {"Iana reserved prefix"}
+                  </td>
+                  <td>
+                    <form method="POST" action="/blocklist" style="padding:0;margin:0;">
+                      <input type="hidden" name="_method" value="DELETE"/>
+                      <input type="hidden" name="prefix" value={entry1.prefix.toString}/>
+                      <input type="hidden" name="origin" value={"Iana reserved prefix"}/>
+                      <input type="submit" class="btn" value="delete"/>
+                    </form>
+                  </td>
+                </tr>
+              }
+              }</tbody>
+          <tbody>{
               for (entry <- blockList.entries) yield {
                 <tr>
                   <td>{ entry.prefix }</td>
-                  <td>>{"Manual"}</td>
+                  <td>{"Manual"}</td>
                   <td>
                     <form method="POST" action="/blocklist" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
@@ -64,21 +85,6 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
                   </td>
                 </tr>
                 }
-              val a =  validatedIanaSets(0).entries
-              for (entry1 <- a) yield {
-                <tr>
-                  <td>{ entry1.prefix }</td>
-                  <td>{"Iana reserved prefix"}</td>
-                  <td>
-                    <form method="POST" action="/blocklist" style="padding:0;margin:0;">
-                      <input type="hidden" name="_method" value="DELETE"/>
-                      <input type="hidden" name="prefix" value={ entry1.prefix.toString }/>
-                      <input type="hidden" name="origin" value={ "Iana reserved prefix" }/>
-                      <input type="submit" class="btn" value="delete"/>
-                    </form>
-                  </td>
-                </tr>
-              }
               } </tbody>
           </table>
             <script><!--

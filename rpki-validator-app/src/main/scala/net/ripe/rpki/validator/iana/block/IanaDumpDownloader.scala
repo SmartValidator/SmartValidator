@@ -41,7 +41,10 @@ class IanaDumpDownloader() extends Logging {
       val designation = (record \\ "designation").text
       val date = dateFormat.parse((record \\ "date").text)
       val status = (record \\ "status").text
-      ianaRecords += new IanaAnnouncement(ip, designation, date, status)
+      if(status != "ALLOCATED"){
+        ianaRecords += new IanaAnnouncement(ip, designation, date, status)
+      }
+
     }
     val a = Seq(ianaRecords)
 
