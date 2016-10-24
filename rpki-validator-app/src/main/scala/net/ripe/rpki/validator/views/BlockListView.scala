@@ -49,13 +49,13 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
           <table id="blocklist-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-                <th>Prefix</th><th>&nbsp;</th>
+                <th>Prefix</th><th>Origin</th><th>&nbsp;</th>
               </tr>
             </thead>
             <tbody>{
               for (entry <- blockList.entries) yield {
                 <tr>
-                  <td>{ entry.prefix }</td>
+                  <td>{ entry.prefix }</td>S
                   <td>
                     <form method="POST" action="/blocklist" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
@@ -65,7 +65,8 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
                   </td>
                 </tr>
                 }
-              for (entry1 <- validatedIanaSets(0).entries) yield {
+              val a =  validatedIanaSets(0).entries
+              for (entry1 <- a) yield {
                 <tr>
                   <td>{ entry1.prefix }</td>
                   <td>
