@@ -43,9 +43,6 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
       </div>
       <div>
         <h2>Current entries</h2>{
-        if (blockList.entries.isEmpty)
-          <div class="alert-message block-message"><p>No blocklist entries defined.</p></div>
-        else {
           <table id="blocklist-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
@@ -55,11 +52,13 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
             <tbody>{
               for (entry <- blockList.entries) yield {
                 <tr>
-                  <td>{ entry.prefix }</td>S
+                  <td>{ entry.prefix }</td>
+                  <td>>{"Manual"}</td>
                   <td>
                     <form method="POST" action="/blocklist" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ entry.prefix.toString }/>
+                      <input type="hidden" name="origin" value={ "Manual" }/>
                       <input type="submit" class="btn" value="delete"/>
                     </form>
                   </td>
@@ -69,10 +68,12 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
               for (entry1 <- a) yield {
                 <tr>
                   <td>{ entry1.prefix }</td>
+                  <td>{"Iana reserved prefix"}</td>
                   <td>
                     <form method="POST" action="/blocklist" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ entry1.prefix.toString }/>
+                      <input type="hidden" name="origin" value={ "Iana reserved prefix" }/>
                       <input type="submit" class="btn" value="delete"/>
                     </form>
                   </td>
@@ -84,7 +85,7 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
 $(document).ready(function() {
   $('#blocklist-table').dataTable({
       "sPaginationType": "full_numbers",
-      "aoColumns": [
+      "aoColumns": [null,
         null,
         { "bSortable": false }
       ]
@@ -99,7 +100,7 @@ $(document).ready(function() {
   });
 });
 // --></script>
-        }
+
         }
       </div>
   }
