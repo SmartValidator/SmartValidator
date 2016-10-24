@@ -21,6 +21,8 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
       <div class="alert-message block-message info" data-alert="alert">
         <a class="close" href="#">×</a>
       </div>
+      <div>
+      </div>
       <h2>Add entry</h2>
       <div class="well">
         <form method="POST" class="form-stacked">
@@ -63,7 +65,7 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
                   </td>
                 </tr>
                 }
-              for (entry1 <- validatedIanaSets.seq.head.entries) yield {
+              for (entry1 <- validatedIanaSets(0).entries) yield {
                 <tr>
                   <td>{ entry1.prefix }</td>
                   <td>
