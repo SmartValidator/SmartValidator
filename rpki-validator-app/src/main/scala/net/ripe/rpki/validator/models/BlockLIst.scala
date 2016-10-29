@@ -2,10 +2,14 @@
 package net.ripe.rpki.validator
 package models
 
-import net.ripe.ipresource.IpRange
+import net.ripe.ipresource.{Asn, IpRange}
+import net.ripe.rpki.validator.lib.Validation._
+
+import scalaz.Scalaz._
 
 
-case class BlockFilter(prefix: IpRange) {
+case class BlockFilter(prefix: IpRange, origin: String = "Manual") {
+
   def shouldBlock(rtrPrefix: RtrPrefix): Boolean = prefix.overlaps(rtrPrefix.prefix)
 }
 

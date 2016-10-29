@@ -113,6 +113,14 @@ object Validation {
   } catch {
     case _: Exception => (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
   }
+  def parseOrigin(s: String): Validation[String, String] = try {
+    val papo = s
+    papo.success
+  } catch {
+    case _: Exception => (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
+  }
+
+
 
   def parseNonNegativeInt(s: String): Validation[String, Int] = parseInt(s).flatMap { x =>
     if (x >= 0)

@@ -2,14 +2,14 @@ package net.ripe.rpki.validator.views
 
 import net.ripe.rpki.validator.iana.block.IanaAnnouncementSet
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
-import net.ripe.rpki.validator.models.BlockList
+import net.ripe.rpki.validator.models.{BlockList,BlockFilter}
 
 import scala.xml.Text
 
 /**
   * Created by fimka on 14/10/16.
   */
-class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncementSet], params: Map[String, String] = Map.
+class BlockListView(blockList: BlockList,validatedIanaBlockFilter: Set[BlockFilter], params: Map[String, String] = Map.
   empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
 //  val currentRtrPrefixes = getCurrentRtrPrefixes()
@@ -29,11 +29,13 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
           <fieldset>
             <div>
               <div class="span4"><label for="block-prefix">Prefix</label></div>
-              <div class="span4"></div>
+              <div class="span12"></div>
             </div>
             <div class="span4">
               <input id="block-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") }
                      placeholder="IPv4 or IPv6 prefix (required)"/>
+              <input id="block-prefix" type="hidden" name="origin" value={ "Manual" }
+                     />
             </div>
             <div class="span2">
               <input type="submit" class="btn primary" value="Add"/>
@@ -49,37 +51,17 @@ class BlockListView(blockList: BlockList,validatedIanaSets: Seq[IanaAnnouncement
                 <th>Prefix</th><th>Origin</th><th>&nbsp;</th>
               </tr>
             </thead>
-            <tbody>{
-              val a = validatedIanaSets(0).entries
-              for (entry1 <- a) yield {
-                <tr>
-                  <td>
-                    {entry1.prefix}
-                  </td>
-                  <td>
-                    {"Iana reserved prefix"}
-                  </td>
-                  <td>
-                    <form method="POST" action="/blocklist" style="padding:0;margin:0;">
-                      <input type="hidden" name="_method" value="DELETE"/>
-                      <input type="hidden" name="prefix" value={entry1.prefix.toString}/>
-                      <input type="hidden" name="origin" value={"Iana reserved prefix"}/>
-                      <input type="submit" class="btn" value="delete"/>
-                    </form>
-                  </td>
-                </tr>
-              }
-              }</tbody>
           <tbody>{
-              for (entry <- blockList.entries) yield {
+            val createTable: Set[BlockFilter] =  (blockList.entries) ++ validatedIanaBlockFilter
+              for (entry <- createTable) yield {
                 <tr>
                   <td>{ entry.prefix }</td>
-                  <td>{"Manual"}</td>
+                  <td>{entry.origin}</td>
                   <td>
-                    <form method="POST" action="/blocklist" style="padding:0;margin:0;">
+                    <form method="POST" action="/blockList" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ entry.prefix.toString }/>
-                      <input type="hidden" name="origin" value={ "Manual" }/>
+                      <input type="hidden" name="origin" value={ entry.origin }/>
                       <input type="submit" class="btn" value="delete"/>
                     </form>
                   </td>
