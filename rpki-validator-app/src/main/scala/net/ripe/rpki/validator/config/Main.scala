@@ -43,6 +43,7 @@ import net.ripe.rpki.validator.iana.block.{IanaAnnouncementSet, IanaAnnouncement
 import net.ripe.rpki.validator.lib.{UserPreferences, _}
 import net.ripe.rpki.validator.models.validation._
 import net.ripe.rpki.validator.models.{Idle, IgnoreFilter, TrustAnchorData, _}
+import net.ripe.rpki.validator.ranking.{AsRankingSet, RankingDumpDownloader}
 import net.ripe.rpki.validator.rtr.{Pdu, RTRServer}
 import net.ripe.rpki.validator.store.{CacheStore, DurableCaches}
 import net.ripe.rpki.validator.util.TrustAnchorLocator
@@ -92,6 +93,9 @@ class Main extends Http with Logging { main =>
     IanaAnnouncementSet("http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.xml"),
     IanaAnnouncementSet("http://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xml")))
 
+  val rankingSets = Ref(Seq(
+    AsRankingSet("http://bgpranking.circl.lu/json")))
+
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
   val ianaAnnouncementValidator = new IanaAnnouncementValidator
 
@@ -108,6 +112,8 @@ class Main extends Http with Logging { main =>
   val bgpRisDumpDownloader = new BgpRisDumpDownloader(http)
 
   val ianaDumpDownloader = new IanaDumpDownloader()
+
+  val rankingDumpDownloader = new RankingDumpDownloader(http)
 
 
   val memoryImage = Ref(
@@ -139,7 +145,8 @@ class Main extends Http with Logging { main =>
 
   runWebServer()
 
-  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.seconds) { refreshIanaDumps() }
+  actorSystem.scheduler.schedule(initialDelay = 30.seconds, interval = 4.seconds) { refreshRankingDumps() }
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
 
@@ -158,15 +165,22 @@ class Main extends Http with Logging { main =>
     }
   }
 
+  private def refreshRankingDumps() {
+    Future.traverse(rankingSets.single.get)(rankingDumpDownloader.download) foreach { dumps =>
+      atomic { implicit transaction =>
+        rankingSets() = dumps
+      }
+    }
+  }
+
   private def refreshIanaDumps() {
-    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.download) foreach { dumps =>
+    Future.traverse(ianaSets.single.get) (ianaDumpDownloader.download) foreach { dumps =>
       atomic { implicit transaction =>
             ianaSets() = dumps
 //            ianaAnnouncementValidator.startUpdate(ianaSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
       }
     }
-    }
-val musicElem = scala.xml.XML.loadFile("/tmp/music.xml")
+  }
 
   private def runValidator(forceNewFetch: Boolean) {
     import lib.DateAndTime._
