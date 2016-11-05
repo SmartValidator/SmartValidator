@@ -1,22 +1,30 @@
 package net.ripe.rpki.validator.controllers
 
 import grizzled.slf4j.Logging
+import net.ripe.rpki.validator.models.{AsRankings, RtrPrefix, ValidatedObjects}
+import net.ripe.rpki.validator.views
+import net.ripe.rpki.validator.views.RankingView
 
 /**
   * Created by fimka on 05/11/16.
   */
 trait RankingController extends ApplicationController with Logging {
+  protected def asRankings: AsRankings
+
+  protected def validatedObjects: ValidatedObjects
+  private def baseUrl = views.Tabs.AsRankingTab.url
+  private def getCurrentRtrPrefixes(): Iterable[RtrPrefix] = validatedObjects.getValidatedRtrPrefixes
 
 
-  get("/ranking") {
+  get(baseUrl) {
+    new RankingView(asRankings, getCurrentRtrPrefixes, messages = feedbackMessages)
+  }
+
+  get(baseUrl) {
 
   }
 
-  get("/ranking-data") {
-
-  }
-
-  post("/ranking")
+  post(baseUrl)
   {
 
   }

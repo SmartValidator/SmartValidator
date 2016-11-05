@@ -89,6 +89,7 @@ class RankingView(rankingSets: AsRankings, getCurrentRtrPrefixes: () => Iterable
 //              }
 //              }</tbody>
 //          </table>
+
             <script><!--
 $(document).ready(function() {
   $('#filters-table').dataTable({
