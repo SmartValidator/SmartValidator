@@ -47,5 +47,6 @@ object Tabs {
   val ValidationDetailsTab = Tab(Text("Validation Details"), "/validation-details")
   val UserPreferencesTab = Tab(<img src="/images/cogs.png" width="15" height="17" alt="Settings"/>, "/user-preferences")
   val BlockListTab = Tab(Text("BlockListView"), "/blockList")
-  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, UserPreferencesTab)
+  val AsRankingTab = Tab(Text("AsRankingView"), "/asRanking")
+  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, AsRankingTab,UserPreferencesTab)
 }
