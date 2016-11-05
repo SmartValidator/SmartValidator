@@ -50,19 +50,23 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
     */
   def download(dump: AsRankingSet)(implicit ec: ExecutionContext): Future[AsRankingSet] = Future {
     try {
-      val post = new HttpPost("http://bgpranking.circl.lu/json")
-//      post.addHeader("content-type", "application/json")
-      val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"100\", \"with_sources\":\"False\" }")
-      post.setEntity(postString)
-      post.setHeader("Content-type", "application/json")
+      val post = makePostExecutor(dump)
       val responseHandler = makeResponseHandler(dump)
-
       blocking { httpClient.execute(post, responseHandler) }
     } catch {
       case e: Exception =>
         error("error retrieving BGP entries from " + dump.url, e)
         dump
     }
+  }
+
+
+  protected def makePostExecutor(dump: AsRankingSet): HttpPost = {
+    val postRequest = new HttpPost(dump.url)
+    val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"100\", \"with_sources\":\"False\" }")
+    postRequest.setEntity(postString)
+    postRequest.setHeader("Content-type", "application/json")
+    postRequest
   }
 
 
@@ -74,7 +78,7 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
             try {
               RankingDump.parseRank(response.getEntity.getContent) match {
                 case Left(exception) =>
-//                  error("Error parsing ranking entries." + exception.toString, exception)
+                  error("Error parsing ranking entries." + exception.toString, exception)
                   dump
                 case Right(entries) =>
 ////                  val modified = lastModified(response)
