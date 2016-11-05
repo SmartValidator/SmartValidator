@@ -2,11 +2,12 @@ package net.ripe.rpki.validator.views
 
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
 import net.ripe.rpki.validator.models.{AsRankings, RtrPrefix}
+import net.ripe.rpki.validator.ranking.RankingSet
 
 /**
   * Created by fimka on 05/11/16.
   */
-class RankingView(rankingSets: AsRankings, getCurrentRtrPrefixes: () => Iterable[RtrPrefix], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCurrentRtrPrefixes: () => Iterable[RtrPrefix], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
 
   val currentRtrPrefixes = getCurrentRtrPrefixes()

@@ -43,7 +43,7 @@ import net.ripe.rpki.validator.iana.block.{IanaAnnouncementSet, IanaAnnouncement
 import net.ripe.rpki.validator.lib.{UserPreferences, _}
 import net.ripe.rpki.validator.models.validation._
 import net.ripe.rpki.validator.models.{Idle, IgnoreFilter, TrustAnchorData, _}
-import net.ripe.rpki.validator.ranking.{AsRankingSet, RankingDumpDownloader}
+import net.ripe.rpki.validator.ranking.{RankingDumpDownloader, RankingSet}
 import net.ripe.rpki.validator.rtr.{Pdu, RTRServer}
 import net.ripe.rpki.validator.store.{CacheStore, DurableCaches}
 import net.ripe.rpki.validator.util.TrustAnchorLocator
@@ -77,7 +77,7 @@ object Main {
 
 class Main extends Http with Logging { main =>
   import scala.concurrent.duration._
-0
+
   implicit val actorSystem = akka.actor.ActorSystem()
   import actorSystem.dispatcher
 
@@ -94,7 +94,7 @@ class Main extends Http with Logging { main =>
     IanaAnnouncementSet("http://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xml")))
 
   val rankingSets = Ref(Seq(
-    AsRankingSet("http://bgpranking.circl.lu/json")))
+    RankingSet("http://bgpranking.circl.lu/json")))
 
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
   val ianaAnnouncementValidator = new IanaAnnouncementValidator
@@ -117,7 +117,7 @@ class Main extends Http with Logging { main =>
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings))
 
   var store : CacheStore = _
 
@@ -282,7 +282,6 @@ class Main extends Http with Logging { main =>
               trustAnchorData = image.trustAnchors.all.map(ta => ta.name -> TrustAnchorData(ta.enabled))(collection.breakOut)), dataFile)
         }
       }
-
       override protected def startTrustAnchorValidation(trustAnchors: Seq[String]) = main.runValidator(trustAnchors, true)
 
       override protected def trustAnchors = memoryImage.single.get.trustAnchors
@@ -305,6 +304,8 @@ class Main extends Http with Logging { main =>
 
       override protected def validatedIanaSets = ianaSets.single.get
 
+      override protected def aSrankingSets = rankingSets.single.get
+
       override protected def getRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
 
       protected def sessionData = rtrServer.rtrSessions.allClientData
@@ -324,7 +325,7 @@ class Main extends Http with Logging { main =>
         memoryImage.transform(_.updateTrustAnchorState(locator, enabled))
       }
 
-
+      override protected def asRankings: AsRankings =  memoryImage.single.get.asRankings
     }
 
     val restApiServlet = new RestApi() {

@@ -10,13 +10,13 @@ import net.ripe.ipresource.IpRange
   }
 
   case class AsRankings(entries: Set[AsRankingBlocker] = Set.empty) {
-    def addAsRank(filter: AsRankingBlocker) = copy(entries + filter)
-    def removeAsRank(filter: AsRankingBlocker) = copy(entries - filter)
+//    def addAsRank(filter: AsRankingBlocker) = copy(entries + filter)
+//    def removeAsRank(filter: AsRankingBlocker) = copy(entries - filter)
 
-    def filter(input: Iterable[RtrPrefix]): Iterable[RtrPrefix] =
-      if (entries.isEmpty) input
-      else input.filterNot(shouldBlock)
-
-    private def shouldBlock(rtrPrefix: RtrPrefix) = entries.exists(_.shouldBlock(rtrPrefix))
+//    def filter(input: Iterable[RtrPrefix]): Iterable[RtrPrefix] =
+//      if (entries.isEmpty) input
+//      else input.filterNot(shouldBlock)
+//
+//    private def shouldBlock(rtrPrefix: RtrPrefix) = entries.exists(_.shouldBlock(rtrPrefix))
   }
 

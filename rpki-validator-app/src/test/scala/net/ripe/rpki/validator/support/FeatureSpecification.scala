@@ -40,6 +40,7 @@ import models._
 import lib.UserPreferences
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 import net.ripe.rpki.validator.api.RestApi
+import net.ripe.rpki.validator.ranking.RankingSet
 
 @RunWith(classOf[JUnitRunner])
 abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggingSetup with Matchers with MockitoSugar with GivenWhenThen {
@@ -67,7 +68,9 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override def updateUserPreferences(userPreferences: UserPreferences) = sys.error("TODO")
     override protected def updateTrustAnchorState(locator: TrustAnchorLocator, enabled: Boolean) {}
 
+    override protected def asRankings: AsRankings = sys.error("TODO")
 
+    override protected def aSrankingSets: Seq[RankingSet] = sys.error("TODO")
   }, "/*")
 
   addServlet(new RestApi {

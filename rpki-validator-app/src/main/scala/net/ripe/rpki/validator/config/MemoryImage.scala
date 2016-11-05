@@ -40,6 +40,7 @@ case class MemoryImage(filters: Filters,
                        trustAnchors: TrustAnchors,
                        validatedObjects: ValidatedObjects,
                        blockList: BlockList,
+                       asRankings: AsRankings,
                        version: Int = 0) {
 
   private lazy val distinctRtrPrefixes =
@@ -83,4 +84,5 @@ case class MemoryImage(filters: Filters,
       trustAnchors = trustAnchors.updateTrustAnchorState(locator, enabled),
       validatedObjects = newValidatedObjects)
   }
+
 }

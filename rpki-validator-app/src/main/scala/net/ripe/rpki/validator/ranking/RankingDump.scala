@@ -39,7 +39,7 @@ import scala.collection.mutable.ArrayBuffer
 
 case class RankingEntry(asn: String, name: String, rank: Double)
 case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: String, entries: Seq[RankingEntry] = Nil)
-case class AsRankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[Date] = None, entries: Seq[RankingEntry] = Seq.empty)
+case class RankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[Date] = None, entries: Seq[RankingEntry] = Seq.empty)
 
 object RankingDump extends Logging {
 //  def toAnnouncedRoutes(entries: Seq[BgpRisEntry]) = {
@@ -59,7 +59,7 @@ object RankingDump extends Logging {
     return Option(format.parse(lastModifiedDate))
   }
 
-  def parseRank(is: InputStream, dump: AsRankingSet): Either[Exception, AsRankingSet] = {
+  def parseRank(is: InputStream, dump: RankingSet): Either[Exception, RankingSet] = {
     implicit val formats = net.liftweb.json.DefaultFormats
     try {
       if(is == null)

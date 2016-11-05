@@ -48,7 +48,7 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
   /**
     * Refreshes the given rankingDump. If the source information was not modified or could not be retrieved the input dump is returned.
     */
-  def download(dump: AsRankingSet)(implicit ec: ExecutionContext): Future[AsRankingSet] = Future {
+  def download(dump: RankingSet)(implicit ec: ExecutionContext): Future[RankingSet] = Future {
     try {
       val post = makePostExecutor(dump)
       val responseHandler = makeResponseHandler(dump)
@@ -61,7 +61,7 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
   }
 
 
-  protected def makePostExecutor(dump: AsRankingSet): HttpPost = {
+  protected def makePostExecutor(dump: RankingSet): HttpPost = {
     val postRequest = new HttpPost(dump.url)
     val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"100\", \"with_sources\":\"False\" }")
     postRequest.setEntity(postString)
@@ -70,9 +70,9 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
   }
 
 
-  protected def makeResponseHandler(dump: AsRankingSet): ResponseHandler[AsRankingSet] = {
-    val responseHandler = new ResponseHandler[AsRankingSet]() {
-      override def handleResponse(response: HttpResponse): AsRankingSet = {
+  protected def makeResponseHandler(dump: RankingSet): ResponseHandler[RankingSet] = {
+    val responseHandler = new ResponseHandler[RankingSet]() {
+      override def handleResponse(response: HttpResponse): RankingSet = {
         response.getStatusLine.getStatusCode match {
           case SC_OK =>
             try {
