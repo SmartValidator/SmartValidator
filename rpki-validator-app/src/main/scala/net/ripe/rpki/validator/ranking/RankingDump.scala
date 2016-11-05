@@ -30,6 +30,7 @@
 package net.ripe.rpki.validator.ranking
 
 import java.io.InputStream
+import java.util.Date
 
 import grizzled.slf4j.Logging
 
@@ -38,7 +39,7 @@ import scala.collection.mutable.ArrayBuffer
 
 case class RankingEntry(asn: String, name: String, rank: Double)
 case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: String, entries: Seq[RankingEntry] = Nil)
-case class AsRankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[String] = None, entries: Seq[RankingEntry] = Seq.empty)
+case class AsRankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[Date] = None, entries: Seq[RankingEntry] = Seq.empty)
 
 object RankingDump extends Logging {
 //  def toAnnouncedRoutes(entries: Seq[BgpRisEntry]) = {
@@ -52,7 +53,13 @@ object RankingDump extends Logging {
 //  }
 
 
-  def parseRank(is: InputStream): Either[Exception, RankingDump] = {
+  private def parseLastModified(lastModifiedDate: String): Option[Date] = {
+    val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
+    format.format(new java.util.Date())
+    return Option(format.parse(String))
+  }
+
+  def parseRank(is: InputStream, dump: AsRankingSet): Either[Exception, AsRankingSet] = {
     implicit val formats = net.liftweb.json.DefaultFormats
     try {
       if(is == null)
@@ -60,9 +67,9 @@ object RankingDump extends Logging {
         throw new RuntimeException("No ranking dump input stream found")
       }
       val content = io.Source.fromInputStream(is).getLines.mkString
-      is.close
+      is.close()
       val jsonResult = net.liftweb.json.parse(content)
-      val lastModified = (jsonResult \\ "date");
+      val lastModified = (jsonResult \\ "date").toString;
       val asRankList = ArrayBuffer[RankingEntry]()
       val sizeList = (jsonResult \\ "size_list").extract[Int];
       val rankedAses = (jsonResult \\ "top_list").children;
@@ -77,7 +84,9 @@ object RankingDump extends Logging {
         val asRankEntry = RankingEntry(asnId, name, rank)
         asRankList += asRankEntry
       }
-      Right(RankingDump("", source.toString, sizeList, lastModified.toString, asRankList))
+      val modified = parseLastModified(lastModified)
+      dump.copy(lastTotal = sizeList, lastModified = modified, entries = asRankList)
+      Right(dump)
     } catch {
       case e: Exception =>
         Left(e)

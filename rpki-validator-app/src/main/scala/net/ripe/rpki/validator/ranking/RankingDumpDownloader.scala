@@ -76,13 +76,12 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
         response.getStatusLine.getStatusCode match {
           case SC_OK =>
             try {
-              RankingDump.parseRank(response.getEntity.getContent) match {
+              RankingDump.parseRank(response.getEntity.getContent, dump) match {
                 case Left(exception) =>
                   error("Error parsing ranking entries." + exception.toString, exception)
                   dump
-                case Right(entries) =>
-////                  val modified = lastModified(response)
-////                  info("Retrieved " + entries.size + " entries from " + dump.url + ", last modified at " + modified.getOrElse("unknown"))
+                case Right(rankingSet) =>
+                      info("Retrieved " + rankingSet.entries.size + " entries from " + rankingSet.url + ", last modified at " + rankingSet.lastModified.toString)
                   dump
               }
             } catch {
@@ -90,14 +89,6 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
                 error("Error parsing ranking entries . " + exception.toString, exception)
                 dump
             }
-//          case SC_NOT_MODIFIED if dump.lastModified.isDefined =>
-//            EntityUtils.consume(response.getEntity)
-//            info("BGP entries from " + dump.url + " were not modified since " + dump.lastModified.get)
-//            dump
-//          case _ =>
-//            EntityUtils.consume(response.getEntity)
-//            warn("error retrieving BGP entries from " + dump.url + ". Code: " + response.getStatusLine.getStatusCode + " " + response.getStatusLine.getReasonPhrase)
-//            dump
         }
       }
     }
