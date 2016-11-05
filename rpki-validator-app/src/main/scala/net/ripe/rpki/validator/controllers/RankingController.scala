@@ -20,12 +20,12 @@ trait RankingController extends ApplicationController with Logging {
     new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes, messages = feedbackMessages)
   }
 
-  get(baseUrl) {
-
-  }
-
-  post(baseUrl)
-  {
-
-  }
+//  get(baseUrl) {
+//
+//  }
+//
+//  post(baseUrl)
+//  {
+//
+//  }
 }
