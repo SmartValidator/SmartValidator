@@ -32,14 +32,13 @@ package net.ripe.rpki.validator.ranking
 import java.io.InputStream
 
 import grizzled.slf4j.Logging
-import org.joda.time.DateTime
 
 import scala.collection.mutable.ArrayBuffer
 
 
 case class RankingEntry(asn: String, name: String, rank: Int)
-case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: Option[DateTime] = None, entries: Seq[RankingEntry] = Nil)
-case class AsRankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[DateTime] = None, entries: Seq[RankingEntry] = Seq.empty)
+case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: String, entries: Seq[RankingEntry] = Nil)
+case class AsRankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[String] = None, entries: Seq[RankingEntry] = Seq.empty)
 
 object RankingDump extends Logging {
 //  def toAnnouncedRoutes(entries: Seq[BgpRisEntry]) = {
@@ -53,7 +52,7 @@ object RankingDump extends Logging {
 //  }
 
 
-  def parseRank(is: InputStream): Either[Exception, IndexedSeq[RankingEntry]] = {
+  def parseRank(is: InputStream): Either[Exception, RankingDump] = {
     implicit val formats = net.liftweb.json.DefaultFormats
     try {
       if(is == null)
@@ -62,20 +61,20 @@ object RankingDump extends Logging {
       }
       val content = io.Source.fromInputStream(is).getLines.mkString
       is.close
-
       val jsonResult = net.liftweb.json.parse(content)
-      val elements = (jsonResult ).children
-
+      val lastModified = (jsonResult \\ "date");
       val asRankList = ArrayBuffer[RankingEntry]()
+      val sizeList = (jsonResult \\ "size_list").extract[Int];
+      val rankedAses = (jsonResult \\ "top_list").children;
+      val source =(jsonResult \\ "source");
 
-      for(rankedAs <- elements)
+      for(rankedAs <- rankedAses)
       {
         val asData = rankedAs.children.head
         val asRankEntry = asData.extract[RankingEntry]
         asRankList += asRankEntry
       }
-
-      Right(asRankList)
+      Right(RankingDump("", source.toString, sizeList, lastModified.toString, asRankList))
     } catch {
       case e: Exception =>
         Left(e)

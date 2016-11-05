@@ -52,7 +52,7 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
     try {
       val post = new HttpPost("http://bgpranking.circl.lu/json")
 //      post.addHeader("content-type", "application/json")
-      val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"date\":\"\" , \"limit\":\"100\", \"with_sources\":\"False\" }")
+      val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"100\", \"with_sources\":\"False\" }")
       post.setEntity(postString)
       post.setHeader("Content-type", "application/json")
       val responseHandler = makeResponseHandler(dump)
