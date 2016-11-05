@@ -169,6 +169,7 @@ class Main extends Http with Logging { main =>
     Future.traverse(rankingSets.single.get)(rankingDumpDownloader.download) foreach { dumps =>
       atomic { implicit transaction =>
         rankingSets() = dumps
+
       }
     }
   }

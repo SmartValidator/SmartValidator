@@ -56,7 +56,7 @@ object RankingDump extends Logging {
   private def parseLastModified(lastModifiedDate: String): Option[Date] = {
     val format = new java.text.SimpleDateFormat("yyyy-MM-dd")
     format.format(new java.util.Date())
-    return Option(format.parse(String))
+    return Option(format.parse(lastModifiedDate))
   }
 
   def parseRank(is: InputStream, dump: AsRankingSet): Either[Exception, AsRankingSet] = {
