@@ -36,7 +36,7 @@ import grizzled.slf4j.Logging
 import scala.collection.mutable.ArrayBuffer
 
 
-case class RankingEntry(asn: String, name: String, rank: Int)
+case class RankingEntry(asn: String, name: String, rank: Double)
 case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: String, entries: Seq[RankingEntry] = Nil)
 case class AsRankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[String] = None, entries: Seq[RankingEntry] = Seq.empty)
 
@@ -70,8 +70,11 @@ object RankingDump extends Logging {
 
       for(rankedAs <- rankedAses)
       {
-        val asData = rankedAs.children.head
-        val asRankEntry = asData.extract[RankingEntry]
+        val asData = rankedAs.children.head.children
+        val asnId = asData(0).extract[String]
+        val name = asData(1).extract[String]
+        val rank = asData(2).extract[Double]
+        val asRankEntry = RankingEntry(asnId, name, rank)
         asRankList += asRankEntry
       }
       Right(RankingDump("", source.toString, sizeList, lastModified.toString, asRankList))

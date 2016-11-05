@@ -145,7 +145,7 @@ class Main extends Http with Logging { main =>
 
   runWebServer()
 
-  actorSystem.scheduler.schedule(initialDelay = 30.seconds, interval = 4.seconds) { refreshRankingDumps() }
+  actorSystem.scheduler.schedule(initialDelay = 30.seconds, interval = 12.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
