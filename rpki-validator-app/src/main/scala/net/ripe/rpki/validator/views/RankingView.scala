@@ -1,7 +1,7 @@
 package net.ripe.rpki.validator.views
 
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
-import net.ripe.rpki.validator.models.{AsRankings, RtrPrefix}
+import net.ripe.rpki.validator.models.{AsRankings, BlockFilter, RtrPrefix}
 import net.ripe.rpki.validator.ranking.RankingSet
 
 /**
@@ -38,65 +38,37 @@ class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCur
         </form>
       </div>
       <div>
-        <h2>Current filters</h2>
-//        if (filters.entries.isEmpty)
-//          <div class="alert-message block-message"><p>No filters defined.</p></div>
-//        else {
-//          <table id="filters-table" class="zebra-striped" style="display: none;">
-//            <thead>
-//              <tr>
-//                <th>Prefix</th><th>Filtered ROA prefixes</th><th>&nbsp;</th>
-//              </tr>
-//            </thead>
-//            <tbody>{
-//              for (filter <- filters.entries) yield {
-//                val filteredOut = currentRtrPrefixes.filter(filter.shouldIgnore(_))
-//                def filteredOutDetails = {
-//                  <table>
-//                    <thead>
-//                      <tr><th>ASN</th><th>Prefix</th><th>Maximum Length</th></tr>
-//                    </thead>
-//                    {
-//                    for { rtrPrefix <- filteredOut } yield {
-//                      <tr>
-//                        <td> { rtrPrefix.asn.getValue.toString } </td>
-//                        <td> { rtrPrefix.prefix.toString } </td>
-//                        <td> { if (rtrPrefix.maxPrefixLength.isDefined) {
-//                          rtrPrefix.maxPrefixLength.get.toString
-//                        } else {
-//                          rtrPrefix.prefix.getPrefixLength.toString
-//                        }
-//                          }
-//                        </td>
-//                      </tr>
-//                    }
-//                    }
-//                  </table>
-//                }
-//
-//                <tr>
-//                  <td>{ filter.prefix }</td>
-//                  <td>
-//                    <span rel="popover" data-content={ Xhtml.toXhtml(filteredOutDetails) } data-original-title="Details">{ filteredOut.size + " prefix(es)" }</span>
-//                  </td>
-//                  <td>
-//                    <form method="POST" action="/filters" style="padding:0;margin:0;">
-//                      <input type="hidden" name="_method" value="DELETE"/>
-//                      <input type="hidden" name="prefix" value={ filter.prefix.toString }/>
-//                      <input type="submit" class="btn" value="delete"/>
-//                    </form>
-//                  </td>
-//                </tr>
-//              }
-//              }</tbody>
-//          </table>
-
-            <script><!--
+        <h2>Current entries</h2>{
+        <table id="blocklist-table" class="zebra-striped" style="display: none;">
+          <thead>
+            <tr>
+              <th>Name</th><th>Rank</th><th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>{
+            var work_set = asRankingSets(0)
+            for (entry <- work_set.entries) yield {
+              <tr>
+                <td>{ entry.name }</td>
+                <td>{entry.rank}</td>
+                <td>
+                  <form method="POST" action="/blockList" style="padding:0;margin:0;">
+                    <input type="hidden" name="_method" value="DELETE"/>
+                    <input type="hidden" name="Name" value={ entry.name.toString }/>
+                    <input type="hidden" name="Rank" value={ entry.rank.toString }/>
+                    <input type="submit" class="btn" value="delete"/>
+                  </form>
+                </td>
+              </tr>
+            }
+            } </tbody>
+        </table>
+          <script><!--
 $(document).ready(function() {
-  $('#filters-table').dataTable({
+  $('#blocklist-table').dataTable({
       "sPaginationType": "full_numbers",
-      "aoColumns": [
-        null, null,
+      "aoColumns": [null,
+        null,
         { "bSortable": false }
       ]
     }).show();
@@ -110,6 +82,7 @@ $(document).ready(function() {
   });
 });
 // --></script>
+
         }
       </div>
   }
