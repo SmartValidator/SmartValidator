@@ -76,15 +76,10 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
         response.getStatusLine.getStatusCode match {
           case SC_OK =>
             try {
-              RankingDump.parseRank(response.getEntity.getContent, dump) match {
-                case Left(exception) =>
-                  error("Error parsing ranking entries." + exception.toString, exception)
-                  dump
-                case Right(rankingSet) =>
-                      info("Retrieved " + rankingSet.entries.size + " entries from " + rankingSet.url + ", last modified at " + rankingSet.lastModified.toString)
-                  dump
+              val dump1 = RankingDump.parseRank(response.getEntity.getContent, dump)
+              dump.copy(url = dump1.url, source = dump1.source, lastTotal = dump1.lastTotal, lastModified = dump1.lastModified, entries = dump1.entries)
               }
-            } catch {
+            catch {
               case exception: Exception =>
                 error("Error parsing ranking entries . " + exception.toString, exception)
                 dump
@@ -94,5 +89,4 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
     }
     responseHandler
   }
-
 }

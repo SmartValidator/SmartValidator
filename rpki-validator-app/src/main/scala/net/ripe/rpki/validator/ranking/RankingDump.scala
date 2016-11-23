@@ -34,8 +34,6 @@ import java.util.Date
 
 import grizzled.slf4j.Logging
 
-import scala.collection.mutable.ArrayBuffer
-
 
 case class RankingEntry(asn: String, name: String, rank: Double)
 case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: String, entries: Seq[RankingEntry] = Nil)
@@ -59,38 +57,32 @@ object RankingDump extends Logging {
     return Option(format.parse(lastModifiedDate))
   }
 
-  def parseRank(is: InputStream, dump: RankingSet): Either[Exception, RankingSet] = {
+  def parseRank(is: InputStream, dump: RankingSet): RankingSet = {
     implicit val formats = net.liftweb.json.DefaultFormats
-    try {
-      if(is == null)
-      {
-        throw new RuntimeException("No ranking dump input stream found")
-      }
-      val content = io.Source.fromInputStream(is).getLines.mkString
-      is.close()
-      val jsonResult = net.liftweb.json.parse(content)
-      val lastModified = (jsonResult \\ "date").toString;
-      val asRankList = ArrayBuffer[RankingEntry]()
-      val sizeList = (jsonResult \\ "size_list").extract[Int];
-      val rankedAses = (jsonResult \\ "top_list").children;
-      val source =(jsonResult \\ "source");
-
-      for(rankedAs <- rankedAses)
-      {
-        val asData = rankedAs.children.head.children
-        val asnId = asData(0).extract[String]
-        val name = asData(1).extract[String]
-        val rank = asData(2).extract[Double]
-        val asRankEntry = RankingEntry(asnId, name, rank)
-        asRankList += asRankEntry
-      }
-      val modified = parseLastModified(lastModified)
-      dump.copy(lastTotal = sizeList, lastModified = modified, entries = asRankList)
-      Right(dump)
-    } catch {
-      case e: Exception =>
-        Left(e)
+    if(is == null)
+    {
+      throw new RuntimeException("No ranking dump input stream found")
     }
+    val content = io.Source.fromInputStream(is).getLines.mkString
+    is.close()
+    val jsonResult = net.liftweb.json.parse(content)
+    val lastModified = (jsonResult \\ "date").values.toString();
+    var asRankList = Set[RankingEntry]()
+    val sizeList = (jsonResult \\ "size_list").extract[Int];
+    val rankedAses = (jsonResult \\ "top_list").children;
+    val source =(jsonResult \\ "source");
+
+    for(rankedAs <- rankedAses)
+    {
+      val asData = rankedAs.children.head.children
+      val asnId = asData(0).extract[String]
+      val name = asData(1).extract[String]
+      val rank = asData(2).extract[Double]
+      asRankList += new RankingEntry(asnId,name,rank)
+    }
+    val modified = parseLastModified(lastModified)
+    dump.copy(lastTotal = sizeList, lastModified = modified, entries = asRankList.toSeq)
+
   }
 
 //  private def makeResourcesUnique(identityMap: ObjectIdentityMap, entry: BgpRisEntry) = {
