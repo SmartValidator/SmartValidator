@@ -48,5 +48,6 @@ object Tabs {
   val UserPreferencesTab = Tab(<img src="/images/cogs.png" width="15" height="17" alt="Settings"/>, "/user-preferences")
   val BlockListTab = Tab(Text("BlockListView"), "/blockList")
   val AsRankingTab = Tab(Text("AsRankingView"), "/asRanking")
+  val RoAlertTab = Tab(Text("RoAlertView"), "/RoAlert")
   def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, AsRankingTab,UserPreferencesTab)
 }
