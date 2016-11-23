@@ -157,11 +157,11 @@
             <version>${jetty.version}</version>
         </dependency>
         <!-- JSon support -->
-        <dependency>
-            <groupId>org.json4s</groupId>
-            <artifactId>json4s-jackson_2.11</artifactId>
-            <version>3.4.2</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.json4s</groupId>-->
+            <!--<artifactId>json4s-jackson_2.11</artifactId>-->
+            <!--<version>3.4.2</version>-->
+        <!--</dependency>-->
         <!-- Embedded database support -->
         <dependency>
             <groupId>org.apache.derby</groupId>

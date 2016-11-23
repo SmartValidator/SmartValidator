@@ -13,4 +13,6 @@ trait RoAlertController extends ApplicationController with Logging{
         new RoAlertView()
     }
 
+
+
 }
