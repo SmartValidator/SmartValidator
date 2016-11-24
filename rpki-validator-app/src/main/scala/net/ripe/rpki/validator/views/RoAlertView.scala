@@ -7,7 +7,12 @@ import net.ripe.ipresource.IpRange
 class RoAlertView(Unit: Unit) {
   def tab = Tabs.RoAlertTab
   def title = tab.text
-  def body = {}
+  def body = {
+
+    <div>
+      Your IpAddress is: { getHostIp.toString() }
+    </div>
+  }
 
 
   private def getHostIp: IpRange = {

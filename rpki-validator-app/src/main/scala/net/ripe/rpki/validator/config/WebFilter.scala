@@ -48,6 +48,7 @@ abstract class WebFilter extends ScalatraFilter
   with BgpPreviewController
   with ExportController
   with RtrSessionsController
+  with RoAlertController
   with UserPreferencesController
   {
 
