@@ -1,6 +1,7 @@
 package net.ripe.rpki.validator.controllers
 
 import grizzled.slf4j.Logging
+import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 import net.ripe.rpki.validator.models.{AsRankings, RtrPrefix, ValidatedObjects}
 import net.ripe.rpki.validator.ranking.RankingSet
 import net.ripe.rpki.validator.views
@@ -15,9 +16,10 @@ trait RankingController extends ApplicationController with Logging {
   private def baseUrl = views.Tabs.AsRankingTab.url
   private def getCurrentRtrPrefixes(): Iterable[RtrPrefix] = validatedObjects.getValidatedRtrPrefixes
   protected def aSrankingSets: Seq[RankingSet]
+  protected def validatedAnnouncements: Seq[BgpValidatedAnnouncement]
 
   get(baseUrl) {
-    new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes, messages = feedbackMessages)
+    new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements, messages = feedbackMessages)
   }
 
 //  get(baseUrl) {

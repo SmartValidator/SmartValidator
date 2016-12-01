@@ -1,13 +1,16 @@
 package net.ripe.rpki.validator.views
 
+import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
-import net.ripe.rpki.validator.models.{AsRankings, BlockFilter, RtrPrefix}
+import net.ripe.rpki.validator.models.{AsRankings, BlockFilter, RouteValidity, RtrPrefix}
 import net.ripe.rpki.validator.ranking.RankingSet
+
+import scala.xml.Xhtml
 
 /**
   * Created by fimka on 05/11/16.
   */
-class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCurrentRtrPrefixes: () => Iterable[RtrPrefix], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCurrentRtrPrefixes: () => Iterable[RtrPrefix], validatedAnnouncements: Seq[BgpValidatedAnnouncement],params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
 
   val currentRtrPrefixes = getCurrentRtrPrefixes()
@@ -39,36 +42,89 @@ class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCur
       </div>
       <div>
         <h2>Current entries</h2>{
-        <table id="blocklist-table" class="zebra-striped" style="display: none;">
+        <table id="asRanking-table" class="zebra-striped" style="display: none;">
           <thead>
             <tr>
-              <th>Name</th><th>Rank</th><th>&nbsp;</th>
+              <th>Asn</th><th>Name</th><th>Rank</th><th>Validates</th><th>Invalidates</th><th>&nbsp;</th>
             </tr>
           </thead>
           <tbody>{
+
             var work_set = asRankingSets(0)
             for (entry <- work_set.entries) yield {
+              val affectedAsn = validatedAnnouncements.filter { announcement =>
+                entry.asn.contains(announcement.asn)
+              }
+
+              // Will work because we only match on affected announcements and will have no unknowns
+              var (validated, invalidated) = affectedAsn.partition(_.validity == RouteValidity.Valid)
+
+              // Validates only matches on asn
+              validated = validated.filter { _.asn == entry.asn }
+
+              def makeDetailsTable(announcements: Seq[BgpValidatedAnnouncement]) = {
+                <table>
+                  <thead>
+                    <tr><th>ASN</th><th>Prefix</th></tr>
+                  </thead>
+                  {
+                  for { announcement <- announcements } yield {
+                    <tr>
+                      <td> { announcement.asn.getValue.toString } </td>
+                      <td> { announcement.prefix.toString } </td>
+                    </tr>
+                  }
+                  }
+                </table>
+              }
+
               <tr>
-                <td>{ entry.name }</td>
+                <td>{entry.asn}</td>
+                <td>{entry.name }</td>
                 <td>{entry.rank}</td>
                 <td>
-                  <form method="POST" action="/blockList" style="padding:0;margin:0;">
+                  <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(validated)) } data-original-title="Details">{ validated.size + " announcement(s)" }</span>
+                </td>
+                <td>
+                  <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(invalidated)) } data-original-title="Details">{ invalidated.size + " announcement(s)" }</span>
+                </td>
+                <td>
+                  <form method="POST" action="/asRanking" style="padding:0;margin:0;">
                     <input type="hidden" name="_method" value="DELETE"/>
-                    <input type="hidden" name="Name" value={ entry.name.toString }/>
-                    <input type="hidden" name="Rank" value={ entry.rank.toString }/>
+                    <input type="hidden" name="asn" value={ entry.asn.toString }/>
+                    <input type="hidden" name="name" value={ entry.name.toString }/>
+                    <input type="hidden" name="rank" value={ entry.rank.toString }/>
                     <input type="submit" class="btn" value="delete"/>
                   </form>
                 </td>
               </tr>
+//              <tr>
+//                <td>{entry.asn}</td>
+//                <td>{entry.name }</td>
+//                <td>{entry.rank}</td>
+//                <td>
+//                  <form method="POST" action="/blockList" style="padding:0;margin:0;">
+//                    <input type="hidden" name="_method" value="DELETE"/>
+//                    <input type="hidden" name="Asn" value={ entry.asn.toString }/>
+//                    <input type="hidden" name="Name" value={ entry.name.toString }/>
+//                    <input type="hidden" name="Rank" value={ entry.rank.toString }/>
+//                    <input type="submit" class="btn" value="Block"/>
+//                  </form>
+//                </td>
+//              </tr>
             }
             } </tbody>
         </table>
           <script><!--
 $(document).ready(function() {
-  $('#blocklist-table').dataTable({
+  $('#asRanking-table').dataTable({
       "sPaginationType": "full_numbers",
-      "aoColumns": [null,
+      "aoColumns": [
         null,
+        null,
+        null,
+        { "bSortable": false },
+        { "bSortable": false },
         { "bSortable": false }
       ]
     }).show();

@@ -33,9 +33,10 @@ import java.io.InputStream
 import java.util.Date
 
 import grizzled.slf4j.Logging
+import net.ripe.ipresource.Asn
 
 
-case class RankingEntry(asn: String, name: String, rank: Double)
+case class RankingEntry(asn: Asn, name: String, rank: Double)
 case class RankingDump(url: String, source: String, lastTotal: Int, lastModified: String, entries: Seq[RankingEntry] = Nil)
 case class RankingSet(url: String, source: String = "Global", lastTotal: Int = 0, lastModified: Option[Date] = None, entries: Seq[RankingEntry] = Seq.empty)
 
@@ -75,7 +76,7 @@ object RankingDump extends Logging {
     for(rankedAs <- rankedAses)
     {
       val asData = rankedAs.children.head.children
-      val asnId = asData(0).extract[String]
+      val asnId = Asn.parse(asData(0).extract[String])
       val name = asData(1).extract[String]
       val rank = asData(2).extract[Double]
       asRankList += new RankingEntry(asnId,name,rank)
