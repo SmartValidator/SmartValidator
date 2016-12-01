@@ -33,8 +33,8 @@ trait RankingController extends ApplicationController with Logging {
         val papo = 1
         val papo1 = 2
       case Failure(errors) =>
-        val papo = 1
-        val papo1 = 2
+        val papo = 3
+        val papo1 = 4
     }
 
   }
