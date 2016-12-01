@@ -90,28 +90,14 @@ class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCur
                 </td>
                 <td>
                   <form method="POST" action="/asRanking" style="padding:0;margin:0;">
-                    <input type="hidden" name="_method" value="DELETE"/>
+                    <input type="hidden" name="_method" value="POST"/>
                     <input type="hidden" name="asn" value={ entry.asn.toString }/>
                     <input type="hidden" name="name" value={ entry.name.toString }/>
                     <input type="hidden" name="rank" value={ entry.rank.toString }/>
-                    <input type="submit" class="btn" value="delete"/>
+                    <input type="submit" class="btn" value="block"/>
                   </form>
                 </td>
               </tr>
-//              <tr>
-//                <td>{entry.asn}</td>
-//                <td>{entry.name }</td>
-//                <td>{entry.rank}</td>
-//                <td>
-//                  <form method="POST" action="/blockList" style="padding:0;margin:0;">
-//                    <input type="hidden" name="_method" value="DELETE"/>
-//                    <input type="hidden" name="Asn" value={ entry.asn.toString }/>
-//                    <input type="hidden" name="Name" value={ entry.name.toString }/>
-//                    <input type="hidden" name="Rank" value={ entry.rank.toString }/>
-//                    <input type="submit" class="btn" value="Block"/>
-//                  </form>
-//                </td>
-//              </tr>
             }
             } </tbody>
         </table>

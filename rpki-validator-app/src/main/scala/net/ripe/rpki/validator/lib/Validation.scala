@@ -119,6 +119,19 @@ object Validation {
   } catch {
     case _: Exception => (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
   }
+  def parseAsnName(s: String): Validation[String, String] = try {
+    val papo = s
+    papo.success
+  } catch {
+    case _: Exception => (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
+  }
+
+  def parseRank(s: String): Validation[String, Double] = parseDouble(s).flatMap { x =>
+    if (x >= 0)
+      x.success
+    else
+      (quote(s) + " must be zero or positive").fail
+  }
 
 
 
@@ -127,6 +140,12 @@ object Validation {
       x.success
     else
       (quote(s) + " must be zero or positive").fail
+  }
+
+  def parseDouble(s: String): Validation[String, Double] = try {
+    s.toDouble.success
+  } catch {
+    case _: NumberFormatException => (quote(s) + " is not a number").fail
   }
 
   def parseInt(s: String): Validation[String, Int] = try {
