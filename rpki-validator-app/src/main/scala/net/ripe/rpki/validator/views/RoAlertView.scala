@@ -4,7 +4,7 @@ import java.net.UnknownHostException
 
 import net.ripe.ipresource.IpRange
 
-class RoAlertView(Unit: Unit) {
+class RoAlertView() {
   def tab = Tabs.RoAlertTab
   def title = tab.text
   def body = {
