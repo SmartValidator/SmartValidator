@@ -1,5 +1,6 @@
 package net.ripe.rpki.validator.controllers;
 import grizzled.slf4j.Logging
+import net.ripe.rpki.validator.models.ValidatedObjects
 import net.ripe.rpki.validator.views
 import net.ripe.rpki.validator.views.RoAlertView
 
@@ -8,9 +9,10 @@ import net.ripe.rpki.validator.views.RoAlertView
  */
 trait RoAlertController extends ApplicationController with Logging{
     private def baseUrl = views.Tabs.RoAlertTab.url;
+    protected def validatedObjects: ValidatedObjects
 
     get(baseUrl) {
-        new RoAlertView()
+        new RoAlertView(validatedObjects)
     }
 
 
