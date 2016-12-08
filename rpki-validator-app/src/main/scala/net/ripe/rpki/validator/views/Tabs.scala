@@ -38,8 +38,8 @@ object Tabs {
   val TrustAnchorsTab = Tab(Text("Trust Anchors"), "/trust-anchors")
   val TrustAnchorMonitorTab = Tab(Text("Trust Anchor Monitoring"), "/trust-anchor-monitor")
   val RoasTab = Tab(Text("ROAs"), "/roas")
-  val FiltersTab = Tab(Text("Ignore Filters"), "/filters")
-  val WhitelistTab = Tab(Text("Whitelist"), "/whitelist")
+  val FiltersTab = Tab(Text("Prefix whitelist"), "/filters")
+  val WhitelistTab = Tab(Text("ASN / ROA whitelist"), "/whitelist")
   val BgpPreviewTab = Tab(Text("BGP Preview"), "/bgp-preview")
   val ExportTab = Tab(Text("Export and API"), "/export")
   val RtrSessionsTab = Tab(Text("Router Sessions"), "/rtr-sessions")
@@ -49,5 +49,6 @@ object Tabs {
   val BlockListTab = Tab(Text("BlockListView"), "/blockList")
   val AsRankingTab = Tab(Text("AsRankingView"), "/asRanking")
   val RoAlertTab = Tab(Text("RoAlertView"), "/RoAlert")
-  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, AsRankingTab, RoAlertTab, UserPreferencesTab)
+  val RoaBlackList = Tab(Text("ROA black list"), "/RoaBlackList")
+  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, AsRankingTab, RoAlertTab, RoaBlackList, UserPreferencesTab)
 }

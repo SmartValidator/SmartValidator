@@ -104,7 +104,6 @@ class Main extends Http with Logging { main =>
 
   val trustAnchors = loadTrustAnchors().all.map { ta => ta.copy(enabled = data.trustAnchorData.get(ta.name).forall(_.enabled)) }
 
-
   val roas = ValidatedObjects(new TrustAnchors(trustAnchors.filter(_.enabled)))
 
   override def trustedCertsLocation = ApplicationOptions.trustedSslCertsLocation
@@ -119,7 +118,7 @@ class Main extends Http with Logging { main =>
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings, data.roaBlackList))
 
   var store : CacheStore = _
 
@@ -328,6 +327,9 @@ class Main extends Http with Logging { main =>
       }
 
       override protected def asRankings: AsRankings =  memoryImage.single.get.asRankings
+
+      override protected def roaBlackList: RoaBlackList =  memoryImage.single.get.roaBlackList
+
     }
 
     val restApiServlet = new RestApi() {

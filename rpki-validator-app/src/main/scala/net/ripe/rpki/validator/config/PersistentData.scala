@@ -41,7 +41,8 @@ import lib.UserPreferences
 
 case class PersistentData(schemaVersion: Int = 0, filters: Filters = Filters(), blockList:BlockList = BlockList(),
                           whitelist: Whitelist = Whitelist(), userPreferences: UserPreferences = UserPreferences(),
-                          asRankings: AsRankings = AsRankings(), trustAnchorData: Map[String, TrustAnchorData] = Map.empty) {
+                          asRankings: AsRankings = AsRankings(), roaBlackList: RoaBlackList = RoaBlackList(),
+                          trustAnchorData: Map[String, TrustAnchorData] = Map.empty) {
 }
 
 class PersistentDataSerialiser {

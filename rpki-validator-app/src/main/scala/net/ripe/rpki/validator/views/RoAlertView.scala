@@ -12,8 +12,8 @@ class RoAlertView(validatedObjects: ValidatedObjects) extends View with ViewHelp
   def title = tab.text
   def body = {
     val externalIp = getHostIp
+    val filteredRoas = filterRelativeIp(externalIp)
     <div>
-
       Your IpAddress is: { externalIp.toString() }
       Relevent roa:
       <table>
@@ -21,14 +21,21 @@ class RoAlertView(validatedObjects: ValidatedObjects) extends View with ViewHelp
           <tr><th>ASN</th><th>Prefix</th><th>Max prefix</th></tr>
         </thead>
         {
-        for { relventRoa <- filterRelativeIp(externalIp) } yield {
-          <tr>
-            <td> { relventRoa.asn.toString } </td>
-            <td> { relventRoa.prefix.toString } </td>
-            <td> { relventRoa.maxPrefixLength.toString } </td>
-
-          </tr>
+        if(filteredRoas.isEmpty)
+        {
+          <h4> No VALID ROA's were found for this IP </h4>
         }
+        else
+        {
+          for { releventRoa <- filterRelativeIp(externalIp) } yield {
+            <tr>
+              <td> { releventRoa.asn.toString } </td>
+              <td> { releventRoa.prefix.toString } </td>
+              <td> { releventRoa.maxPrefixLength.toString } </td>
+            </tr>
+          }
+        }
+
         }
       </table>
     </div>
