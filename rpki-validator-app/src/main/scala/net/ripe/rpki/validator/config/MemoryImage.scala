@@ -41,6 +41,7 @@ case class MemoryImage(filters: Filters,
                        validatedObjects: ValidatedObjects,
                        blockList: BlockList,
                        asRankings: AsRankings,
+                       blockAsList: BlockAsList,
                        roaBlackList: RoaBlackList,
                        version: Int = 0) {
 
@@ -65,6 +66,10 @@ case class MemoryImage(filters: Filters,
   def addBlocklistEntry(filter: BlockFilter) = copy(version = version + 1, blockList = blockList.addBlockListEntry(filter))
 
   def removeBlocklistEntry(filter: BlockFilter) = copy(version = version + 1, blockList = blockList.removeBlockListEntry(filter))
+
+  def addBlockAslistEntry(filter: BlockAsFilter) = copy(version = version + 1, blockAsList = blockAsList.addBlockAsListEntry(filter))
+
+  def removeBlockAslistEntry(filter: BlockAsFilter) = copy(version = version + 1, blockAsList = blockAsList.removeBlockAsListEntry(filter))
 
   def addWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, whitelist = whitelist.addEntry(entry))
 

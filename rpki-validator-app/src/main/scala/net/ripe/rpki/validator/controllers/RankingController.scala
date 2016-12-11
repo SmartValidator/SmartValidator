@@ -2,10 +2,10 @@ package net.ripe.rpki.validator
 package controllers
 
 import grizzled.slf4j.Logging
-import net.ripe.ipresource.{IpRange,Asn}
+import net.ripe.ipresource.{Asn, IpRange}
 import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 import net.ripe.rpki.validator.lib.Validation._
-import net.ripe.rpki.validator.models.{AsRankings, BlockFilter, RtrPrefix, ValidatedObjects}
+import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.ranking.{RankingEntry, RankingSet}
 import net.ripe.rpki.validator.views.RankingView
 
@@ -23,6 +23,11 @@ trait RankingController extends ApplicationController with Logging {
   private def getCurrentRtrPrefixes(): Iterable[RtrPrefix] = validatedObjects.getValidatedRtrPrefixes
   protected def aSrankingSets: Seq[RankingSet]
   protected def validatedAnnouncements: Seq[BgpValidatedAnnouncement]
+  protected def blockAsList: BlockAsList
+
+  protected def addBlockAsListEntry(entry: BlockAsFilter): Unit
+  protected def removeBlockAsListEntry(entry: BlockAsFilter): Unit
+  protected def blockAsListEntryExistsRanking(entry: BlockAsFilter): Boolean = blockAsList.entries.contains(entry)
 
   get(baseUrl) {
     new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements, messages = feedbackMessages)
@@ -30,11 +35,15 @@ trait RankingController extends ApplicationController with Logging {
   post(baseUrl) {
     submittedBlocker match {
       case Success(entry) =>
-        val papo = 1
-        val papo1 = 2
+        if(blockAsListEntryExistsRanking(new BlockAsFilter(entry.asn,"RankingAsn"))){
+          new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements,params, Seq(ErrorMessage("Entry is already blocked")))
+        }
+        else{
+          addBlockAsListEntry(new BlockAsFilter(entry.asn,"RankingAsn"))
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been added to the AS block list.")))
+        }
       case Failure(errors) =>
-        val papo = 3
-        val papo1 = 4
+        new RankingView(asRankings, aSrankingSets,getCurrentRtrPrefixes,validatedAnnouncements, params, errors)
     }
 
   }
@@ -58,12 +67,4 @@ trait RankingController extends ApplicationController with Logging {
   }
 
 
-  //  get(baseUrl) {
-//
-//  }
-//
-//  post(baseUrl)
-//  {
-//
-//  }
 }

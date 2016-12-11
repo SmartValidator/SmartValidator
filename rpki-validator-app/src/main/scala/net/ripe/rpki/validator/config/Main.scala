@@ -118,7 +118,7 @@ class Main extends Http with Logging { main =>
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings, data.roaBlackList))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.roaBlackList))
 
   var store : CacheStore = _
 
@@ -297,8 +297,13 @@ class Main extends Http with Logging { main =>
       override protected def removeWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeWhitelistEntry(entry)) }
 
       override protected def blockList = memoryImage.single.get.blockList
+      override protected def blockAsList = memoryImage.single.get.blockAsList
+
       override protected def addBlockListEntry(entry: BlockFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlocklistEntry(entry)) }
       override protected def removeBlockListEntry(entry: BlockFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlocklistEntry(entry)) }
+
+      override protected def addBlockAsListEntry(entry: BlockAsFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlockAslistEntry(entry)) }
+      override protected def removeBlockAsListEntry(entry: BlockAsFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlockAslistEntry(entry)) }
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements

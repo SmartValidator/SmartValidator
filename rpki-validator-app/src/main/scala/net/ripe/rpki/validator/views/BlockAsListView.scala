@@ -1,20 +1,20 @@
 package net.ripe.rpki.validator.views
 
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
-import net.ripe.rpki.validator.models.{BlockFilter, BlockList}
+import net.ripe.rpki.validator.models.{BlockAsFilter, BlockAsList}
 
 import scala.xml.Text
 
 /**
   * Created by fimka on 14/10/16.
   */
-class BlockListView(blockList: BlockList, validatedIanaBlockFilter: Set[BlockFilter], params: Map[String, String] = Map.
+class BlockAsListView(blockAsList: BlockAsList, params: Map[String, String] = Map.
   empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
-  private val fieldNameToText = Map("prefix" -> "Prefix")
+  private val fieldNameToText = Map("asn" -> "Asn")
   //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
-  def tab = Tabs.BlockListTab
-  def title = Text("Blocklist")
+  def tab = Tabs.BlockAsListTab
+  def title = Text("BlockAslist")
   def body = {
     <div>{ renderMessages(messages, fieldNameToText) }</div>
       <div class="alert-message block-message info" data-alert="alert">
@@ -27,13 +27,13 @@ class BlockListView(blockList: BlockList, validatedIanaBlockFilter: Set[BlockFil
         <form method="POST" class="form-stacked">
           <fieldset>
             <div>
-              <div class="span4"><label for="block-prefix">Prefix</label></div>
+              <div class="span4"><label for="block-asn">Asn</label></div>
               <div class="span12"></div>
             </div>
             <div class="span4">
-              <input id="block-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") }
-                     placeholder="IPv4 or IPv6 prefix (required)"/>
-              <input id="block-prefix" type="hidden" name="origin" value={ "Manual" }
+              <input id="block-asn" type="text" name="asn" value={ params.getOrElse("asn", "") }
+                     placeholder="Asn number"/>
+              <input id="block-asn" type="hidden" name="origin" value={ "Manual" }
               />
             </div>
             <div class="span2">
@@ -44,22 +44,22 @@ class BlockListView(blockList: BlockList, validatedIanaBlockFilter: Set[BlockFil
       </div>
       <div>
         <h2>Current entries</h2>{
-        <table id="blocklist-table" class="zebra-striped" style="display: none;">
+        <table id="blockaslist-table" class="zebra-striped" style="display: none;">
           <thead>
             <tr>
-              <th>Prefix</th><th>Origin</th><th>&nbsp;</th>
+              <th>Asn</th><th>Origin</th><th>&nbsp;</th>
             </tr>
           </thead>
           <tbody>{
-            val createTable: Set[BlockFilter] =  (blockList.entries) ++ validatedIanaBlockFilter
+            val createTable: Set[BlockAsFilter] =  (blockAsList.entries)
             for (entry <- createTable) yield {
               <tr>
-                <td>{ entry.prefix }</td>
+                <td>{ entry.asn}</td>
                 <td>{entry.origin}</td>
                 <td>
-                  <form method="POST" action="/blockList" style="padding:0;margin:0;">
+                  <form method="POST" action="/blockAsList" style="padding:0;margin:0;">
                     <input type="hidden" name="_method" value="DELETE"/>
-                    <input type="hidden" name="prefix" value={ entry.prefix.toString }/>
+                    <input type="hidden" name="asn" value={ entry.asn.toString }/>
                     <input type="hidden" name="origin" value={ entry.origin }/>
                     <input type="submit" class="btn" value="delete"/>
                   </form>
@@ -70,7 +70,7 @@ class BlockListView(blockList: BlockList, validatedIanaBlockFilter: Set[BlockFil
         </table>
           <script><!--
 $(document).ready(function() {
-  $('#blocklist-table').dataTable({
+  $('#blockaslist-table').dataTable({
       "sPaginationType": "full_numbers",
       "aoColumns": [null,
         null,

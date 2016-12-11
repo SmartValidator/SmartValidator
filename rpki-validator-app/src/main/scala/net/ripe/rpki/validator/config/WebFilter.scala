@@ -44,6 +44,7 @@ abstract class WebFilter extends ScalatraFilter
   with FiltersController
   with WhitelistController
   with BlockListController
+  with BlockAsListController
   with RankingController
   with BgpPreviewController
   with ExportController
