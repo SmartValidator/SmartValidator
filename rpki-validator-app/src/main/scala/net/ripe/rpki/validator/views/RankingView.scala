@@ -2,7 +2,7 @@ package net.ripe.rpki.validator.views
 
 import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 import net.ripe.rpki.validator.lib.Validation.FeedbackMessage
-import net.ripe.rpki.validator.models.{AsRankings, BlockFilter, RouteValidity, RtrPrefix}
+import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.ranking.RankingSet
 
 import scala.xml.Xhtml
@@ -10,7 +10,7 @@ import scala.xml.Xhtml
 /**
   * Created by fimka on 05/11/16.
   */
-class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCurrentRtrPrefixes: () => Iterable[RtrPrefix], validatedAnnouncements: Seq[BgpValidatedAnnouncement],params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCurrentRtrPrefixes: () => Iterable[RtrPrefix], validatedAnnouncements: Seq[BgpValidatedAnnouncement],blockAsList: BlockAsList,params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
 
   val currentRtrPrefixes = getCurrentRtrPrefixes()
@@ -77,27 +77,52 @@ class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCur
                   }
                 </table>
               }
+              if(!blockAsList.entries.contains(new BlockAsFilter(entry.asn,"RankingAsn"))){
+                <tr>
+                  <td>{entry.asn}</td>
+                  <td>{entry.name }</td>
+                  <td>{entry.rank}</td>
+                  <td>
+                    <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(validated)) } data-original-title="Details">{ validated.size + " announcement(s)" }</span>
+                  </td>
+                  <td>
+                    <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(invalidated)) } data-original-title="Details">{ invalidated.size + " announcement(s)" }</span>
+                  </td>
+                  <td>
+                    <form method="POST" action="/asRanking" style="padding:0;margin:0;">
+                      <input type="hidden" name="_method" value="POST"/>
+                      <input type="hidden" name="asn" value={ entry.asn.toString }/>
+                      <input type="hidden" name="name" value={ entry.name.toString }/>
+                      <input type="hidden" name="rank" value={ entry.rank.toString }/>
+                      <input type="submit" class="btn" value="Block"/>
+                    </form>
+                  </td>
+                </tr>
+              }
+              else{
+                <tr>
+                  <td>{entry.asn}</td>
+                  <td>{entry.name }</td>
+                  <td>{entry.rank}</td>
+                  <td>
+                    <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(validated)) } data-original-title="Details">{ validated.size + " announcement(s)" }</span>
+                  </td>
+                  <td>
+                    <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(invalidated)) } data-original-title="Details">{ invalidated.size + " announcement(s)" }</span>
+                  </td>
+                  <td>
+                    <form method="POST" action="/asRanking" style="padding:0;margin:0;">
+                      <input type="hidden" name="_method" value="DELETE"/>
+                      <input type="hidden" name="asn" value={ entry.asn.toString }/>
+                      <input type="hidden" name="name" value={ entry.name.toString }/>
+                      <input type="hidden" name="rank" value={ entry.rank.toString }/>
+                      <input type="submit" class="btn" value="Unblock"/>
+                    </form>
+                  </td>
+                </tr>
 
-              <tr>
-                <td>{entry.asn}</td>
-                <td>{entry.name }</td>
-                <td>{entry.rank}</td>
-                <td>
-                  <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(validated)) } data-original-title="Details">{ validated.size + " announcement(s)" }</span>
-                </td>
-                <td>
-                  <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(invalidated)) } data-original-title="Details">{ invalidated.size + " announcement(s)" }</span>
-                </td>
-                <td>
-                  <form method="POST" action="/asRanking" style="padding:0;margin:0;">
-                    <input type="hidden" name="_method" value="POST"/>
-                    <input type="hidden" name="asn" value={ entry.asn.toString }/>
-                    <input type="hidden" name="name" value={ entry.name.toString }/>
-                    <input type="hidden" name="rank" value={ entry.rank.toString }/>
-                    <input type="submit" class="btn" value="block"/>
-                  </form>
-                </td>
-              </tr>
+              }
+
             }
             } </tbody>
         </table>

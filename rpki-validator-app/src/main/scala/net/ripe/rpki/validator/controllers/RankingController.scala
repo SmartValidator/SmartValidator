@@ -30,20 +30,20 @@ trait RankingController extends ApplicationController with Logging {
   protected def blockAsListEntryExistsRanking(entry: BlockAsFilter): Boolean = blockAsList.entries.contains(entry)
 
   get(baseUrl) {
-    new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements, messages = feedbackMessages)
+    new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements,blockAsList, messages = feedbackMessages)
   }
   post(baseUrl) {
     submittedBlocker match {
       case Success(entry) =>
         if(blockAsListEntryExistsRanking(new BlockAsFilter(entry.asn,"RankingAsn"))){
-          new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements,params, Seq(ErrorMessage("Entry is already blocked")))
+          new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements,blockAsList,params, Seq(ErrorMessage("Entry is already blocked")))
         }
         else{
           addBlockAsListEntry(new BlockAsFilter(entry.asn,"RankingAsn"))
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been added to the AS block list.")))
         }
       case Failure(errors) =>
-        new RankingView(asRankings, aSrankingSets,getCurrentRtrPrefixes,validatedAnnouncements, params, errors)
+        new RankingView(asRankings, aSrankingSets,getCurrentRtrPrefixes,validatedAnnouncements,blockAsList, params, errors)
     }
 
   }
