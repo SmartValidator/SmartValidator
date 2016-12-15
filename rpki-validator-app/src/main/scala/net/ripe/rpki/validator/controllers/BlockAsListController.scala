@@ -31,9 +31,9 @@ trait BlockAsListController extends ApplicationController {
       case Success(entry) =>
         if (blockAsListEntryExists(entry)) {
           removeBlockAsListEntry(entry)
-          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been removed from the filters.")))
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The AS has been removed from the block list.")))
         } else {
-          new BlockAsListView(blockAsList, params, Seq(ErrorMessage("Block list filter doesn't exist")))
+          new BlockAsListView(blockAsList, params, Seq(ErrorMessage("As doesn't exist")))
         }
       case Failure(errors) =>
         // go away hacker!
@@ -53,7 +53,7 @@ trait BlockAsListController extends ApplicationController {
   }
 
   private def submittedBlocker: ValidationNEL[FeedbackMessage, BlockAsFilter] = {
-    val asn = validateParameter("prefix", required(parseAsn))
+    val asn = validateParameter("asn", required(parseAsn))
     val origin = validateParameter("origin", required(parseOrigin))
     (asn |@| origin).apply(validate).flatMap(identity)
 

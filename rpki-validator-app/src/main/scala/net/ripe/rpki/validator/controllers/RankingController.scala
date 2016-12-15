@@ -47,6 +47,21 @@ trait RankingController extends ApplicationController with Logging {
     }
 
   }
+  delete(baseUrl) {
+    submittedBlocker match {
+      case Success(entry) =>
+        if(blockAsListEntryExistsRanking(new BlockAsFilter(entry.asn,"RankingAsn"))){
+          removeBlockAsListEntry(new BlockAsFilter(entry.asn,"RankingAsn"))
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been removed to the AS block list.")))
+        }
+        else{
+          new RankingView(asRankings, aSrankingSets, getCurrentRtrPrefixes,validatedAnnouncements,blockAsList,params, Seq(ErrorMessage("Entry is already unblocked")))
+        }
+      case Failure(errors) =>
+        new RankingView(asRankings, aSrankingSets,getCurrentRtrPrefixes,validatedAnnouncements,blockAsList, params, errors)
+    }
+
+  }
 
 
   private def validate(asn: Asn, name: String, rank: Double): ValidationNEL[FeedbackMessage, RankingEntry] = {

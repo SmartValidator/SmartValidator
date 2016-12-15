@@ -60,8 +60,8 @@ class BlockAsListView(blockAsList: BlockAsList, params: Map[String, String] = Ma
                   <form method="POST" action="/blockAsList" style="padding:0;margin:0;">
                     <input type="hidden" name="_method" value="DELETE"/>
                     <input type="hidden" name="asn" value={ entry.asn.toString }/>
-                    <input type="hidden" name="origin" value={ entry.origin }/>
-                    <input type="submit" class="btn" value="unblock"/>
+                    <input type="hidden" name="origin" value={ entry.origin.toString}/>
+                    <input type="submit" class="btn" value="Unblock"/>
                   </form>
                 </td>
               </tr>
