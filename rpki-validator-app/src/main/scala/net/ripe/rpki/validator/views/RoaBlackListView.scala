@@ -19,7 +19,7 @@ class RoaBlackListView (roaBlackList: RoaBlackList, looseRoas:ArrayBuffer[LooseR
         { renderMessages(messages, fieldNameToText) }
         <table>
           <thead>
-            <tr><th>ASN</th><th>Prefix</th><th>Max prefix</th></tr>
+            <tr><th>ASN</th><th>Prefix</th></tr>
           </thead>
           {
           if(looseRoas.isEmpty)
@@ -31,7 +31,9 @@ class RoaBlackListView (roaBlackList: RoaBlackList, looseRoas:ArrayBuffer[LooseR
             for ( releventRoa <- looseRoas ) yield {
               <tr>
                 <td> { releventRoa.asn.toString } </td>
-                <td> { releventRoa.prefix.toString} </td>
+                <td> { releventRoa.prefix.toString } </td>
+                <td> { releventRoa.maxLength.toString } </td>
+
               </tr>
             }
           }

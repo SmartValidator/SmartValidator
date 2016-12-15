@@ -17,18 +17,18 @@ trait RoaBlackListController extends ApplicationController with Logging {
   protected def validatedObjects: ValidatedObjects
   private def getCurrentRtrPrefixes(): Iterable[RtrPrefix] = validatedObjects.getValidatedRtrPrefixes
   protected def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement]
-  protected var looseRoas = ArrayBuffer[LooseRoa]()
+  protected var looseRoas = findLooseROA()
 
 
   private def isRoaLoose(roa: RtrPrefix): Boolean = {
     var maxAdvertisiedLength:Int = 0
     var roaMaxLength : Int = roa.prefix.getPrefixLength
-    if(roa.maxPrefixLength.isEmpty){
-      roaMaxLength = roa.prefix.getPrefixLength
+    if(roa.maxPrefixLength.isDefined){
+      roaMaxLength = roa.maxPrefixLength.get
     }
 
     for(bgpAnnouncement <- validatedAnnouncements){
-      if(roa.prefix.contains(bgpAnnouncement.prefix))
+      if(roa.prefix.contains(bgpAnnouncement.prefix)) // change to think on maxLength too
       {
         if(maxAdvertisiedLength < bgpAnnouncement.prefix.getPrefixLength){
           maxAdvertisiedLength = bgpAnnouncement.prefix.getPrefixLength
@@ -43,18 +43,22 @@ trait RoaBlackListController extends ApplicationController with Logging {
     false
   }
 
-  private def findLooseROA() {
+  private def findLooseROA() : ArrayBuffer[LooseRoa] = {
+    var looseRoas = ArrayBuffer[LooseRoa]()
     val currentRoas = getCurrentRtrPrefixes()
     currentRoas.foreach{ roa =>
           if(isRoaLoose(roa)){
-            val temp = LooseRoa(roa.asn, roa.prefix)
+            val temp = LooseRoa(roa.asn, roa.prefix, roa.maxPrefixLength.getOrElse(roa.prefix.getPrefixLength))
+//              val temp = LooseRoa(roa.asn, roa.prefix, roa.maxPrefixLength.get)
+
             looseRoas += temp
           }
         }
+    looseRoas
   }
 
   get(baseUrl){
-    new RoaBlackListView(roaBlackList, looseRoas, messages = feedbackMessages)
+    new RoaBlackListView(roaBlackList, findLooseROA(), messages = feedbackMessages)
   }
 
 

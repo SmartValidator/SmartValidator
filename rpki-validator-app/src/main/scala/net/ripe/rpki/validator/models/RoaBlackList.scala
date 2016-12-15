@@ -5,7 +5,7 @@ import net.ripe.ipresource.{Asn, IpRange}
 /**
   * Created by fimka on 08/12/16.
   */
-  case class BlockedRoa(prefix: IpRange) {
+  case class BlockedRoa(asn: Asn, prefix: IpRange, maxLength: Integer) {
     def shouldBlock(rtrPrefix: RtrPrefix): Boolean = prefix.overlaps(rtrPrefix.prefix)
   }
 
@@ -13,9 +13,8 @@ import net.ripe.ipresource.{Asn, IpRange}
 
   }
 
-  case class LooseRoa(asn: Asn, prefix: IpRange){
 
-  }
+
 
 
 
