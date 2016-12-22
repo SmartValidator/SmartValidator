@@ -48,11 +48,11 @@ case class NewVersionDetails(version: String, url: URI)
 object RoaOperationMode extends Enumeration {
   type RoaOperationMode = Value
   val AutoModeRemoveBadROA, AutoModeRemoveGoodROA, ManualMode = Value
-
+  def valueOf(name: String) = this.values.find(_.toString == name)
   def isOrderType(s: String) = values.exists(_.toString == s)
 }
 // Note enableFeedback is an option so that we can see detect if users never made this choice, and prompt them.
-case class UserPreferences(updateAlertActive: Boolean = true, maxStaleDays: Int = 0, roaOperationMode: RoaOperationMode) {
+case class UserPreferences(updateAlertActive: Boolean = true, maxStaleDays: Int = 0, roaOperationMode: RoaOperationMode = null) {
   require(maxStaleDays >= 0)
 }
 

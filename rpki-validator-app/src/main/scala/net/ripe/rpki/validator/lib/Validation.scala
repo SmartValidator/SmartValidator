@@ -163,10 +163,10 @@ object Validation {
   }
 
   def parseRadioBoxValue(s: Option[String]): Validation[String, RoaOperationMode] = {
-      s match {
-        case RoaOperationMode.ManualMode => RoaOperationMode.ManualMode.success
-        case RoaOperationMode.AutoModeRemoveBadROA => RoaOperationMode.AutoModeRemoveBadROA.success
-        case RoaOperationMode.AutoModeRemoveGoodROA => RoaOperationMode.AutoModeRemoveGoodROA.success
+    RoaOperationMode.valueOf(s.getOrElse("")) match {
+        case Some(RoaOperationMode.ManualMode) => RoaOperationMode.ManualMode.success
+        case Some(RoaOperationMode.AutoModeRemoveBadROA) => RoaOperationMode.AutoModeRemoveBadROA.success
+        case Some(RoaOperationMode.AutoModeRemoveGoodROA) => RoaOperationMode.AutoModeRemoveGoodROA.success
         case None => "".fail
       }
   }
