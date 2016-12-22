@@ -70,8 +70,8 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
               Choose protection level -
               <ul>
                 <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)} checked = {if(userPreferences.roaOperationMode== RoaOperationMode.ManualMode){"checked"}}/> Manual mode </li>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) checked = {if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){"checked"}}}/> Automatically remove ROA's which invalidate BGP anonucments </li>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString) checked = {if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveGoodROA){"checked"}}}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) } checked = {if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){"checked"}}/> Automatically remove ROA's which invalidate BGP anonucments </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked = {if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveGoodROA){"checked"}}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
               </ul>
             </label>
           </div>
