@@ -66,6 +66,13 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
               </span>
               days.
             </label>
+            <label class="radio">
+              Choose protection level -
+              <ul>
+                <li>Safe mode: <input type="number" class="span2" min="0" name="max-stale-days" value={ Text(userPreferences.maxStaleDays.toString) }/></li>
+                <li>Auto mode</li>
+              </ul>
+            </label>
           </div>
           <div>
             <br/>
