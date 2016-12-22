@@ -32,18 +32,27 @@ package lib
 
 
 import java.net.URI
+
 import org.joda.time.DateTime
 import java.io.InputStream
 import java.util.Properties
+
 import grizzled.slf4j.Logging
 import org.joda.time.Duration
 import java.io.ByteArrayInputStream
 
+import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
+
 
 case class NewVersionDetails(version: String, url: URI)
+object RoaOperationMode extends Enumeration {
+  type RoaOperationMode = Value
+  val AutoModeRemoveBadROA, AutoModeRemoveGoodROA, ManualMode = Value
 
+  def isOrderType(s: String) = values.exists(_.toString == s)
+}
 // Note enableFeedback is an option so that we can see detect if users never made this choice, and prompt them.
-case class UserPreferences(updateAlertActive: Boolean = true, maxStaleDays: Int = 0) {
+case class UserPreferences(updateAlertActive: Boolean = true, maxStaleDays: Int = 0, roaOperationMode: RoaOperationMode) {
   require(maxStaleDays >= 0)
 }
 

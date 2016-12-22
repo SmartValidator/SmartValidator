@@ -31,7 +31,7 @@ package net.ripe.rpki.validator
 package views
 
 import scala.xml._
-import lib.UserPreferences
+import lib.{RoaOperationMode, UserPreferences}
 import lib.Validation._
 
 
@@ -69,8 +69,9 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
             <label class="radio">
               Choose protection level -
               <ul>
-                <li>Safe mode: <input type="number" class="span2" min="0" name="max-stale-days" value={ Text(userPreferences.maxStaleDays.toString) }/></li>
-                <li>Auto mode</li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString) }/> Manual mode </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) }/> Automatically remove ROA's which invalidate BGP anonucments </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString) }/> Automatically preserve ROA's which invalidate BGP anonucments </li>
               </ul>
             </label>
           </div>

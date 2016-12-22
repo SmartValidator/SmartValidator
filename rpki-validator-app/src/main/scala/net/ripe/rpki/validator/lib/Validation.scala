@@ -33,6 +33,7 @@ import scalaz._
 import Scalaz._
 import net.ripe.ipresource.Asn
 import net.ripe.ipresource.IpRange
+import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
 
 object Validation {
 
@@ -159,6 +160,15 @@ object Validation {
       case Some(_) => true.success
       case None    => false.success
     }
+  }
+
+  def parseRadioBoxValue(s: Option[String]): Validation[String, RoaOperationMode] = {
+      s match {
+        case RoaOperationMode.ManualMode => RoaOperationMode.ManualMode.success
+        case RoaOperationMode.AutoModeRemoveBadROA => RoaOperationMode.AutoModeRemoveBadROA.success
+        case RoaOperationMode.AutoModeRemoveGoodROA => RoaOperationMode.AutoModeRemoveGoodROA.success
+        case None => "".fail
+      }
   }
 
   def containedIn(range: Range): Int => Validation[String, Int] = value => {
