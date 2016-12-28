@@ -33,11 +33,20 @@ package views
 import scala.xml._
 import lib.{RoaOperationMode, UserPreferences}
 import lib.Validation._
+import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
 
 
 class UserPreferencesView(val userPreferences: UserPreferences, val messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
 
   private val fieldNameToText = Map("enable-update-checks" -> "Check for updates", "max-stale-days" -> "Maximum days out of date")
+
+  private def isRoaOperationMode(roaOperationMode: RoaOperationMode): Text = {
+    if(roaOperationMode.equals(userPreferences.roaOperationMode))
+      {
+        return Text("checked")
+      }
+    Text("")
+  }
 
   def tab = Tabs.UserPreferencesTab
 
@@ -67,11 +76,12 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
               days.
             </label>
             <label class="radio">
+              Current protection level is: {Text(userPreferences.roaOperationMode.toString)}
               Choose protection level -
               <ul>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)} checked = {if(userPreferences.roaOperationMode== RoaOperationMode.ManualMode){"checked"}}/> Manual mode </li>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) } checked = {if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){"checked"}}/> Automatically remove ROA's which invalidate BGP anonucments </li>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked = {if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveGoodROA){"checked"}}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)} checked = {isRoaOperationMode(RoaOperationMode.ManualMode)}/> Manual mode </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) } checked = {isRoaOperationMode(RoaOperationMode.AutoModeRemoveBadROA)}/> Automatically remove ROA's which invalidate BGP anonucments </li>
+                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked = {isRoaOperationMode(RoaOperationMode.AutoModeRemoveGoodROA)}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
               </ul>
             </label>
           </div>
