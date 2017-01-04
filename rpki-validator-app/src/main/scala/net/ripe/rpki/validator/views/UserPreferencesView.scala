@@ -77,7 +77,7 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
             </label>
             <label class="radio">
               Current protection level is: {Text(userPreferences.roaOperationMode.toString)}
-              Choose protection level -
+              choose protection level -
               <ul>
                 <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)} checked = {isRoaOperationMode(RoaOperationMode.ManualMode)}/> Manual mode </li>
                 <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) } checked = {isRoaOperationMode(RoaOperationMode.AutoModeRemoveBadROA)}/> Automatically remove ROA's which invalidate BGP anonucments </li>
