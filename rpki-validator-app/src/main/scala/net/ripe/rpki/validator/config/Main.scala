@@ -184,6 +184,8 @@ class Main extends Http with Logging { main =>
     }
   }
 
+//  private def RoaValidator
+
   private def runValidator(forceNewFetch: Boolean) {
     import lib.DateAndTime._
 
@@ -313,6 +315,8 @@ class Main extends Http with Logging { main =>
       override protected def aSrankingSets = rankingSets.single.get
 
       override protected def getRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
+
+      /*override*/ protected def getRoaIssueList = memoryImage.single.get.getRoaIssues
 
       protected def sessionData = rtrServer.rtrSessions.allClientData
 

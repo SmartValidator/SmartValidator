@@ -30,9 +30,11 @@
 package net.ripe.rpki.validator
 package config
 
+import net.ripe.ipresource.Asn
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 
+import scala.collection.mutable
 import scalaz.Validation
 
 case class MemoryImage(filters: Filters,
@@ -47,6 +49,17 @@ case class MemoryImage(filters: Filters,
 
   private lazy val distinctRtrPrefixes =
     (Set.empty[RtrPrefix] ++ whitelist.entries ++ filters.filter(validatedObjects.getValidatedRtrPrefixes)).toSeq
+
+  private var roaIssues = processRoaIssues()
+
+  def processRoaIssues(): mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] ={
+
+    new mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean]
+  }
+
+  def refreshRoaIssues(): Unit ={
+    roaIssues = processRoaIssues()
+  }
 
   def startProcessingTrustAnchor(locator: TrustAnchorLocator, description: String) =
     copy(trustAnchors = trustAnchors.startProcessing(locator, description))
@@ -76,6 +89,9 @@ case class MemoryImage(filters: Filters,
   def removeWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, whitelist = whitelist.removeEntry(entry))
 
   def getDistinctRtrPrefixes: Seq[RtrPrefix] = distinctRtrPrefixes
+
+  def getRoaIssues: mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] = roaIssues
+
 
   def addFilter(filter: IgnoreFilter) = copy(version = version + 1, filters = filters.addFilter(filter))
 
