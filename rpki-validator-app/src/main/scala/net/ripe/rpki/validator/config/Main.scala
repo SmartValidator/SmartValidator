@@ -35,6 +35,7 @@ import java.util.EnumSet
 import javax.servlet.DispatcherType
 
 import grizzled.slf4j.Logging
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssueSeeker
 import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.bgp.preview._
 import net.ripe.rpki.validator.config.health.HealthServlet
@@ -98,6 +99,8 @@ class Main extends Http with Logging { main =>
 
   val bgpAnnouncementValidator = new BgpAnnouncementValidator
   val ianaAnnouncementValidator = new IanaAnnouncementValidator
+  val roaBgpIssueSeeker = new RoaBgpIssueSeeker
+
 
   val dataFile = ApplicationOptions.dataFileLocation
   val data = PersistentDataSerialiser.read(dataFile).getOrElse(PersistentData())
@@ -309,6 +312,7 @@ class Main extends Http with Logging { main =>
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements
+      /*override*/ protected def roaBgpIssuesSet = roaBgpIssueSeeker.roaBgpIssuesSet
 
       override protected def validatedIanaSets = ianaSets.single.get
 

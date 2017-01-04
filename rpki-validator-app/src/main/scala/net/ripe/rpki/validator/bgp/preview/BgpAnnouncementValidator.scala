@@ -30,16 +30,16 @@
 package net.ripe.rpki.validator
 package bgp.preview
 
-import lib.NumberResources._
-import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
-import net.ripe.ipresource.Asn
-import net.ripe.ipresource.IpRange
 import grizzled.slf4j.Logging
+import net.ripe.ipresource.{Asn, IpRange}
+import net.ripe.rpki.validator.RoaBgpIssues.{RoaBgpCollisons, RoaBgpIssue}
 import net.ripe.rpki.validator.lib.DateAndTime
+import net.ripe.rpki.validator.lib.NumberResources._
 import net.ripe.rpki.validator.models.RouteValidity._
+import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
 import org.joda.time.DateTime
 
-import scala.concurrent.stm.{MaybeTxn, Ref}
+import scala.collection.mutable
 
 case class BgpAnnouncementSet(url: String, lastModified: Option[DateTime] = None, entries: Seq[BgpAnnouncement] = Seq.empty)
 
@@ -53,7 +53,6 @@ object BgpValidatedAnnouncement {
            invalidsLength: Seq[RtrPrefix] = Seq.empty) = BgpValidatedAnnouncement(announced,
     valids.map((Valid, _)) ++ invalidsAsn.map((InvalidAsn, _)) ++ invalidsLength.map((InvalidLength, _)))
 }
-
 
 case class BgpValidatedAnnouncement(announced: BgpAnnouncement, prefixes: Seq[(RouteValidity, RtrPrefix)] = List.empty) {
   require(!invalidsAsn.exists(_.asn == announced.asn), "invalidsAsn must not contain the announced ASN")
@@ -105,12 +104,17 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
   import scala.concurrent.stm._
 
   private val _validatedAnnouncements = Ref(IndexedSeq.empty[BgpValidatedAnnouncement])
+  private val _roaBgpIssueSet = Ref(RoaBgpCollisons(DateTime.now(),IndexedSeq.empty[RoaBgpIssue]))
 
   def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement] = _validatedAnnouncements.single.get
+  def roaBgpIssuesSet: RoaBgpCollisons = _roaBgpIssueSet.single.get
+
 
   def startUpdate(announcements: Seq[BgpAnnouncement], prefixes: Seq[RtrPrefix]) = {
     val v = validate(announcements, prefixes)
+    val g = extractRoaBgpIssues(v)
     _validatedAnnouncements.single.set(v)
+    _roaBgpIssueSet.single.set(RoaBgpCollisons(DateTime.now(),g))
   }
 
   private def validate(announcements: Seq[BgpAnnouncement], prefixes: Seq[RtrPrefix]): IndexedSeq[BgpValidatedAnnouncement] = {
@@ -121,5 +125,31 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
     }
     info(s"Completed validating ${result.size} BGP announcements with ${prefixes.size} RTR prefixes in ${time/1000.0} seconds")
     result
+  }
+
+
+  def extractRoaBgpIssues(sortedAnnoucments: IndexedSeq[BgpValidatedAnnouncement]): IndexedSeq[RoaBgpIssue] = {
+    var unemptyCollisionedAnnoucments = sortedAnnoucments.filter(_.prefixes.nonEmpty)
+    var collisionsSet = mutable.Set[RoaBgpIssue]()
+    for(bgpValidatedAnnoucment <- unemptyCollisionedAnnoucments)
+      {
+        for(roaBgp <- bgpValidatedAnnoucment.prefixes)
+        {
+          if(!roaBgp._1.equals(RouteValidity.Valid)){
+            val foundRoa = collisionsSet.filter(_.roa == roaBgp._2)
+            if(foundRoa.nonEmpty)
+              {
+                foundRoa.head.bgpAnnouncements.add((roaBgp._1,bgpValidatedAnnoucment.announced))
+              }
+            else
+            {
+                var a2 = RoaBgpIssue(roaBgp._2, mutable.Set.empty[(RouteValidity.RouteValidity, BgpAnnouncement)])
+                a2.bgpAnnouncements.add((roaBgp._1,bgpValidatedAnnoucment.announced))
+                collisionsSet.add(a2)
+            }
+          }
+        }
+      }
+    collisionsSet.toIndexedSeq
   }
 }

@@ -52,7 +52,7 @@ object RoaOperationMode extends Enumeration {
   def isOrderType(s: String) = values.exists(_.toString == s)
 }
 // Note enableFeedback is an option so that we can see detect if users never made this choice, and prompt them.
-case class UserPreferences(updateAlertActive: Boolean = true, maxStaleDays: Int = 0, roaOperationMode: RoaOperationMode = null) {
+case class UserPreferences(updateAlertActive: Boolean = true, maxStaleDays: Int = 0, roaOperationMode: RoaOperationMode = RoaOperationMode.AutoModeRemoveBadROA) {
   require(maxStaleDays >= 0)
 }
 
