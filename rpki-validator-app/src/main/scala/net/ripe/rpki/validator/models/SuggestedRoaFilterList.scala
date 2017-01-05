@@ -11,7 +11,9 @@ import net.ripe.ipresource.{Asn, IpRange}
 
   }
 
-  case class SuggestedRoaFilterList(entries: Set[SuggestedRoaFilter] = Set.empty) {
+  case class SuggestedRoaFilterList(var entries: scala.collection.mutable.Set[SuggestedRoaFilter] = scala.collection.mutable.Set.empty) {
+    def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(entries + filter)
+    def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(entries - filter)
 
   }
 

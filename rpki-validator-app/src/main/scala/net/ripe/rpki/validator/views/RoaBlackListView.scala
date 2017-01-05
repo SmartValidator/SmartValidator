@@ -55,7 +55,7 @@ class RoaBlackListView (suggestedRoaFilterList: SuggestedRoaFilterList, looseRoa
               </tr>
             </thead>
             <tbody>{
-              val createTable: Set[SuggestedRoaFilter] =  (suggestedRoaFilterList.entries)
+              val createTable: scala.collection.mutable.Set[SuggestedRoaFilter] =  (suggestedRoaFilterList.entries)
               for (entry <- createTable) yield {
                 <tr>
                   <td>{entry.asn}</td>

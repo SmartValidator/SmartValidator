@@ -294,6 +294,8 @@ class Main extends Http with Logging { main =>
       override protected def validatedObjects = memoryImage.single.get.validatedObjects
 
       override protected def filters = memoryImage.single.get.filters
+      override protected def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.addSuggestedRoaFilter(filter)) }
+      override protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeSuggestedRoaFilter(filter)) }
       override protected def addFilter(filter: IgnoreFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.addFilter(filter)) }
       override protected def removeFilter(filter: IgnoreFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeFilter(filter)) }
 
@@ -312,7 +314,7 @@ class Main extends Http with Logging { main =>
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements
-      /*override*/ protected def roaBgpIssuesSet = roaBgpIssueSeeker.roaBgpIssuesSet
+      override protected def roaBgpIssuesSet = bgpAnnouncementValidator.roaBgpIssuesSet
 
       override protected def validatedIanaSets = ianaSets.single.get
 

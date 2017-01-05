@@ -92,6 +92,9 @@ case class MemoryImage(filters: Filters,
 
   def getRoaIssues: mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] = roaIssues
 
+  def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(version = version + 1, suggestedRoaFilterList = suggestedRoaFilterList.addSuggestedRoaFilter(filter))
+
+  def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(version = version + 1, suggestedRoaFilterList = suggestedRoaFilterList.removeSuggestedRoaFilter(filter))
 
   def addFilter(filter: IgnoreFilter) = copy(version = version + 1, filters = filters.addFilter(filter))
 

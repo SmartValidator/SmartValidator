@@ -69,7 +69,7 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
         if (suggestedRoaFilters.entries.isEmpty)
           <div class="alert-message block-message"><p>No suggested Roa filter exist.</p></div>
         else {
-          <table id="filters-table" class="zebra-striped" style="display: none;">
+          <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
                 <th>Asn</th><th>prefix</th><th>maxLength</th><th>&nbsp;</th>
@@ -83,11 +83,13 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
                   <td>{ filter.maxLength }</td>
                   <td>
                     <form method="POST" action="/filters" style="padding:0;margin:0;">
-                      <input type="hidden" name="_method" value="DELETE"/>
+                      <input type="hidden" name="_method" value="POST"/>
                       <input type="hidden" name="asn" value={ filter.asn.toString }/>
                       <input type="hidden" name="prefix" value={ filter.prefix.toString }/>
                       <input type="hidden" name="maxLength" value={ filter.maxLength.toString }/>
-                      <input type="submit" class="btn" value="delete"/>
+                      <input type="hidden" name="block" value={ filter.block.toString }/>
+                      <input type="hidden" name="fix" value={ filter.fix.toString }/>
+                      <input type="submit" class="btn" value="Block"/>
                     </form>
                   </td>
                 </tr>
@@ -96,7 +98,7 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
           </table>
             <script><!--
 $(document).ready(function() {
-  $('#filters-table').dataTable({
+  $('#suggestedRoas-table').dataTable({
       "sPaginationType": "full_numbers",
       "aoColumns": [
         null, null,null,

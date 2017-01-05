@@ -1,5 +1,6 @@
 package net.ripe.rpki.validator.RoaBgpIssues
 
+import net.ripe.ipresource.IpRange
 import net.ripe.rpki.validator.bgp.preview.BgpAnnouncement
 import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models.RtrPrefix
@@ -8,7 +9,8 @@ import org.joda.time.DateTime
 /**
   * Created by fimka on 04/01/17.
   */
-case class RoaBgpIssue(roa: RtrPrefix, bgpAnnouncements :scala.collection.mutable.Set[(RouteValidity, BgpAnnouncement)])
+case class RoaBgpIssue(roa: RtrPrefix, bgpAnnouncements :scala.collection.mutable.Set[(RouteValidity, BgpAnnouncement)]) {
+}
 case class RoaBgpCollisons(lastModified: DateTime, roaBgpIssuesSet: IndexedSeq[RoaBgpIssue])
 
 

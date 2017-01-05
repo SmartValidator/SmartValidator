@@ -38,6 +38,7 @@ import net.ripe.rpki.validator.config.WebFilter
 import org.scalatra.test.scalatest.ScalatraFeatureSpec
 import models._
 import lib.UserPreferences
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisons
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.ranking.RankingSet
@@ -49,6 +50,8 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def filters = sys.error("TODO")
     override protected def addFilter(filter: IgnoreFilter) = sys.error("TODO")
     override protected def removeFilter(filter: IgnoreFilter) = sys.error("TODO")
+    override protected def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = sys.error("TODO")
+    override protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = sys.error("TODO")
     override protected def whitelist = sys.error("TODO")
     override protected def addWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
     override protected def removeWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
@@ -75,6 +78,8 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def aSrankingSets: Seq[RankingSet] = sys.error("TODO")
 
     override protected def suggestedRoaFilters: SuggestedRoaFilterList = sys.error("TODO")
+
+    override protected def roaBgpIssuesSet: RoaBgpCollisons = sys.error("TODO")
   }, "/*")
 
   addServlet(new RestApi {
