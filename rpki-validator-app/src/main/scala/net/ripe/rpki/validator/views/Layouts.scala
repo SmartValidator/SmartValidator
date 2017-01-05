@@ -57,6 +57,8 @@ object Layouts {
         <script src="/javascript/bootstrap/1.3.0/bootstrap-alerts.js"/>
         <script src="/javascript/bootstrap/1.3.0/bootstrap-twipsy.js"/>
         <script src="/javascript/bootstrap/1.3.0/bootstrap-popover.js"/>
+        <link rel="stylesheet" href="http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css"></link>
+        <script src="http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
         <script src="/javascript/bootstrap/1.4.0/bootstrap-dropdown.js"/>
         <script type="text/javascript" charset="utf-8"><!--
             $(document).ready(function(){

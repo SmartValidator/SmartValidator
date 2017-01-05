@@ -121,7 +121,7 @@ class Main extends Http with Logging { main =>
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.roaBlackList))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.suggestedRoaFilterList))
 
   var store : CacheStore = _
 
@@ -340,8 +340,8 @@ class Main extends Http with Logging { main =>
       }
 
       override protected def asRankings: AsRankings =  memoryImage.single.get.asRankings
-
-      override protected def roaBlackList: RoaBlackList =  memoryImage.single.get.roaBlackList
+      //TODO bring back roa blacklist.
+      override protected def suggestedRoaFilters: SuggestedRoaFilterList =  memoryImage.single.get.suggestedRoaFilterList
 
     }
 

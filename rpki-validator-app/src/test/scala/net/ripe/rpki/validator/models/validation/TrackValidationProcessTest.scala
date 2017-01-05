@@ -48,7 +48,7 @@ import scalaz.Failure
 class TrackValidationProcessTest extends ValidatorTestCase with BeforeAndAfter {
 
   class MyTrackValidationProcessTrustAnchor(trustAnchors: Seq[TrustAnchor]) extends MyValidationProcess with TrackValidationProcess {
-    override val memoryImage = Ref(MemoryImage(Filters(), Whitelist(), new TrustAnchors(trustAnchors), ValidatedObjects(new TrustAnchors(trustAnchors)), BlockList(), AsRankings(),BlockAsList(),RoaBlackList()))
+    override val memoryImage = Ref(MemoryImage(Filters(), Whitelist(), new TrustAnchors(trustAnchors), ValidatedObjects(new TrustAnchors(trustAnchors)), BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList()))
     override def runProcess(forceNewFetch: Boolean) = { super.runProcess(false) }
   }
 

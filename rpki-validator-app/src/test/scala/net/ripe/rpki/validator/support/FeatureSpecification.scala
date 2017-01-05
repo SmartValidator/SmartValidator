@@ -70,12 +70,11 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override def newVersionDetailFetcher = sys.error("TODO")
     override def updateUserPreferences(userPreferences: UserPreferences) = sys.error("TODO")
     override protected def updateTrustAnchorState(locator: TrustAnchorLocator, enabled: Boolean) {}
-//    override protected def roaBlackList: RoaBlackList = sys.error("TODO")
 
     override protected def asRankings: AsRankings = sys.error("TODO")
     override protected def aSrankingSets: Seq[RankingSet] = sys.error("TODO")
 
-    override protected def roaBlackList: RoaBlackList = sys.error("TODO")
+    override protected def suggestedRoaFilters: SuggestedRoaFilterList = sys.error("TODO")
   }, "/*")
 
   addServlet(new RestApi {

@@ -44,7 +44,7 @@ case class MemoryImage(filters: Filters,
                        blockList: BlockList,
                        asRankings: AsRankings,
                        blockAsList: BlockAsList,
-                       roaBlackList: RoaBlackList,
+                       suggestedRoaFilterList: SuggestedRoaFilterList,
                        version: Int = 0) {
 
   private lazy val distinctRtrPrefixes =

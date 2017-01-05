@@ -161,6 +161,11 @@ object Validation {
       case None    => false.success
     }
   }
+  def parseBool(s: String): Validation[String, Boolean] = try {
+    s.toBoolean.success
+  } catch {
+    case _: Exception => (quote(s) + " is not a boolean").fail
+  }
 
   def parseRadioBoxValue(s: Option[String]): Validation[String, RoaOperationMode] = {
     RoaOperationMode.valueOf(s.getOrElse("")) match {

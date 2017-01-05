@@ -41,8 +41,8 @@ import lib.UserPreferences
 
 case class PersistentData(schemaVersion: Int = 0, filters: Filters = Filters(), blockList:BlockList = BlockList(),
                           whitelist: Whitelist = Whitelist(), userPreferences: UserPreferences = UserPreferences(),
-                          asRankings: AsRankings = AsRankings(),blockAsList:BlockAsList = BlockAsList(),
-                          roaBlackList: RoaBlackList = RoaBlackList(),
+                          asRankings: AsRankings = AsRankings(), blockAsList:BlockAsList = BlockAsList(),
+                          suggestedRoaFilterList: SuggestedRoaFilterList = SuggestedRoaFilterList(),
                           trustAnchorData: Map[String, TrustAnchorData] = Map.empty) {
 }
 

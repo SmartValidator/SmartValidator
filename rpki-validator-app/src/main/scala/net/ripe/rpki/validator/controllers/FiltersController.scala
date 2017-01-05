@@ -34,35 +34,72 @@ import scalaz._
 import Scalaz._
 import lib.Validation._
 import models._
+import net.ripe.ipresource.{Asn, IpRange}
+import net.ripe.rpki.validator.lib.UserPreferences
 import views.FiltersView
+import net.ripe.rpki.validator.lib.RoaOperationMode
 
 trait FiltersController extends ApplicationController {
   
   protected def filters: Filters
+  protected def suggestedRoaFilters : SuggestedRoaFilterList
   protected def addFilter(filter: IgnoreFilter): Unit
   protected def removeFilter(filter: IgnoreFilter): Unit
   protected def filterExists(filter: IgnoreFilter): Boolean = filters.entries.contains(filter)
   protected def validatedObjects: ValidatedObjects
+  protected def userPreferences: UserPreferences
 
   private def baseUrl = views.Tabs.FiltersTab.url
   
   private def getCurrentRtrPrefixes(): Iterable[RtrPrefix] = validatedObjects.getValidatedRtrPrefixes
 
+//  private def updateByUserPreference = {
+//    if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
+//      for(entry <- suggestedRoaFilters.entries) {
+//        if(!filterExists(new IgnoreFilter(entry.prefix))){
+//          addFilter(new IgnoreFilter(entry.prefix))
+//          entry.block = true
+//        }
+//      }
+//    }
+//    if(userPreferences.roaOperationMode == RoaOperationMode.ManualMode){
+//      for(entry <- suggestedRoaFilters.entries) {
+//        if(filterExists(new IgnoreFilter(entry.prefix))){
+//          removeFilter(new IgnoreFilter(entry.prefix))
+//          entry.block = false
+//        }
+//      }
+//    }
+//
+//
+//  }
+
   get(baseUrl) {
-    new FiltersView(filters, getCurrentRtrPrefixes, messages = feedbackMessages)
+    //updateByUserPreference
+    new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, messages = feedbackMessages)
   }
 
   post(baseUrl) {
     submittedFilter match {
       case Success(entry) =>
         if (filterExists(entry))
-          new FiltersView(filters, getCurrentRtrPrefixes, params, Seq(ErrorMessage("filter already exists")))
+          new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, Seq(ErrorMessage("filter already exists")))
         else {
           addFilter(entry)
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been added to the filters.")))
         }
       case Failure(errors) =>
-        new FiltersView(filters, getCurrentRtrPrefixes, params, errors)
+        submitedSuggestedRoaFilter match {
+          case Success(entry) =>
+            if (filterExists(new IgnoreFilter(entry.prefix)))
+              new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, Seq(ErrorMessage("filter already exists")))
+            else {
+              addFilter(new IgnoreFilter(entry.prefix))
+              redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been added to the filters.")))
+            }
+          case Failure(errors) =>
+            new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, errors)
+        }
     }
   }
 
@@ -73,16 +110,39 @@ trait FiltersController extends ApplicationController {
           removeFilter(entry)
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been removed from the filters.")))
         } else {
-          new FiltersView(filters, getCurrentRtrPrefixes, params, Seq(ErrorMessage("filter no longer exists")))
+          new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, Seq(ErrorMessage("filter no longer exists")))
         }
       case Failure(errors) =>
         // go away hacker!
-        new FiltersView(filters, getCurrentRtrPrefixes, params, errors)
+        new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, errors)
     }
   }
 
   private def submittedFilter: ValidationNEL[FeedbackMessage, IgnoreFilter] = {
     validateParameter("prefix", required(parseIpPrefix)) map IgnoreFilter
+  }
+  private def validate(asn: Asn, prefix: IpRange, maxLength: Int, block: Boolean, fix: Boolean): ValidationNEL[FeedbackMessage, SuggestedRoaFilter] = {
+    if (!prefix.isLegalPrefix) {
+      ErrorMessage("must be a legal IPv4 or IPv6 prefix", Some("prefix")).failNel
+    } else {
+      val validated = asn.success map { _ =>
+        new SuggestedRoaFilter(asn, prefix, maxLength, block, fix)
+
+      }
+
+      liftFailErrorMessage(validated)
+    }
+  }
+
+  private def submitedSuggestedRoaFilter: ValidationNEL[FeedbackMessage, SuggestedRoaFilter] = {
+    val asn = validateParameter("asn", required(parseAsn))
+    val prefix = validateParameter("prefix", required(parseIpPrefix))
+    val maxLength = validateParameter("maxlength", required(parseInt))
+    val block = validateParameter("block", required(parseBool))
+    val fix = validateParameter("fix", required(parseBool))
+    (asn |@| prefix |@| maxLength |@| block |@| fix).apply(validate).flatMap(identity)
+
+
   }
 
 }

@@ -1,32 +1,32 @@
 /**
- * The BSD License
- *
- * Copyright (c) 2010-2012 RIPE NCC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *   - Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *   - Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *   - Neither the name of the RIPE NCC nor the names of its contributors may be
- *     used to endorse or promote products derived from this software without
- *     specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+  * The BSD License
+  *
+  * Copyright (c) 2010-2012 RIPE NCC
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions are met:
+  *   - Redistributions of source code must retain the above copyright notice,
+  *     this list of conditions and the following disclaimer.
+  *   - Redistributions in binary form must reproduce the above copyright notice,
+  *     this list of conditions and the following disclaimer in the documentation
+  *     and/or other materials provided with the distribution.
+  *   - Neither the name of the RIPE NCC nor the names of its contributors may be
+  *     used to endorse or promote products derived from this software without
+  *     specific prior written permission.
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
 package net.ripe.rpki.validator
 package views
 
@@ -40,12 +40,14 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
 
   private val fieldNameToText = Map("enable-update-checks" -> "Check for updates", "max-stale-days" -> "Maximum days out of date")
 
-  private def isRoaOperationMode(roaOperationMode: RoaOperationMode): Text = {
+  private def isRoaOperationMode(roaOperationMode: RoaOperationMode): Boolean = {
     if(roaOperationMode.equals(userPreferences.roaOperationMode))
       {
-        return Text("checked")
+        return true
       }
-    Text("")
+    else{
+      return false
+    }
   }
 
   def tab = Tabs.UserPreferencesTab
@@ -78,11 +80,30 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
             <label class="radio">
               Current protection level is: {Text(userPreferences.roaOperationMode.toString)}
               choose protection level -
-              <ul>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)} checked = {isRoaOperationMode(RoaOperationMode.ManualMode)}/> Manual mode </li>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) } checked = {isRoaOperationMode(RoaOperationMode.AutoModeRemoveBadROA)}/> Automatically remove ROA's which invalidate BGP anonucments </li>
-                <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked = {isRoaOperationMode(RoaOperationMode.AutoModeRemoveGoodROA)}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
-              </ul>
+              {
+                if(isRoaOperationMode(RoaOperationMode.ManualMode)){
+                  <ul>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)} checked="checked" /> Manual mode </li>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) }/> Automatically remove ROA's which invalidate BGP anonucments </li>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
+                  </ul>
+                } else if(isRoaOperationMode(RoaOperationMode.AutoModeRemoveBadROA)){
+                  <ul>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)}  /> Manual mode </li>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) } checked="checked"/> Automatically remove ROA's which invalidate BGP anonucments </li>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)}/> Automatically preserve ROA's which invalidate BGP anonucments </li>
+                  </ul>
+                }
+                else{
+                  <ul>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.ManualMode.toString)}  /> Manual mode </li>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveBadROA.toString) }/> Automatically remove ROA's which invalidate BGP anonucments </li>
+                    <li><input type="radio" name="ROA-operation-mode" value={ Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked="checked"/> Automatically preserve ROA's which invalidate BGP anonucments </li>
+                  </ul>
+
+                  }
+              }
+
             </label>
           </div>
           <div>
@@ -93,6 +114,12 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
       </form>
     </div>
     <script><!--
+$(function() {
+     var $radios = $('input:radio[name=gender]');
+    if($radios.is(':checked') === false) {
+        $radios.filter('[value=Male]').prop('checked', true);
+    }
+});
 $(function () {
   $('[rel=twipsy]').twipsy({
     "live": true
