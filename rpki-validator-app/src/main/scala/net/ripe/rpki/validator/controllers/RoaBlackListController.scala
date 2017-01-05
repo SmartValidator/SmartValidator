@@ -44,16 +44,18 @@ trait RoaBlackListController extends ApplicationController with Logging {
   }
 
   private def findLooseROA() : ArrayBuffer[LooseRoa] = {
-    var looseRoas = ArrayBuffer[LooseRoa]()
-    val currentRoas = getCurrentRtrPrefixes()
-    currentRoas.foreach{ roa =>
-          if(isRoaLoose(roa)){
-            val temp = LooseRoa(roa.asn, roa.prefix, roa.maxPrefixLength.getOrElse(roa.prefix.getPrefixLength))
-//              val temp = LooseRoa(roa.asn, roa.prefix, roa.maxPrefixLength.get)
+    if ( looseRoas == null || looseRoas.isEmpty) {
+      looseRoas = ArrayBuffer[LooseRoa]()
+      val currentRoas = getCurrentRtrPrefixes()
+      currentRoas.foreach { roa =>
+        if (isRoaLoose(roa)) {
+          val temp = LooseRoa(roa.asn, roa.prefix, roa.maxPrefixLength.getOrElse(roa.prefix.getPrefixLength))
+          //              val temp = LooseRoa(roa.asn, roa.prefix, roa.maxPrefixLength.get)
 
-            looseRoas += temp
-          }
+          looseRoas += temp
         }
+      }
+    }
     looseRoas
   }
 

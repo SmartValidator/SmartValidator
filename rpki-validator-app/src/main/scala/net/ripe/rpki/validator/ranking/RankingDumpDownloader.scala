@@ -50,6 +50,9 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
     */
   def download(dump: RankingSet)(implicit ec: ExecutionContext): Future[RankingSet] = Future {
     try {
+//      if(dump.lastTotal !=0 && dump.lastModified.getOrElse(DateTime.now().toDate) == DateTime.now().toDate){
+//
+//        }
       val post = makePostExecutor(dump)
       val responseHandler = makeResponseHandler(dump)
       blocking { httpClient.execute(post, responseHandler) }
@@ -63,7 +66,7 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
 
   protected def makePostExecutor(dump: RankingSet): HttpPost = {
     val postRequest = new HttpPost(dump.url)
-    val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"300\", \"with_sources\":\"False\" }")
+    val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"50\", \"with_sources\":\"False\" }")
     postRequest.setEntity(postString)
     postRequest.setHeader("Content-type", "application/json")
     postRequest
