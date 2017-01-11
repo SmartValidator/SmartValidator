@@ -50,17 +50,6 @@ case class MemoryImage(filters: Filters,
   private lazy val distinctRtrPrefixes =
     (Set.empty[RtrPrefix] ++ whitelist.entries ++ filters.filter(validatedObjects.getValidatedRtrPrefixes)).toSeq
 
-  private var roaIssues = processRoaIssues()
-
-  def processRoaIssues(): mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] ={
-
-    new mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean]
-  }
-
-  def refreshRoaIssues(): Unit ={
-    roaIssues = processRoaIssues()
-  }
-
   def startProcessingTrustAnchor(locator: TrustAnchorLocator, description: String) =
     copy(trustAnchors = trustAnchors.startProcessing(locator, description))
 
@@ -90,7 +79,7 @@ case class MemoryImage(filters: Filters,
 
   def getDistinctRtrPrefixes: Seq[RtrPrefix] = distinctRtrPrefixes
 
-  def getRoaIssues: mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] = roaIssues
+//  def getRoaIssues: mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] = roaIssues
 
   def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(version = version + 1, suggestedRoaFilterList = suggestedRoaFilterList.addSuggestedRoaFilter(filter))
 

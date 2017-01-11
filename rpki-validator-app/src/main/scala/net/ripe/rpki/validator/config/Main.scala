@@ -322,8 +322,6 @@ class Main extends Http with Logging { main =>
 
       override protected def getRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
 
-      /*override*/ protected def getRoaIssueList = memoryImage.single.get.getRoaIssues
-
       protected def sessionData = rtrServer.rtrSessions.allClientData
 
       // Software Update checker

@@ -2,64 +2,83 @@
 package net.ripe.rpki.validator
 package controllers
 
-import net.ripe.ipresource.{IpRange,Asn}
-import net.ripe.rpki.validator.lib.Validation._
-import net.ripe.rpki.validator.models.{BlockAsList, _}
-import net.ripe.rpki.validator.views.{BlockAsListView, FiltersView}
-
-import scalaz.Scalaz._
-import scalaz.{Failure, Success}
+import net.liftweb.json._
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisons
+import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncementSet, BgpValidatedAnnouncement}
+import net.ripe.rpki.validator.models._
+import net.ripe.rpki.validator.views.BlockAsListView
 
 trait BlockAsListController extends ApplicationController {
-  protected def filters: Filters
-  protected def blockAsList: BlockAsList
-
-  protected def addBlockAsListEntry(entry: BlockAsFilter): Unit
-  protected def removeBlockAsListEntry(entry: BlockAsFilter): Unit
-  protected def blockAsListEntryExists(entry: BlockAsFilter): Boolean = blockAsList.entries.contains(entry)
   private def baseUrl = views.Tabs.BlockAsListTab.url
 
+  protected def getRtrPrefixes: Seq[RtrPrefix]
+  protected def validatedObjects: ValidatedObjects
+  protected def bgpAnnouncementSet: Seq[BgpAnnouncementSet]
+  protected def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement]
+  protected def roaBgpIssuesSet: RoaBgpCollisons
+  protected def filters: Filters
 
 
   get(baseUrl) {
-    new BlockAsListView(blockAsList, messages = feedbackMessages)
+    new BlockAsListView(messages = feedbackMessages)
+  }
+
+  get("/roaIssues.json") {
+    import net.liftweb.json.JsonDSL._
+
+    contentType = "text/json"
+    response.addHeader("Pragma", "public")
+    response.addHeader("Cache-Control", "no-cache")
+
+    val roas = getRtrPrefixes.map(rtr =>
+      ("asn" -> rtr.asn.toString) ~
+        ("prefix" -> rtr.prefix.toString) ~
+        ("maxLength" -> rtr.maxPrefixLength.getOrElse(rtr.prefix.getPrefixLength)) ~
+        ("ta" -> rtr.getCaName)
+    )
+
+    val validRoaSize = getRtrPrefixes.size
+    val bgpAnnoucmentCount = bgpAnnouncementSet.size
+    val roaBgpCollisons = roaBgpIssuesSet.roaBgpIssuesSet.size
+
+    response.getWriter.write(compactRender("roas" -> roas))
   }
 
 
-  delete(baseUrl) {
-    submittedBlocker match {
-      case Success(entry) =>
-        if (blockAsListEntryExists(entry)) {
-          removeBlockAsListEntry(entry)
-          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The AS has been removed from the block list.")))
-        } else {
-          new BlockAsListView(blockAsList, params, Seq(ErrorMessage("As doesn't exist")))
-        }
-      case Failure(errors) =>
-        // go away hacker!
-        new BlockAsListView(blockAsList, params, errors)
-    }
+  get("/validatedRoasVSfilters.json") {
+    import net.liftweb.json.JsonDSL._
+
+    contentType = "text/json"
+    response.addHeader("Pragma", "public")
+    response.addHeader("Cache-Control", "no-cache")
+
+    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.size - getRtrPrefixes.size
+    val validRoaSize = getRtrPrefixes.size
+
+    var labels = List("Filtered Roas count", "Left Roas")
+    val values = List(filteredRoas, validRoaSize)
+    val json = ("labels" -> labels) ~ ("series" -> values)
+
+    response.getWriter.write(pretty(render(json)))
   }
 
-  private def validate(asn: Asn, origin: String): ValidationNEL[FeedbackMessage, BlockAsFilter] = {
-    if (false) {
-      ErrorMessage("must be a legal IPv4 or IPv6 prefix", Some("prefix")).failNel
-    } else {
-      val validated = origin.success map { _ =>
-        new BlockAsFilter(asn, origin)
-      }
-      liftFailErrorMessage(validated)
-    }
+  get("/bgpAnnouncements.json") {
+    import net.liftweb.json.JsonDSL._
+
+    contentType = "text/json"
+    response.addHeader("Pragma", "public")
+    response.addHeader("Cache-Control", "no-cache")
+
+    val bgpASize = validatedAnnouncements.size
+    val validBgpASize = validatedAnnouncements.count(_.validity.equals(RouteValidity.Valid))
+    val unknownBgpASize = validatedAnnouncements.count(_.validity.equals(RouteValidity.Unknown))
+    val invalidBgpAsize = bgpASize - validBgpASize - unknownBgpASize
+    val labels = List("Unknown", "Invalid", "Valid")
+    val values = List(unknownBgpASize, invalidBgpAsize, validBgpASize)
+    val json = ("labels" -> labels) ~ ("series" -> values)
+
+    response.getWriter.write(pretty(render(json)))
   }
 
-  private def submittedBlocker: ValidationNEL[FeedbackMessage, BlockAsFilter] = {
-    val asn = validateParameter("asn", required(parseAsn))
-    val origin = validateParameter("origin", required(parseOrigin))
-    (asn |@| origin).apply(validate).flatMap(identity)
-
-
-
-
-  }
 }
 
