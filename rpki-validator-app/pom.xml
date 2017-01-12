@@ -336,6 +336,7 @@
                         <exclude>src/main/resources/public/javascript/datatables/**</exclude>
                         <exclude>src/main/resources/public/javascript/bootstrap/**</exclude>
                         <exclude>src/main/resources/public/stylesheets/bootstrap/**</exclude>
+                        <exclude>src/main/resources/public/javascript/chartist/**</exclude>
                         <exclude>src/test/resources/trusted.ssl.certs/**</exclude>
                     </excludes>
                 </configuration>

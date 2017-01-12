@@ -30,10 +30,9 @@
 package net.ripe.rpki.validator
 package views
 
+import net.ripe.rpki.validator.lib.{NewVersionDetails, UserPreferences}
+
 import scala.xml._
-import org.joda.time._
-import config.ReleaseInfo
-import lib.{ UserPreferences, NewVersionDetails }
 
 object Layouts {
   def none(view: View): NodeSeq = {
@@ -57,8 +56,8 @@ object Layouts {
         <script src="/javascript/bootstrap/1.3.0/bootstrap-alerts.js"/>
         <script src="/javascript/bootstrap/1.3.0/bootstrap-twipsy.js"/>
         <script src="/javascript/bootstrap/1.3.0/bootstrap-popover.js"/>
-        <link rel="stylesheet" href="http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css"></link>
-        <script src="http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+        <link rel="stylesheet" href="/javascript/chartist/chartist.min.css"></link>
+        <script src="/javascript/chartist/chartist.min.js"></script>
         <script src="/javascript/bootstrap/1.4.0/bootstrap-dropdown.js"/>
         <script type="text/javascript" charset="utf-8"><!--
             $(document).ready(function(){

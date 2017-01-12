@@ -68,7 +68,7 @@ class RankingDumpDownloader(httpClient: HttpClient) extends Logging {
     val postRequest = new HttpPost(dump.url)
     val postString = new StringEntity("{\"method\": \"cached_top_asns\", \"source\": \"global\", \"limit\":\"50\", \"with_sources\":\"False\" }")
     postRequest.setEntity(postString)
-    postRequest.setHeader("Content-type", "application/json")
+    postRequest.setHeader("content-type", "application/json")
     postRequest
   }
 

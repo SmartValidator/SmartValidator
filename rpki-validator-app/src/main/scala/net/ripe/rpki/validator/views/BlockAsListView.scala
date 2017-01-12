@@ -20,7 +20,7 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
       <div id="roaBgpCollisionsByType">    </div>
       <div id="roaPerTrustAnchor">    </div>
 
-
+      <script src="/javascript/chartist/access-plugin/chartist-plugin-accessibility.js"></script>
 
       <script type="text/javascript" charset="utf-8"><!--
           $.getJSON( "/validatedRoasVSfilters.json", function(validatedRoasVSfilters) {
