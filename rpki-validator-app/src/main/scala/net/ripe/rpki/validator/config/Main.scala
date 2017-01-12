@@ -52,6 +52,7 @@ import org.apache.commons.io.FileUtils
 import org.eclipse.jetty.server.Server
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
+import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
 
 import scala.Predef._
 import scala.collection.JavaConverters._
@@ -118,6 +119,8 @@ class Main extends Http with Logging { main =>
   val ianaDumpDownloader = new IanaDumpDownloader()
 
   val rankingDumpDownloader = new RankingDumpDownloader(http)
+
+  protected var lastState: RoaOperationMode = null;
 
 
   val memoryImage = Ref(
@@ -322,7 +325,10 @@ class Main extends Http with Logging { main =>
 
       override protected def getRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
 
+
       protected def sessionData = rtrServer.rtrSessions.allClientData
+
+
 
       // Software Update checker
       override def newVersionDetailFetcher = new OnlineNewVersionDetailFetcher(ReleaseInfo.version,
@@ -334,6 +340,29 @@ class Main extends Http with Logging { main =>
       // UserPreferences
       override def userPreferences = main.userPreferences.single.get
       override def updateUserPreferences(userPreferences: UserPreferences) = updateAndPersist { implicit transaction => main.userPreferences.set(userPreferences) }
+
+      override protected def updateFilters() = {
+        if(lastState == null || main.userPreferences.single.get.roaOperationMode != lastState){
+          if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode){
+            memoryImage.single.get.suggestedRoaFilterList.entries =  scala.collection.mutable.Set.empty
+            memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
+            var defaultMaxLen: Int = 0
+            for(entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet){
+              memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
+              lastState =  RoaOperationMode.ManualMode
+            }
+          }
+          if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
+            for(entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
+              if(!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))){
+                entry.block = true
+                memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
+              }
+            }
+            lastState =  RoaOperationMode.AutoModeRemoveBadROA
+          }
+        }
+      }
 
       override protected def updateTrustAnchorState(locator: TrustAnchorLocator, enabled: Boolean) = updateAndPersist { implicit transaction =>
         memoryImage.transform(_.updateTrustAnchorState(locator, enabled))
@@ -350,6 +379,8 @@ class Main extends Http with Logging { main =>
 
       override protected def getCachedObjects = store.getAllObjects
     }
+
+
 
     val root = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS)
     root.setResourceBase(getClass.getResource("/public").toString)
@@ -387,4 +418,33 @@ class Main extends Http with Logging { main =>
     }
   }
 
+
+
+
+
 }
+
+
+//
+//override def updateFilters() = {
+//  if(lastState == null || userPreferences.single.get.roaOperationMode != lastState){
+//  if(userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode){
+//  memoryImage.single.get.suggestedRoaFilterList.entries =  scala.collection.mutable.Set.empty
+//  memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
+//  var defaultMaxLen: Int = 0
+//  for(entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet){
+//  memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
+//  lastState =  RoaOperationMode.ManualMode
+//}
+//}
+//  if(userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
+//  for(entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
+//  if(!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))){
+//  entry.block = true
+//  memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
+//}
+//}
+//  lastState =  RoaOperationMode.AutoModeRemoveBadROA
+//}
+//}
+//}
