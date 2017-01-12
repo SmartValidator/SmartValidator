@@ -33,6 +33,7 @@ package views
 import scala.xml._
 import models._
 import lib.Validation._
+import scala.util.control.Breaks._
 
 class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPrefix],suggestedRoaFilters: SuggestedRoaFilterList, params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("prefix" -> "Prefix")
@@ -77,22 +78,24 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
             </thead>
             <tbody>{
               for (filter <- suggestedRoaFilters.entries) yield {
-                <tr>
-                  <td>{ filter.asn }</td>
-                  <td>{ filter.prefix }</td>
-                  <td>{ filter.maxLength }</td>
-                  <td>
-                    <form method="POST" action="/filters" style="padding:0;margin:0;">
-                      <input type="hidden" name="_method" value="POST"/>
-                      <input type="hidden" name="asn" value={ filter.asn.toString }/>
-                      <input type="hidden" name="prefix" value={ filter.prefix.toString }/>
-                      <input type="hidden" name="maxLength" value={ filter.maxLength.toString }/>
-                      <input type="hidden" name="block" value={ filter.block.toString }/>
-                      <input type="hidden" name="fix" value={ filter.fix.toString }/>
-                      <input type="submit" class="btn" value="Block"/>
-                    </form>
-                  </td>
-                </tr>
+                if(filters.entries.find(_.prefix == filter.prefix).getOrElse(None) == None){
+                  <tr>
+                    <td>{ filter.asn }</td>
+                    <td>{ filter.prefix }</td>
+                    <td>{ filter.maxLength }</td>
+                    <td>
+                      <form method="POST" action="/filters" style="padding:0;margin:0;">
+                        <input type="hidden" name="_method" value="POST"/>
+                        <input type="hidden" name="asn" value={ filter.asn.toString }/>
+                        <input type="hidden" name="prefix" value={ filter.prefix.toString }/>
+                        <input type="hidden" name="maxLength" value={ filter.maxLength.toString }/>
+                        <input type="hidden" name="block" value={ filter.block.toString }/>
+                        <input type="hidden" name="fix" value={ filter.fix.toString }/>
+                        <input style="color: green" type="submit" class="btn" value="Block"/>
+                      </form>
+                    </td>
+                  </tr>
+                }
               }
               }</tbody>
           </table>
@@ -164,7 +167,7 @@ $(document).ready(function() {
                     <form method="POST" action="/filters" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ filter.prefix.toString }/>
-                      <input type="submit" class="btn" value="delete"/>
+                      <input type="submit" id="block_btn" class="btn" value="delete"/>
                     </form>
                   </td>
                 </tr>

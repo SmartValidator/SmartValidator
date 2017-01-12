@@ -45,7 +45,7 @@ class PersistentDataTest extends ValidatorTestCase {
   val data_empty: PersistentData = PersistentData()
   val json_empty: String = """{"schemaVersion":0,"filters":{"entries":[]},"whitelist":{"entries":[]},"userPreferences":{"updateAlertActive":true,"maxStaleDays":0},"trustAnchorData":{}}"""
   val data_some: PersistentData = PersistentData(0,
-      Filters(Set(IgnoreFilter(IpRange.parse("192.168.0.0/16")))), BlockList(),
+      Filters(scala.collection.mutable.Set(IgnoreFilter(IpRange.parse("192.168.0.0/16")))), BlockList(),
       Whitelist(Set(RtrPrefix(Asn.parse("AS65530"), IpRange.parse("10.0.0.0/8"), None))))
   val json_some: String = """{"schemaVersion":0,"filters":{"entries":[{"prefix":"192.168.0.0/16"}]},"whitelist":{"entries":[{"asn":65530,"prefix":"10.0.0.0/8"}]},"userPreferences":{"updateAlertActive":true,"maxStaleDays":0},"trustAnchorData":{}}"""
 

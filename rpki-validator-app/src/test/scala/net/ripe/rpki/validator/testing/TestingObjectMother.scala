@@ -105,7 +105,7 @@ object TestingObjectMother {
   }
 
 
-  def FILTERS = Filters(Set(IgnoreFilter(ROA_PREFIX_V6_1.getPrefix)))
+  def FILTERS = Filters(scala.collection.mutable.Set(IgnoreFilter(ROA_PREFIX_V6_1.getPrefix)))
 
   def WHITELIST = Whitelist(Set(ASN3_TO_WHITELIST1))
 }

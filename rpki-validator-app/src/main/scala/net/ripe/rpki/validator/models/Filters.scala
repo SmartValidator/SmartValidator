@@ -36,7 +36,7 @@ case class IgnoreFilter(prefix: IpRange) {
   def shouldIgnore(rtrPrefix: RtrPrefix): Boolean = prefix.overlaps(rtrPrefix.prefix)
 }
 
-case class Filters(entries: Set[IgnoreFilter] = Set.empty) {
+case class Filters(var entries: scala.collection.mutable.Set[IgnoreFilter] = scala.collection.mutable.Set.empty) {
   def addFilter(filter: IgnoreFilter) = copy(entries + filter)
   def removeFilter(filter: IgnoreFilter) = copy(entries - filter)
 

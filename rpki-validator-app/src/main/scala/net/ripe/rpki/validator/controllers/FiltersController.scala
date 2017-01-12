@@ -63,27 +63,21 @@ trait FiltersController extends ApplicationController {
     if(lastState == null || userPreferences.roaOperationMode != lastState){
       if(userPreferences.roaOperationMode == RoaOperationMode.ManualMode){
         suggestedRoaFilters.entries =  scala.collection.mutable.Set.empty
+        filters.entries = scala.collection.mutable.Set.empty
         var defaultMaxLen: Int = 0
         for(entry <- roaBgpIssuesSet.roaBgpIssuesSet){
           suggestedRoaFilters.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
-          //addSuggestedRoaFilter(new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,5))
+          lastState =  RoaOperationMode.ManualMode
         }
       }
       if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
         for(entry <- suggestedRoaFilters.entries) {
           if(!filterExists(new IgnoreFilter(entry.prefix))){
-            addFilter(new IgnoreFilter(entry.prefix))
             entry.block = true
+            filters.entries += new IgnoreFilter(entry.prefix)
           }
         }
-      }
-      if(userPreferences.roaOperationMode == RoaOperationMode.ManualMode){
-        for(entry <- suggestedRoaFilters.entries) {
-          if(filterExists(new IgnoreFilter(entry.prefix))){
-            removeFilter(new IgnoreFilter(entry.prefix))
-            entry.block = false
-          }
-        }
+        lastState =  RoaOperationMode.AutoModeRemoveBadROA
       }
     }
 
