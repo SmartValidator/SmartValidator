@@ -91,7 +91,7 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
                         <input type="hidden" name="maxLength" value={ filter.maxLength.toString }/>
                         <input type="hidden" name="block" value={ filter.block.toString }/>
                         <input type="hidden" name="fix" value={ filter.fix.toString }/>
-                        <input style="color: green" type="submit" class="btn" value="Block"/>
+                        <input style="background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(0%, #ffffff), to(#FF6347));background-color:#FF6347; " type="submit" class="btn" value="Block"/>
                       </form>
                     </td>
                   </tr>
@@ -167,7 +167,7 @@ $(document).ready(function() {
                     <form method="POST" action="/filters" style="padding:0;margin:0;">
                       <input type="hidden" name="_method" value="DELETE"/>
                       <input type="hidden" name="prefix" value={ filter.prefix.toString }/>
-                      <input type="submit" id="block_btn" class="btn" value="delete"/>
+                      <input style="background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(0%, #ffffff), to(#32CD32));background-color:#32CD32; " type="submit" class="btn" value="Unblock"/>
                     </form>
                   </td>
                 </tr>
