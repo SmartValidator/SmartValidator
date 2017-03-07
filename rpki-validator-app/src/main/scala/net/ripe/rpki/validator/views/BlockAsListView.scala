@@ -41,9 +41,9 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
         .done(function(bgpAnnouncements) {
           console.log( "second success" );
           console.log( bgpAnnouncements );
-          var chart2 = new Chartist.Pie('#bgpAnnouncements', bgpAnnouncements, {
+          var chart = new Chartist.Pie('#bgpAnnouncements', bgpAnnouncements, {
             showLabel: false,
-             donut: true,
+            dount: true,
             plugins: [
                        Chartist.plugins.legend({
             legendNames: ['Valid ' + bgpAnnouncements.series[0].toString(), 'Invalid ' + bgpAnnouncements.series[1].toString(), 'Unknown ' + bgpAnnouncements.series[2].toString()]
