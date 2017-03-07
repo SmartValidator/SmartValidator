@@ -84,8 +84,8 @@ trait BlockAsListController extends ApplicationController {
     val filteredRoas = validatedObjects.getValidatedRtrPrefixes.size - getRtrPrefixes.size
     val validRoaSize = getRtrPrefixes.size
 
-    var labels = List("Filtered Roas count", "Left Roas")
-    val values = List(filteredRoas, validRoaSize)
+    var labels = List("Total number of ROAs", "Filtered ROAs")
+    val values = List(validRoaSize, filteredRoas)
     val json = ("labels" -> labels) ~ ("series" -> values)
 
     response.getWriter.write(pretty(render(json)))
@@ -102,8 +102,8 @@ trait BlockAsListController extends ApplicationController {
     val validBgpASize = validatedAnnouncements.count(_.validity.equals(RouteValidity.Valid))
     val unknownBgpASize = validatedAnnouncements.count(_.validity.equals(RouteValidity.Unknown))
     val invalidBgpAsize = bgpASize - validBgpASize - unknownBgpASize
-    val labels = List("Unknown", "Invalid", "Valid")
-    val values = List(unknownBgpASize, invalidBgpAsize, validBgpASize)
+    val labels = List("Valid","Invalid", "Unknown")
+    val values = List(validBgpASize,invalidBgpAsize,unknownBgpASize )
     val json = ("labels" -> labels) ~ ("series" -> values)
 
     response.getWriter.write(pretty(render(json)))

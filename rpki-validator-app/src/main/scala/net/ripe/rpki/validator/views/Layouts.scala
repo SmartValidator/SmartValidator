@@ -58,6 +58,8 @@ object Layouts {
         <script src="/javascript/bootstrap/1.3.0/bootstrap-popover.js"/>
         <link rel="stylesheet" href="/javascript/chartist/chartist.min.css"></link>
         <script src="/javascript/chartist/chartist.min.js"></script>
+        <script src="/javascript/chartist/legend/chartist-plugin-legend.js"></script>
+        <link rel="stylesheet" href="/javascript/chartist/legend/legendcss.css"></link>
         <script src="/javascript/bootstrap/1.4.0/bootstrap-dropdown.js"/>
         <script type="text/javascript" charset="utf-8"><!--
             $(document).ready(function(){
