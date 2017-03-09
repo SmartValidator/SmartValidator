@@ -34,6 +34,7 @@ import java.io.{File, PrintStream}
 import java.util.EnumSet
 import javax.servlet.DispatcherType
 
+import com.jcabi.ssh.{SSHByPassword, Shell}
 import grizzled.slf4j.Logging
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssueSeeker
 import net.ripe.rpki.validator.api.RestApi
@@ -41,6 +42,7 @@ import net.ripe.rpki.validator.bgp.preview._
 import net.ripe.rpki.validator.config.health.HealthServlet
 import net.ripe.rpki.validator.fetchers.FetcherConfig
 import net.ripe.rpki.validator.iana.block.{IanaAnnouncementSet, IanaAnnouncementValidator, IanaDumpDownloader}
+import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
 import net.ripe.rpki.validator.lib.{UserPreferences, _}
 import net.ripe.rpki.validator.models.validation._
 import net.ripe.rpki.validator.models.{Idle, IgnoreFilter, TrustAnchorData, _}
@@ -52,7 +54,6 @@ import org.apache.commons.io.FileUtils
 import org.eclipse.jetty.server.Server
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
-import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
 
 import scala.Predef._
 import scala.collection.JavaConverters._
@@ -149,13 +150,25 @@ class Main extends Http with Logging { main =>
   wipeRsyncDiskCache()
 
   val rtrServer = runRtrServer()
-
+  connectToRouter();
   runWebServer()
-
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60.seconds) { connectToRouter() }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
+
+
+  private def connectToRouter(): Unit = {
+    try {
+      val shell = new SSHByPassword("bgpsafe", 22, "fima", "1987");
+      val stdout = new Shell.Plain(shell).exec("show ip interface brief");
+      logger.info(stdout);
+    }catch {
+      case e: Exception => println("Error: " + e);
+    }
+  }
+
 
 
   private def loadTrustAnchors(): TrustAnchors = {

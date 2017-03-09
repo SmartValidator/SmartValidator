@@ -186,6 +186,12 @@
             <groupId>org.scalacheck</groupId>
             <artifactId>scalacheck_${scala.binary.version}</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.jcabi</groupId>
+            <artifactId>jcabi-ssh</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -310,6 +316,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!--<plugin>-->
                 <!--<groupId>com.mycila.maven-license-plugin</groupId>-->
                 <!--<artifactId>maven-license-plugin</artifactId>-->
