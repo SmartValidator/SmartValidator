@@ -150,9 +150,8 @@ class Main extends Http with Logging { main =>
   wipeRsyncDiskCache()
 
   val rtrServer = runRtrServer()
-  connectToRouter();
   runWebServer()
-  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60.seconds) { connectToRouter() }
+//  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
