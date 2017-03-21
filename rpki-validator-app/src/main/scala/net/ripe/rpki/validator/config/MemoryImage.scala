@@ -45,6 +45,7 @@ case class MemoryImage(filters: Filters,
                        asRankings: AsRankings,
                        blockAsList: BlockAsList,
                        suggestedRoaFilterList: SuggestedRoaFilterList,
+                       pathEndTable: PathEndTable,
                        version: Int = 0) {
 
   private lazy val distinctRtrPrefixes =
@@ -84,6 +85,10 @@ case class MemoryImage(filters: Filters,
   def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(version = version + 1, suggestedRoaFilterList = suggestedRoaFilterList.addSuggestedRoaFilter(filter))
 
   def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(version = version + 1, suggestedRoaFilterList = suggestedRoaFilterList.removeSuggestedRoaFilter(filter))
+
+  def addPathEndRecord(record: PathEndRecord) = copy(version = version + 1, pathEndTable = pathEndTable.addPathEndRecord(record))
+
+  def removePathEndRecord(record: PathEndRecord) = copy(version = version + 1, pathEndTable = pathEndTable.removePathEndRecord(record))
 
   def addFilter(filter: IgnoreFilter) = copy(version = version + 1, filters = filters.addFilter(filter))
 

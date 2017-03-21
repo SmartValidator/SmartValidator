@@ -51,5 +51,6 @@ object Tabs {
   val AsRankingTab = Tab(Text("AsRankingView"), "/asRanking")
   val RoAlertTab = Tab(Text("RoAlertView"), "/RoAlert")
   val RoaBlackList = Tab(Text("ROA black list"), "/RoaBlackList")
-  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, AsRankingTab, RoAlertTab,BlockAsListTab, RoaBlackList, UserPreferencesTab)
+  val PathEndPreviewTab = Tab(Text("PathEnd Preview"), "/pathend-preview")
+  def visibleTabs = Seq(HomeTab, TrustAnchorsTab, RoasTab, FiltersTab, WhitelistTab, BlockListTab, BgpPreviewTab, ExportTab, RtrSessionsTab, AsRankingTab, RoAlertTab,BlockAsListTab, RoaBlackList, UserPreferencesTab,PathEndPreviewTab)
 }

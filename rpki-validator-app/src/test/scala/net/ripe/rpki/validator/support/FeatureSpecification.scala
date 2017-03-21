@@ -52,6 +52,8 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def removeFilter(filter: IgnoreFilter) = sys.error("TODO")
     override protected def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = sys.error("TODO")
     override protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = sys.error("TODO")
+    override protected def addPathEndRecord(filter: PathEndRecord) = sys.error("TODO")
+    override protected def removePathEndRecord(filter: PathEndRecord) = sys.error("TODO")
     override protected def whitelist = sys.error("TODO")
     override protected def addWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
     override protected def removeWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
@@ -79,6 +81,7 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def aSrankingSets: Seq[RankingSet] = sys.error("TODO")
 
     override protected def suggestedRoaFilters: SuggestedRoaFilterList = sys.error("TODO")
+    override protected def pathEndTable: PathEndTable = sys.error("TODO")
 
     override protected def roaBgpIssuesSet: RoaBgpCollisons = sys.error("TODO")
   }, "/*")
