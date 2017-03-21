@@ -33,7 +33,7 @@ package config
 import java.io.{File, PrintStream}
 import java.util.EnumSet
 import javax.servlet.DispatcherType
-
+import net.ripe.ipresource.{Asn, IpRange}
 import grizzled.slf4j.Logging
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssueSeeker
 import net.ripe.rpki.validator.api.RestApi
@@ -124,7 +124,7 @@ class Main extends Http with Logging { main =>
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.suggestedRoaFilterList,data.pathEndTable))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.suggestedRoaFilterList,data.pathEndTable,data.localPathEndNeighbors))
 
   var store : CacheStore = _
 
@@ -301,6 +301,8 @@ class Main extends Http with Logging { main =>
       override protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeSuggestedRoaFilter(filter)) }
       override protected def addPathEndRecord(filter: PathEndRecord) = updateAndPersist { implicit transaction => updateMemoryImage(_.addPathEndRecord(filter)) }
       override protected def removePathEndRecord(filter: PathEndRecord) = updateAndPersist { implicit transaction => updateMemoryImage(_.removePathEndRecord(filter)) }
+      override protected def addPathEndNeighbor(entry: Asn) = updateAndPersist { implicit transaction => updateMemoryImage(_.addPathEndNeighbor(entry)) }
+      override protected def removePathEndNeighbor(entry: Asn) = updateAndPersist { implicit transaction => updateMemoryImage(_.removePathEndNeighbor(entry)) }
       override protected def addFilter(filter: IgnoreFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.addFilter(filter)) }
       override protected def removeFilter(filter: IgnoreFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeFilter(filter)) }
 
@@ -374,6 +376,7 @@ class Main extends Http with Logging { main =>
       //TODO bring back roa blacklist.
       override protected def suggestedRoaFilters: SuggestedRoaFilterList =  memoryImage.single.get.suggestedRoaFilterList
       override protected def pathEndTable: PathEndTable =  memoryImage.single.get.pathEndTable
+      override protected def localPathEndNeighbors: LocalPathEndNeighbors =  memoryImage.single.get.localPathEndNeighbors
 
     }
 

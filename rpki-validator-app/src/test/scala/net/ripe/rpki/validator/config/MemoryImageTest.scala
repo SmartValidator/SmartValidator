@@ -46,7 +46,7 @@ class MemoryImageTest extends ValidatorTestCase with BeforeAndAfterAll with Befo
 
   test("Should find distinct ROA prefixes") {
 
-    subject = new MemoryImage(Filters(), Whitelist(), trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable())
+    subject = new MemoryImage(Filters(), Whitelist(), trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable(),LocalPathEndNeighbors())
     val distinctRoaPrefixes = subject.getDistinctRtrPrefixes
 
     distinctRoaPrefixes.size should equal(4)
@@ -57,7 +57,7 @@ class MemoryImageTest extends ValidatorTestCase with BeforeAndAfterAll with Befo
   }
 
   test("Should list whitelist entries when no roas") {
-    subject = new MemoryImage(Filters(), WHITELIST, trustAnchors, ValidatedObjects(trustAnchors), BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable())
+    subject = new MemoryImage(Filters(), WHITELIST, trustAnchors, ValidatedObjects(trustAnchors), BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable(),LocalPathEndNeighbors())
     val distinctRoaPrefixes = subject.getDistinctRtrPrefixes
 
     distinctRoaPrefixes.size should equal(1)
@@ -67,7 +67,7 @@ class MemoryImageTest extends ValidatorTestCase with BeforeAndAfterAll with Befo
   test("Should mix whitelist entries with roas for same prefix") {
     val whitelist = WHITELIST.addEntry(ASN1_TO_ROA_PREFIX_V4_2)
 
-    subject = new MemoryImage(Filters(), whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable())
+    subject = new MemoryImage(Filters(), whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable(),LocalPathEndNeighbors())
     val distinctRoaPrefixes = subject.getDistinctRtrPrefixes
 
     distinctRoaPrefixes.size should equal(5)
@@ -81,7 +81,7 @@ class MemoryImageTest extends ValidatorTestCase with BeforeAndAfterAll with Befo
   test("Should mix whitelist entries with roas for same prefix and a filter") {
     val whitelist = WHITELIST.addEntry(ASN1_TO_ROA_PREFIX_V4_2)
 
-    subject = new MemoryImage(FILTERS, whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable())
+    subject = new MemoryImage(FILTERS, whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable(),LocalPathEndNeighbors())
     val distinctRoaPrefixes = subject.getDistinctRtrPrefixes
 
     distinctRoaPrefixes.size should equal(4)
@@ -96,7 +96,7 @@ class MemoryImageTest extends ValidatorTestCase with BeforeAndAfterAll with Befo
 
     val filters: Filters = FILTERS.addFilter(new IgnoreFilter(UNUSED_PREFIX_FOR_FILTER))
 
-    subject = new MemoryImage(filters, whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable())
+    subject = new MemoryImage(filters, whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable(),LocalPathEndNeighbors())
     val distinctRoaPrefixes = subject.getDistinctRtrPrefixes
 
     distinctRoaPrefixes.size should equal(4)
@@ -109,7 +109,7 @@ class MemoryImageTest extends ValidatorTestCase with BeforeAndAfterAll with Befo
   test("Should prevail whitelist entry over roa prefix filtered out by filter") {
     val whitelist = WHITELIST.addEntry(ASN1_TO_ROA_PREFIX_V6_1)
 
-    subject = new MemoryImage(FILTERS, whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable())
+    subject = new MemoryImage(FILTERS, whitelist, trustAnchors, ROAS, BlockList(), AsRankings(),BlockAsList(),SuggestedRoaFilterList(),PathEndTable(),LocalPathEndNeighbors())
     val distinctRoaPrefixes = subject.getDistinctRtrPrefixes
 
     distinctRoaPrefixes.size should equal(5)

@@ -42,6 +42,7 @@ import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisons
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.ranking.RankingSet
+import net.ripe.ipresource.{Asn, IpRange}
 
 @RunWith(classOf[JUnitRunner])
 abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggingSetup with Matchers with MockitoSugar with GivenWhenThen {
@@ -54,6 +55,8 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = sys.error("TODO")
     override protected def addPathEndRecord(filter: PathEndRecord) = sys.error("TODO")
     override protected def removePathEndRecord(filter: PathEndRecord) = sys.error("TODO")
+    override protected def addPathEndNeighbor(entry: Asn) = sys.error("TODO")
+    override protected def removePathEndNeighbor(entry: Asn) = sys.error("TODO")
     override protected def whitelist = sys.error("TODO")
     override protected def addWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
     override protected def removeWhitelistEntry(entry: RtrPrefix) = sys.error("TODO")
@@ -82,6 +85,8 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
 
     override protected def suggestedRoaFilters: SuggestedRoaFilterList = sys.error("TODO")
     override protected def pathEndTable: PathEndTable = sys.error("TODO")
+    override protected def localPathEndNeighbors: LocalPathEndNeighbors = sys.error("TODO")
+
 
     override protected def roaBgpIssuesSet: RoaBgpCollisons = sys.error("TODO")
   }, "/*")

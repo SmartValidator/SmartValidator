@@ -40,10 +40,14 @@ import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 
 trait PathEndController extends ApplicationController {
   protected def pathEndTable: PathEndTable
+  protected def localPathEndNeighbors: LocalPathEndNeighbors
   protected def addPathEndRecord(entry: PathEndRecord): Unit
   protected def removePathEndRecord(entry: PathEndRecord): Unit
+  protected def addPathEndNeighbor(entry: Asn): Unit
+  protected def removePathEndNeighbor(entry: Asn): Unit
   protected def entryExists(entry: PathEndRecord): Boolean = pathEndTable.entries.contains(entry)
-  protected def myAsn: Asn = new Asn(2)
+  protected def neighborExists(entry: Asn): Boolean = localPathEndNeighbors.entries.contains(entry)
+  protected def myAsn: Asn = new Asn(123321)
 
   protected def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement]
 
@@ -51,43 +55,51 @@ trait PathEndController extends ApplicationController {
 
 
   get(baseUrl) {
-    new PathEndPreviewView(pathEndTable, messages = feedbackMessages)
+    new PathEndPreviewView(pathEndTable,localPathEndNeighbors,validatedAnnouncements,myAsn,params, messages = feedbackMessages)
   }
-//TODO: how we get data?
   post(baseUrl) {
-//    submittedEntry match {
-//      case Success(entry) =>
-//        if (entryExists(entry))
-//          new PathEndPreviewView(pathEndTable, params, Seq(ErrorMessage("entry already exists in the whitelist")))
-//        else {
-//          addWhitelistEntry(entry)
-//          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been added to the whitelist.")))
-//        }
-//      case Failure(errors) =>
-//        new PathEndPreviewView(pathEndTable, params, errors)
-//    }
+    submittedEntry match {
+      case Success(entry) =>
+        if (neighborExists(entry))
+          new PathEndPreviewView(pathEndTable,localPathEndNeighbors,validatedAnnouncements,myAsn, params, Seq(ErrorMessage("Asn already defined as a trusted neighbor")))
+        else {
+          addPathEndNeighbor(entry)
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("Added new trusted neighbor")))
+        }
+      case Failure(errors) =>
+        new PathEndPreviewView(pathEndTable, localPathEndNeighbors,validatedAnnouncements,myAsn, params, errors)
+    }
   }
 
   delete(baseUrl) {
-//    submittedEntry match {
-//      case Success(entry) =>
-//        if (entryExists(entry)) {
-//          removeWhitelistEntry(entry)
-//          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been removed from the whitelist.")))
-//        } else {
-//          new PathEndPreviewView(pathEndTable, params, Seq(ErrorMessage("entry no longer exists in the whitelist")))
-//        }
-//      case Failure(errors) =>
-//        // go away hacker!
-//        new PathEndPreviewView(pathEndTable, params, errors)
-//    }
+    submittedEntry match {
+      case Success(entry) =>
+        if (neighborExists(entry)) {
+          removePathEndNeighbor(entry)
+          redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The asn removed from trusted neighbors list.")))
+        } else {
+          new PathEndPreviewView(pathEndTable,localPathEndNeighbors,validatedAnnouncements,myAsn, params, Seq(ErrorMessage("There was a problem removing the Asn from the list.")))
+        }
+      case Failure(errors) =>
+        // go away hacker!
+        new PathEndPreviewView(pathEndTable,localPathEndNeighbors,validatedAnnouncements,myAsn, params, errors)
+    }
+  }
+  private def validate(myAsnInput: Asn, asn: Asn): ValidationNEL[FeedbackMessage, Asn] = {
+    val validated = asn.success map { _ =>
+      new Asn(asn.getValue())
+
+    }
+
+    liftFailErrorMessage(validated)
+
   }
 
-//  private def submittedEntry: ValidationNEL[FeedbackMessage, PathEndRecord] = {
-////    val asn = validateParameter("asn", required(parseAsn))
-////    val lastModified = validateParameter("lastModified", required(parseOrigin)
-////
-////    (asn |@| prefix |@| maxPrefixLength).apply(RtrPrefix.validate).flatMap(identity)
-//  }
+  private def submittedEntry: ValidationNEL[FeedbackMessage, Asn] = {
+    val myAsnInput = validateParameter("myAsn",required(parseAsn))
+    val asn = validateParameter("asn", required(parseAsn))
+
+    (myAsnInput |@| asn).apply(validate).flatMap(identity)
+  }
 
 }

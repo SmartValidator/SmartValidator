@@ -44,6 +44,7 @@ case class PersistentData(schemaVersion: Int = 0, filters: Filters = Filters(), 
                           asRankings: AsRankings = AsRankings(), blockAsList:BlockAsList = BlockAsList(),
                           suggestedRoaFilterList: SuggestedRoaFilterList = SuggestedRoaFilterList(),
                           pathEndTable: PathEndTable = PathEndTable(),
+                          localPathEndNeighbors: LocalPathEndNeighbors = LocalPathEndNeighbors(),
                           trustAnchorData: Map[String, TrustAnchorData] = Map.empty) {
 }
 
