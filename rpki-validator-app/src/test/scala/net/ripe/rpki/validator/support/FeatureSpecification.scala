@@ -30,19 +30,19 @@
 package net.ripe.rpki.validator
 package support
 
+import net.ripe.ipresource.Asn
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
+import net.ripe.rpki.validator.api.RestApi
+import net.ripe.rpki.validator.config.WebFilter
+import net.ripe.rpki.validator.lib.UserPreferences
+import net.ripe.rpki.validator.models._
+import net.ripe.rpki.validator.ranking.RankingSet
+import net.ripe.rpki.validator.util.TrustAnchorLocator
 import org.junit.runner.RunWith
-import org.scalatest.{GivenWhenThen, Matchers}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import net.ripe.rpki.validator.config.WebFilter
+import org.scalatest.{GivenWhenThen, Matchers}
 import org.scalatra.test.scalatest.ScalatraFeatureSpec
-import models._
-import lib.UserPreferences
-import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisons
-import net.ripe.rpki.validator.util.TrustAnchorLocator
-import net.ripe.rpki.validator.api.RestApi
-import net.ripe.rpki.validator.ranking.RankingSet
-import net.ripe.ipresource.{Asn, IpRange}
 
 @RunWith(classOf[JUnitRunner])
 abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggingSetup with Matchers with MockitoSugar with GivenWhenThen {
@@ -88,7 +88,7 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def localPathEndNeighbors: LocalPathEndNeighbors = sys.error("TODO")
 
 
-    override protected def roaBgpIssuesSet: RoaBgpCollisons = sys.error("TODO")
+    override protected def roaBgpIssuesSet: RoaBgpCollisions = sys.error("TODO")
   }, "/*")
 
   addServlet(new RestApi {

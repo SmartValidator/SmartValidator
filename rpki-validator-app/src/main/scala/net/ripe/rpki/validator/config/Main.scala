@@ -35,8 +35,8 @@ import java.util.EnumSet
 import javax.servlet.DispatcherType
 
 import com.jcabi.ssh.{SSHByPassword, Shell}
-import net.ripe.ipresource.{Asn, IpRange}
 import grizzled.slf4j.Logging
+import net.ripe.ipresource.Asn
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssueSeeker
 import net.ripe.rpki.validator.api.RestApi
 import net.ripe.rpki.validator.bgp.preview._

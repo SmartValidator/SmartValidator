@@ -1,38 +1,38 @@
 /**
- * The BSD License
- *
- * Copyright (c) 2010-2012 RIPE NCC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *   - Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *   - Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *   - Neither the name of the RIPE NCC nor the names of its contributors may be
- *     used to endorse or promote products derived from this software without
- *     specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+  * The BSD License
+  *
+  * Copyright (c) 2010-2012 RIPE NCC
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions are met:
+  *   - Redistributions of source code must retain the above copyright notice,
+  * this list of conditions and the following disclaimer.
+  *   - Redistributions in binary form must reproduce the above copyright notice,
+  * this list of conditions and the following disclaimer in the documentation
+  * and/or other materials provided with the distribution.
+  *   - Neither the name of the RIPE NCC nor the names of its contributors may be
+  * used to endorse or promote products derived from this software without
+  * specific prior written permission.
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
 package net.ripe.rpki.validator
 package bgp.preview
 
 import grizzled.slf4j.Logging
 import net.ripe.ipresource.{Asn, IpRange}
-import net.ripe.rpki.validator.RoaBgpIssues.{RoaBgpCollisons, RoaBgpIssue}
+import net.ripe.rpki.validator.RoaBgpIssues.{RoaBgpCollisions, RoaBgpIssue}
 import net.ripe.rpki.validator.lib.DateAndTime
 import net.ripe.rpki.validator.lib.NumberResources._
 import net.ripe.rpki.validator.models.RouteValidity._
@@ -101,20 +101,22 @@ object BgpAnnouncementValidator {
 }
 
 class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) extends Logging {
+
   import scala.concurrent.stm._
 
   private val _validatedAnnouncements = Ref(IndexedSeq.empty[BgpValidatedAnnouncement])
-  private val _roaBgpIssueSet = Ref(RoaBgpCollisons(DateTime.now(),IndexedSeq.empty[RoaBgpIssue]))
+  private val _roaBgpIssueSet = Ref(RoaBgpCollisions(DateTime.now(), IndexedSeq.empty[RoaBgpIssue]))
 
   def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement] = _validatedAnnouncements.single.get
-  def roaBgpIssuesSet: RoaBgpCollisons = _roaBgpIssueSet.single.get
+
+  def roaBgpIssuesSet: RoaBgpCollisions = _roaBgpIssueSet.single.get
 
 
   def startUpdate(announcements: Seq[BgpAnnouncement], prefixes: Seq[RtrPrefix]) = {
     val v = validate(announcements, prefixes)
-    val g = extractRoaBgpIssues(v)
     _validatedAnnouncements.single.set(v)
-    _roaBgpIssueSet.single.set(RoaBgpCollisons(DateTime.now(),g))
+    val roaBgpIssuesSet = extractRoaBgpIssues(v)
+    _roaBgpIssueSet.single.set(RoaBgpCollisions(DateTime.now(), roaBgpIssuesSet))
   }
 
   private def validate(announcements: Seq[BgpAnnouncement], prefixes: Seq[RtrPrefix]): IndexedSeq[BgpValidatedAnnouncement] = {
@@ -123,33 +125,47 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
     val (result, time) = DateAndTime.timed {
       announcements.par.map(BgpAnnouncementValidator.validate(_, prefixTree)).seq.toIndexedSeq
     }
-    info(s"Completed validating ${result.size} BGP announcements with ${prefixes.size} RTR prefixes in ${time/1000.0} seconds")
+    info(s"Completed validating ${result.size} BGP announcements with ${prefixes.size} RTR prefixes in ${time / 1000.0} seconds")
     result
   }
 
 
+
+
   def extractRoaBgpIssues(sortedAnnoucments: IndexedSeq[BgpValidatedAnnouncement]): IndexedSeq[RoaBgpIssue] = {
-    var unemptyCollisionedAnnoucments = sortedAnnoucments.filter(_.prefixes.nonEmpty)
-    var collisionsSet = mutable.Set[RoaBgpIssue]()
-    for(bgpValidatedAnnoucment <- unemptyCollisionedAnnoucments)
-      {
-        for(roaBgp <- bgpValidatedAnnoucment.prefixes)
-        {
-          if(!roaBgp._1.equals(RouteValidity.Valid)){
-            val foundRoa = collisionsSet.filter(_.roa == roaBgp._2)
-            if(foundRoa.nonEmpty)
-              {
-                foundRoa.head.bgpAnnouncements.add((roaBgp._1,bgpValidatedAnnoucment.announced))
-              }
-            else
-            {
-                var a2 = RoaBgpIssue(roaBgp._2, mutable.Set.empty[(RouteValidity.RouteValidity, BgpAnnouncement)])
-                a2.bgpAnnouncements.add((roaBgp._1,bgpValidatedAnnoucment.announced))
-                collisionsSet.add(a2)
+    val unemptyCollisionedAnnoucments = sortedAnnoucments.filter(_.prefixes.nonEmpty)
+    var collisionsSet: mutable.Set[RoaBgpIssue] = mutable.Set(roaBgpIssuesSet.roaBgpIssuesSet.toArray: _*)
+    if (collisionsSet.isEmpty) {
+      collisionsSet = mutable.Set[RoaBgpIssue]()
+    }
+
+    for (bgpValidatedAnnouncement <- unemptyCollisionedAnnoucments) {
+      for (roaBgp <- bgpValidatedAnnouncement.prefixes) {
+        if (!roaBgp._1.equals(RouteValidity.Valid)) {
+          //TODO: lets find
+
+
+          var foundRoa = collisionsSet.filter(_.roa == roaBgp._2)
+          if (foundRoa.nonEmpty) {
+            //TODO: need to improve performance here
+            var foundSimilarAnnouncements = foundRoa.head.bgpAnnouncements.find(x => x._1 == roaBgp._1 && x._2 == bgpValidatedAnnouncement.announced)
+            var oldDate: DateTime = DateTime.now()
+            if (foundSimilarAnnouncements.nonEmpty) {
+              oldDate = foundSimilarAnnouncements.get._4
             }
+              foundRoa.head.bgpAnnouncements.remove(foundSimilarAnnouncements.get)
+              foundRoa.head.bgpAnnouncements.add((roaBgp._1, bgpValidatedAnnouncement.announced, oldDate, DateTime.now()))
+          }
+          else {
+            val a2 = RoaBgpIssue(roaBgp._2, mutable.Set.empty[(RouteValidity.RouteValidity, BgpAnnouncement, DateTime, DateTime)])
+            a2.bgpAnnouncements.add((roaBgp._1, bgpValidatedAnnouncement.announced, DateTime.now(), DateTime.now()))
+            collisionsSet.add(a2)
           }
         }
       }
+    }
+    //TODO: GoOver last validated and filter those who weren't validated in the last 24-48 hours.
+
     collisionsSet.toIndexedSeq
   }
 }

@@ -29,7 +29,6 @@
  */
 package net.ripe.rpki.validator.RoaBgpIssues
 
-import net.ripe.ipresource.IpRange
 import net.ripe.rpki.validator.bgp.preview.BgpAnnouncement
 import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models.RtrPrefix
@@ -38,20 +37,21 @@ import org.joda.time.DateTime
 /**
   * Created by fimka on 04/01/17.
   */
-case class RoaBgpIssue(roa: RtrPrefix, bgpAnnouncements :scala.collection.mutable.Set[(RouteValidity, BgpAnnouncement)]) {
-}
-case class RoaBgpCollisons(lastModified: DateTime, roaBgpIssuesSet: IndexedSeq[RoaBgpIssue])
 
+
+//Imitates bgp issue set that is indexed by Roa's that break Bgp announcements.
+//Each record holds bgp announcements array that holds - the invalidity reason, bgp announcement, dateTime of first
+// introduces, dateTime of last time it appeared if it's recognized within 24h it won't be deleted.
+case class RoaBgpIssue(roa: RtrPrefix, bgpAnnouncements :scala.collection.mutable.Set[(RouteValidity, BgpAnnouncement,
+  DateTime, DateTime)]) {
+}
+
+case class RoaBgpCollisions(lastModified: DateTime, roaBgpIssuesSet: IndexedSeq[RoaBgpIssue])
 
 class RoaBgpIssueSeeker {
   import scala.concurrent.stm._
-
-
-  private val _roaBgpIssueSet = Ref(RoaBgpCollisons(DateTime.now(), IndexedSeq.empty[RoaBgpIssue]))
-
-
-  def roaBgpIssuesSet: RoaBgpCollisons = _roaBgpIssueSet.single.get
-
+  private val _roaBgpIssueSet = Ref(RoaBgpCollisions(DateTime.now(), IndexedSeq.empty[RoaBgpIssue]))
+  def roaBgpIssuesSet: RoaBgpCollisions = _roaBgpIssueSet.single.get
 }
 
 

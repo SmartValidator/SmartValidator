@@ -32,7 +32,7 @@ package net.ripe.rpki.validator
 package controllers
 
 import net.liftweb.json._
-import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisons
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
 import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncementSet, BgpValidatedAnnouncement}
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.views.BlockAsListView
@@ -44,7 +44,7 @@ trait BlockAsListController extends ApplicationController {
   protected def validatedObjects: ValidatedObjects
   protected def bgpAnnouncementSet: Seq[BgpAnnouncementSet]
   protected def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement]
-  protected def roaBgpIssuesSet: RoaBgpCollisons
+  protected def roaBgpIssuesSet: RoaBgpCollisions
   protected def filters: Filters
 
 

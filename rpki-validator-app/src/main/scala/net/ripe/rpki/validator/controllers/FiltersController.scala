@@ -30,21 +30,21 @@
 package net.ripe.rpki.validator
 package controllers
 
-import scalaz._
-import Scalaz._
-import lib.Validation._
-import models._
 import net.ripe.ipresource.{Asn, IpRange}
-import net.ripe.rpki.validator.lib.UserPreferences
-import views.FiltersView
-import net.ripe.rpki.validator.lib.RoaOperationMode
 import net.ripe.rpki.validator.RoaBgpIssues._
 import net.ripe.rpki.validator.lib.RoaOperationMode._
+import net.ripe.rpki.validator.lib.UserPreferences
+import net.ripe.rpki.validator.lib.Validation._
+import net.ripe.rpki.validator.models._
+import net.ripe.rpki.validator.views.FiltersView
+
+import scalaz.Scalaz._
+import scalaz._
 
 trait FiltersController extends ApplicationController {
   protected def updateFilters
   protected def filters: Filters
-  protected def roaBgpIssuesSet: RoaBgpCollisons
+  protected def roaBgpIssuesSet: RoaBgpCollisions
   protected def suggestedRoaFilters : SuggestedRoaFilterList
   protected def addSuggestedRoaFilter(filter: SuggestedRoaFilter): Unit
   protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter): Unit
