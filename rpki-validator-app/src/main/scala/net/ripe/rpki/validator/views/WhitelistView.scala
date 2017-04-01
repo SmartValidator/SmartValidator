@@ -30,12 +30,14 @@
 package net.ripe.rpki.validator
 package views
 
-import scala.xml._
-import models._
-import lib.Validation._
-import bgp.preview.BgpValidatedAnnouncement
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssue
+import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
+import net.ripe.rpki.validator.lib.Validation._
+import net.ripe.rpki.validator.models._
 
-class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidatedAnnouncement], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+import scala.xml._
+
+class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidatedAnnouncement], collisions: IndexedSeq[RoaBgpIssue], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("asn" -> "Origin", "prefix" -> "Prefix", "maxPrefixLength" -> "Maximum prefix length")
 
   def tab = Tabs.WhitelistTab
@@ -80,6 +82,58 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
         </fieldset>
       </form>
     </div>
+      <div>
+        <h2>Suggested conflicted ASN and Prefixes </h2>{
+        if (collisions.seq.isEmpty)
+          <div class="alert-message block-message"><p>No suggested ASN whitelist exist.</p></div>
+        else {
+          <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
+            <thead>
+              <tr>
+                <th>Invalidaty reason</th><th>asn</th><th>prefix</th><th>conflict time span</th><th>last time spotted</th><th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>{
+              for (collison <- collisions.seq)  yield {
+                for(detailedColl <- collison.bgpAnnouncements) yield{
+                  <tr>
+                    <td>{ detailedColl._1 }</td>
+                    <td>{ detailedColl._2.asn }</td>
+                    <td>{ detailedColl._2.prefix }</td>
+                    <td>{ detailedColl._3 }</td>
+                    <td>{ detailedColl._4 }</td>
+                  </tr>
+                }
+
+
+              }
+              }</tbody>
+          </table>
+            <script><!--
+$(document).ready(function() {
+  $('#suggestedRoas-table').dataTable({
+      "sPaginationType": "full_numbers",
+      "aoColumns": [
+        null, null,null,
+        { "bSortable": false }
+      ]
+    }).show();
+  $('[rel=popover]').popover({
+    "live": true,
+    "html": true,
+    "placement": "below",
+    "offset": 10
+  }).live('click', function (e) {
+    e.preventDefault();
+  });
+});
+// --></script>
+        }
+        }
+      </div>
+
+
+
     <div>
       <h2>Current entries</h2>{
         if (whitelist.entries.isEmpty)

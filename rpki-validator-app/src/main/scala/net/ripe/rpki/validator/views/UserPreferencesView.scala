@@ -157,13 +157,13 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                 Enable to learn ROA - BGP Anoucment conflict and automatically approve conflicted BGP Anouncmetns after specific amount of time.
                 <span rel="twipsy" data-original-title="Increasing this number increases the certinty rate that a BGP-ROA conflict is a mistake">
                   time:
-                  <input type="number" class="span2" min="20" name="fake-conflict-certinty-rate" value={Text(userPreferences.conflictCertDays.toString)}/>
+                  <input type="number" class="span2" min="0" name="fake-conflict-certinty-rate" value={Text(userPreferences.conflictCertDays.toString)}/>
                 </span>
               </label>
               <label class="checkbox">
                 The number of days to hold BGP-ROA conflicted values that weren't validated
                 <span rel="twipsy" data-original-title="Increasing this number means that you would like to hold ROA-BGP conflicted that weren't validated fot this number of days.">
-                  <input type="number" class="span2" min="1" name="max-conflicted-bgp-stale-days" value={Text(userPreferences.maxConflictedBgpStaleDays.toString)}/>
+                  <input type="number" class="span2" min="0" name="max-conflicted-bgp-stale-days" value={Text(userPreferences.maxConflictedBgpStaleDays.toString)}/>
                 </span>
                 days.
               </label>

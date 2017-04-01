@@ -184,9 +184,10 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
       true
     }
 
-    collisionsSet.foreach(x=> x.bgpAnnouncements.filterNot(y => isBgpIssueOld(y._4)))
-    //TODO: GoOver last validated and filter those who weren't validated in the last 24-48 hours.
+    collisionsSet.foreach(x=> x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._4)))
+    collisionsSet = collisionsSet.filterNot(x=> x.bgpAnnouncements.isEmpty)
 
+    //TODO: clean empty anoncments after filteration
     collisionsSet.toIndexedSeq
   }
 }
