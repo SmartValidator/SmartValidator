@@ -63,7 +63,10 @@ trait UserPreferencesController extends ApplicationController with SoftwareUpdat
     val enableUpdateChecks = validateParameter("enable-update-checks", parseCheckBoxValue)
     val maxStale = validateParameter("max-stale-days", required(parseNonNegativeInt))
     val roaOperationMode = validateParameter("ROA-operation-mode", parseRadioBoxValue)
-    (enableUpdateChecks |@| maxStale |@| roaOperationMode).apply(UserPreferences)
+    val conflictCertDays = validateParameter("fake-conflict-certinty-rate", required(parseNonNegativeInt))
+    val conflictLearnMode = validateParameter("BGP-ROA-CONFLICT-LEARN-MODE", parseCheckBoxValue)
+    val maxConflictedBgpStaleDays = validateParameter("max-conflicted-bgp-stale-days", required(parseNonNegativeInt))
+    (enableUpdateChecks |@| maxStale |@| roaOperationMode |@| conflictCertDays |@| conflictLearnMode |@| maxConflictedBgpStaleDays).apply(UserPreferences)
   }
 }
 

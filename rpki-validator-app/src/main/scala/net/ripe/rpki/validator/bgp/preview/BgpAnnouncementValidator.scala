@@ -37,9 +37,11 @@ import net.ripe.rpki.validator.lib.DateAndTime
 import net.ripe.rpki.validator.lib.NumberResources._
 import net.ripe.rpki.validator.models.RouteValidity._
 import net.ripe.rpki.validator.models.{RouteValidity, RtrPrefix}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Period}
 
 import scala.collection.mutable
+
+
 
 case class BgpAnnouncementSet(url: String, lastModified: Option[DateTime] = None, entries: Seq[BgpAnnouncement] = Seq.empty)
 
@@ -111,13 +113,18 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
 
   def roaBgpIssuesSet: RoaBgpCollisions = _roaBgpIssueSet.single.get
 
-
   def startUpdate(announcements: Seq[BgpAnnouncement], prefixes: Seq[RtrPrefix]) = {
     val v = validate(announcements, prefixes)
     _validatedAnnouncements.single.set(v)
-    val roaBgpIssuesSet = extractRoaBgpIssues(v)
+
+  }
+
+  def updateRoaBgpConflictsSet(maxRoaBgpConflictDays: Int) ={
+    val roaBgpIssuesSet = extractRoaBgpIssues(_validatedAnnouncements.single.get, maxRoaBgpConflictDays)
     _roaBgpIssueSet.single.set(RoaBgpCollisions(DateTime.now(), roaBgpIssuesSet))
   }
+
+
 
   private def validate(announcements: Seq[BgpAnnouncement], prefixes: Seq[RtrPrefix]): IndexedSeq[BgpValidatedAnnouncement] = {
     info("Started validating " + announcements.size + " BGP announcements with " + prefixes.size + " RTR prefixes.")
@@ -132,7 +139,9 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
 
 
 
-  def extractRoaBgpIssues(sortedAnnoucments: IndexedSeq[BgpValidatedAnnouncement]): IndexedSeq[RoaBgpIssue] = {
+
+  def extractRoaBgpIssues(sortedAnnoucments: IndexedSeq[BgpValidatedAnnouncement], maxStaleRecordsStore: Int): IndexedSeq[RoaBgpIssue] = {
+
     val unemptyCollisionedAnnoucments = sortedAnnoucments.filter(_.prefixes.nonEmpty)
     var collisionsSet: mutable.Set[RoaBgpIssue] = mutable.Set(roaBgpIssuesSet.roaBgpIssuesSet.toArray: _*)
     if (collisionsSet.isEmpty) {
@@ -142,21 +151,22 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
     for (bgpValidatedAnnouncement <- unemptyCollisionedAnnoucments) {
       for (roaBgp <- bgpValidatedAnnouncement.prefixes) {
         if (!roaBgp._1.equals(RouteValidity.Valid)) {
-          //TODO: lets find
-
-
+          //TODO: lets filter out those values that were validated for 24 hours
           var foundRoa = collisionsSet.filter(_.roa == roaBgp._2)
-          if (foundRoa.nonEmpty) {
+          if (foundRoa.nonEmpty)
+          {
             //TODO: need to improve performance here
-            var foundSimilarAnnouncements = foundRoa.head.bgpAnnouncements.find(x => x._1 == roaBgp._1 && x._2 == bgpValidatedAnnouncement.announced)
+            val foundSimilarAnnouncements = foundRoa.head.bgpAnnouncements.find(x => x._1 == roaBgp._1 && x._2 == bgpValidatedAnnouncement.announced)
             var oldDate: DateTime = DateTime.now()
             if (foundSimilarAnnouncements.nonEmpty) {
-              oldDate = foundSimilarAnnouncements.get._4
-            }
+              oldDate = foundSimilarAnnouncements.get._3
               foundRoa.head.bgpAnnouncements.remove(foundSimilarAnnouncements.get)
+            }
+              //The fourth value is the latest date of updating
               foundRoa.head.bgpAnnouncements.add((roaBgp._1, bgpValidatedAnnouncement.announced, oldDate, DateTime.now()))
           }
-          else {
+          else
+          {
             val a2 = RoaBgpIssue(roaBgp._2, mutable.Set.empty[(RouteValidity.RouteValidity, BgpAnnouncement, DateTime, DateTime)])
             a2.bgpAnnouncements.add((roaBgp._1, bgpValidatedAnnouncement.announced, DateTime.now(), DateTime.now()))
             collisionsSet.add(a2)
@@ -164,6 +174,17 @@ class BgpAnnouncementValidator(implicit actorSystem: akka.actor.ActorSystem) ext
         }
       }
     }
+
+    def isBgpIssueOld(recordValidationDate: DateTime):Boolean = {
+      val currentTime = DateTime.now()
+      val timeDifference = new Period(currentTime, recordValidationDate)
+      if(timeDifference.getDays() < maxStaleRecordsStore ){
+        return false
+      }
+      true
+    }
+
+    collisionsSet.foreach(x=> x.bgpAnnouncements.filterNot(y => isBgpIssueOld(y._4)))
     //TODO: GoOver last validated and filter those who weren't validated in the last 24-48 hours.
 
     collisionsSet.toIndexedSeq
