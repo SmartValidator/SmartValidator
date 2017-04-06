@@ -30,15 +30,16 @@
 package net.ripe.rpki.validator
 package controllers
 
-import scalaz._
-import Scalaz._
-import lib.Validation._
-import models._
 import net.ripe.rpki.validator.RoaBgpIssues.{RoaBgpCollisions, RoaBgpIssue}
-import views.WhitelistView
 import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 import net.ripe.rpki.validator.lib.UserPreferences
+import net.ripe.rpki.validator.lib.Validation._
+import net.ripe.rpki.validator.models._
+import net.ripe.rpki.validator.views.WhitelistView
 import org.joda.time.{DateTime, Period}
+
+import scalaz.Scalaz._
+import scalaz._
 
 trait WhitelistController extends ApplicationController {
   protected def whitelist: Whitelist
@@ -105,7 +106,8 @@ trait WhitelistController extends ApplicationController {
     if(userPreferences.roaBgpConflictLearnMode){
       val safeDays = userPreferences.conflictCertDays
       roaBgpIssuesSet.roaBgpIssuesSet.foreach(x=> x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
-      roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x=> x.bgpAnnouncements.isEmpty)
+      val filteredIssueSet = roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x=> x.bgpAnnouncements.isEmpty)
+      return filteredIssueSet.toIndexedSeq
     }
     roaBgpIssuesSet.roaBgpIssuesSet
   }
