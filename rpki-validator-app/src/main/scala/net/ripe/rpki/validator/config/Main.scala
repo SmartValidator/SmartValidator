@@ -141,6 +141,9 @@ class Main extends Http with Logging { main =>
 
       Txn.afterCommit { _ =>
         if (oldVersion != newVersion) {
+          if(bgpAnnouncements.isEmpty){
+            refreshRisDumps() //TODO: make some kind of failure rule to disengage incase i
+          }
           bgpAnnouncementValidator.startUpdate(bgpAnnouncements, distinctRtrPrefixes.toSeq)
           bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
           rtrServer.notify(newVersion)
@@ -182,6 +185,8 @@ class Main extends Http with Logging { main =>
       atomic { implicit transaction =>
         bgpAnnouncementSets() = dumps
         bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
+        bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
+
       }
     }
   }

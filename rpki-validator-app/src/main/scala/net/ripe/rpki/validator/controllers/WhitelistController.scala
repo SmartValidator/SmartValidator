@@ -30,14 +30,16 @@
 package net.ripe.rpki.validator
 package controllers
 
-import net.ripe.rpki.validator.RoaBgpIssues.{RoaBgpCollisions, RoaBgpIssue}
-import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
+import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
+import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncement, BgpValidatedAnnouncement}
 import net.ripe.rpki.validator.lib.UserPreferences
 import net.ripe.rpki.validator.lib.Validation._
+import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.views.WhitelistView
 import org.joda.time.{DateTime, Period}
 
+import scala.collection.mutable
 import scalaz.Scalaz._
 import scalaz._
 
@@ -102,14 +104,19 @@ trait WhitelistController extends ApplicationController {
     }
     true
   }
-  private def getBGPConflictsFiltered(): IndexedSeq[RoaBgpIssue]={
+  private def getBGPConflictsFiltered(): IndexedSeq[(RouteValidity, BgpAnnouncement,
+    DateTime, DateTime)]={
     if(userPreferences.roaBgpConflictLearnMode){
       val safeDays = userPreferences.conflictCertDays
-      roaBgpIssuesSet.roaBgpIssuesSet.foreach(x=> x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
-      val filteredIssueSet = roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x=> x.bgpAnnouncements.isEmpty)
-      return filteredIssueSet.toIndexedSeq
+      roaBgpIssuesSet.roaBgpIssuesSet.foreach(x => x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
+      val filteredIssueSet = roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
+      var a:mutable.Set[(RouteValidity, BgpAnnouncement,
+        DateTime, DateTime)] = mutable.Set.empty
+      filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y=> a.add(y)));
+      return a.toIndexedSeq
     }
-    roaBgpIssuesSet.roaBgpIssuesSet
+//    roaBgpIssuesSet.roaBgpIssuesSet //change
+    IndexedSeq.empty
   }
 
 }

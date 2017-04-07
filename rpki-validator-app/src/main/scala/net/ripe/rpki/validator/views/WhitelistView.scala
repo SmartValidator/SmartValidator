@@ -30,14 +30,16 @@
 package net.ripe.rpki.validator
 package views
 
-import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssue
-import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
+import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncement, BgpValidatedAnnouncement}
 import net.ripe.rpki.validator.lib.Validation._
+import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
+import org.joda.time.DateTime
 
 import scala.xml._
 
-class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidatedAnnouncement], collisions: IndexedSeq[RoaBgpIssue], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidatedAnnouncement], collisions: IndexedSeq[(RouteValidity, BgpAnnouncement,
+  DateTime, DateTime)], params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("asn" -> "Origin", "prefix" -> "Prefix", "maxPrefixLength" -> "Maximum prefix length")
 
   def tab = Tabs.WhitelistTab
@@ -90,31 +92,29 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
           <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-                <th>Invalidaty reason</th><th>asn</th><th>prefix</th><th>conflict time span</th><th>last time spotted</th><th>&nbsp;</th>
+                <th>Invalidaty reason</th><th>asn</th><th>prefix</th><th>conflict time span</th><th>last time spotted</th>
               </tr>
             </thead>
             <tbody>{
-              for (collison <- collisions.seq)  yield {
-                for(detailedColl <- collison.bgpAnnouncements) yield{
+              for (collison <- collisions.seq) yield{
                   <tr>
-                    <td>{ detailedColl._1 }</td>
-                    <td>{ detailedColl._2.asn }</td>
-                    <td>{ detailedColl._2.prefix }</td>
-                    <td>{ detailedColl._3 }</td>
-                    <td>{ detailedColl._4 }</td>
+                    <td>{ collison._1.toString }</td>
+                    <td>{ collison._2.asn.toString }</td>
+                    <td>{ collison._2.prefix.toString }</td>
+                    <td>{ collison._3.toString }</td>
+                    <td>{ collison._4.toString }</td>
                   </tr>
                 }
 
-
               }
-              }</tbody>
+              </tbody>
           </table>
             <script><!--
 $(document).ready(function() {
   $('#suggestedRoas-table').dataTable({
       "sPaginationType": "full_numbers",
       "aoColumns": [
-        null, null,null,
+        null, null,null,null,
         { "bSortable": false }
       ]
     }).show();

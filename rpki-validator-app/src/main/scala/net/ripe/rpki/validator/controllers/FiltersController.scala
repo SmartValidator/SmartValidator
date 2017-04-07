@@ -141,8 +141,6 @@ trait FiltersController extends ApplicationController {
     val block = validateParameter("block", required(parseBool))
     val fix = validateParameter("fix", required(parseBool))
     (asn |@| prefix |@| maxLength |@| block |@| fix).apply(validate).flatMap(identity)
-
-
   }
 
 }
