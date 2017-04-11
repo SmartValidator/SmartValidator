@@ -27,31 +27,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package net.ripe.rpki.validator.fetchers
+package net.ripe.rpki.validator.models
 
-import java.net.URI
+case class SuggestedWhitelist(var entries: Set[RtrPrefix] = Set.empty[RtrPrefix]) {
+  def addEntry(entry: RtrPrefix) = copy(entries + entry)
+  def removeEntry(entry: RtrPrefix) = copy(entries - entry)
 
-import grizzled.slf4j.Logging
-import net.ripe.rpki.validator.config.{ApplicationOptions, Http}
-import net.ripe.rpki.validator.store.HttpFetcherStore
-import org.apache.commons.io.IOUtils
-import org.apache.http.HttpStatus
-import org.apache.http.client.methods.HttpGet
-
-class SingleObjectHttpFetcher(store: HttpFetcherStore) extends Fetcher with Http with Logging {
-  override def trustedCertsLocation = ApplicationOptions.trustedSslCertsLocation
-
-  def fetch(uri: URI, process: FetcherListener): Seq[Fetcher.Error] = {
-    tryTo(uri)(connectionE) {
-      val response = httpGet(uri.toString)
-      response.getStatusLine.getStatusCode match {
-        case HttpStatus.SC_OK =>
-          IOUtils.toByteArray(response.getEntity.getContent)
-        case _ =>
-          throw new RuntimeException(response.getStatusLine.getStatusCode + " " + response.getStatusLine.getReasonPhrase)
-      }
-    }.right.map { bytes =>
-      processObject(uri, bytes, process)
-    }.left.toSeq
+  def clearEntries = {
+    entries = Set.empty[RtrPrefix]
   }
 }

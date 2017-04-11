@@ -53,7 +53,7 @@ import net.ripe.rpki.validator.store.{CacheStore, DurableCaches}
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 import org.apache.commons.io.FileUtils
 import org.eclipse.jetty.server.Server
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Period}
 import org.slf4j.LoggerFactory
 
 import scala.Predef._
@@ -126,7 +126,7 @@ class Main extends Http with Logging { main =>
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.suggestedRoaFilterList,data.pathEndTable,data.localPathEndNeighbors))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.suggestedRoaFilterList,data.pathEndTable,data.localPathEndNeighbors, data.suggestedWhitelistASN))
 
   var store : CacheStore = _
 
@@ -142,7 +142,7 @@ class Main extends Http with Logging { main =>
       Txn.afterCommit { _ =>
         if (oldVersion != newVersion) {
           if(bgpAnnouncements.isEmpty){
-            refreshRisDumps() //TODO: make some kind of failure rule to disengage incase i
+            refreshRisDumps() //TODO: make some kind of failure rule to disengage in-case it's stuck and repetitive
           }
           bgpAnnouncementValidator.startUpdate(bgpAnnouncements, distinctRtrPrefixes.toSeq)
           bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
@@ -157,6 +157,7 @@ class Main extends Http with Logging { main =>
   val rtrServer = runRtrServer()
   runWebServer()
 //  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
+  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 10.minutes) { updateSuggestedWhitelistRecords() }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
@@ -173,7 +174,28 @@ class Main extends Http with Logging { main =>
     }
   }
 
+  private def isBgpIssueOld(recordValidationDate: DateTime):Boolean = {
+    val currentTime = DateTime.now()
+    val timeDifference = new Period(currentTime, recordValidationDate)
+    if(timeDifference.getDays() >= userPreferences.single.get.conflictCertDays ){
+      return false
+    }
+    true
+  }
 
+  private def updateSuggestedWhitelistRecords() {
+      //See if the user wants automatic whitelisting of long term conflicting ROA's
+      if(userPreferences.single.get.roaBgpConflictLearnMode){
+        val safeDays = userPreferences.single.get.conflictCertDays
+        bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.foreach(x => x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
+        val filteredIssueSet = bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
+        memoryImage.single.get.suggestedWhitelistASN.clearEntries
+        filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y => {
+         memoryImage.single.get.suggestedWhitelistASN.addEntry(new RtrPrefix(y._2.asn, y._2.prefix))
+        }))
+//        updateMemoryImage(_.updateSuggestedWhitelistASN(suggestedWhitelistASN))
+      }
+  }
 
   private def loadTrustAnchors(): TrustAnchors = {
     val tals = FileUtils.listFiles(ApplicationOptions.talDirLocation, Array("tal"), false)
@@ -208,8 +230,6 @@ class Main extends Http with Logging { main =>
       }
     }
   }
-
-//  private def RoaValidator
 
   private def runValidator(forceNewFetch: Boolean) {
     import lib.DateAndTime._
@@ -348,6 +368,7 @@ class Main extends Http with Logging { main =>
 
       override protected def getRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
 
+      override protected def suggestedWhitelistASN = memoryImage.single.get.suggestedWhitelistASN
 
       protected def sessionData = rtrServer.rtrSessions.allClientData
 
@@ -362,7 +383,14 @@ class Main extends Http with Logging { main =>
 
       // UserPreferences
       override def userPreferences = main.userPreferences.single.get
-      override def updateUserPreferences(userPreferences: UserPreferences) = updateAndPersist { implicit transaction => main.userPreferences.set(userPreferences) }
+      override def updateUserPreferences(userPreferences: UserPreferences) = {
+        if(!userPreferences.roaBgpConflictLearnMode){
+          memoryImage.single.get.suggestedWhitelistASN.copy(Set.empty[RtrPrefix])
+        }
+        updateAndPersist { implicit transaction => main.userPreferences.set(userPreferences) }
+      }
+
+
 
       override protected def updateFilters() = {
         if(lastState == null || main.userPreferences.single.get.roaOperationMode != lastState){

@@ -31,15 +31,12 @@ package net.ripe.rpki.validator
 package controllers
 
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
-import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncement, BgpValidatedAnnouncement}
+import net.ripe.rpki.validator.bgp.preview.BgpValidatedAnnouncement
 import net.ripe.rpki.validator.lib.UserPreferences
 import net.ripe.rpki.validator.lib.Validation._
-import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.views.WhitelistView
-import org.joda.time.{DateTime, Period}
 
-import scala.collection.mutable
 import scalaz.Scalaz._
 import scalaz._
 
@@ -50,27 +47,27 @@ trait WhitelistController extends ApplicationController {
   protected def entryExists(entry: RtrPrefix): Boolean = whitelist.entries.contains(entry)
   protected def userPreferences: UserPreferences
   protected def validatedAnnouncements: Seq[BgpValidatedAnnouncement]
-
+  protected def suggestedWhitelistASN: SuggestedWhitelist
   private def baseUrl = views.Tabs.WhitelistTab.url
 
 
   protected def roaBgpIssuesSet: RoaBgpCollisions
 
   get(baseUrl) {
-    new WhitelistView(whitelist, validatedAnnouncements, getBGPConflictsFiltered(),messages = feedbackMessages)
+    new WhitelistView(whitelist, validatedAnnouncements, suggestedWhitelistASN,messages = feedbackMessages)
   }
 
   post(baseUrl) {
     submittedEntry match {
       case Success(entry) =>
         if (entryExists(entry))
-          new WhitelistView(whitelist, validatedAnnouncements, getBGPConflictsFiltered(), params, Seq(ErrorMessage("entry already exists in the whitelist")))
+          new WhitelistView(whitelist, validatedAnnouncements, suggestedWhitelistASN, params, Seq(ErrorMessage("entry already exists in the whitelist")))
         else {
           addWhitelistEntry(entry)
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been added to the whitelist.")))
         }
       case Failure(errors) =>
-        new WhitelistView(whitelist, validatedAnnouncements, getBGPConflictsFiltered(), params, errors)
+        new WhitelistView(whitelist, validatedAnnouncements, suggestedWhitelistASN, params, errors)
     }
   }
 
@@ -81,11 +78,11 @@ trait WhitelistController extends ApplicationController {
           removeWhitelistEntry(entry)
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The entry has been removed from the whitelist.")))
         } else {
-          new WhitelistView(whitelist, validatedAnnouncements, getBGPConflictsFiltered(), params, Seq(ErrorMessage("entry no longer exists in the whitelist")))
+          new WhitelistView(whitelist, validatedAnnouncements, suggestedWhitelistASN, params, Seq(ErrorMessage("entry no longer exists in the whitelist")))
         }
       case Failure(errors) =>
         // go away hacker!
-        new WhitelistView(whitelist, validatedAnnouncements, getBGPConflictsFiltered(), params, errors)
+        new WhitelistView(whitelist, validatedAnnouncements, suggestedWhitelistASN, params, errors)
     }
   }
 
@@ -96,27 +93,27 @@ trait WhitelistController extends ApplicationController {
 
     (asn |@| prefix |@| maxPrefixLength).apply(RtrPrefix.validate).flatMap(identity)
   }
-  def isBgpIssueOld(recordValidationDate: DateTime):Boolean = {
-    val currentTime = DateTime.now()
-    val timeDifference = new Period(currentTime, recordValidationDate)
-    if(timeDifference.getDays() >= userPreferences.conflictCertDays ){
-      return false
-    }
-    true
-  }
-  private def getBGPConflictsFiltered(): IndexedSeq[(RouteValidity, BgpAnnouncement,
-    DateTime, DateTime)]={
-    if(userPreferences.roaBgpConflictLearnMode){
-      val safeDays = userPreferences.conflictCertDays
-      roaBgpIssuesSet.roaBgpIssuesSet.foreach(x => x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
-      val filteredIssueSet = roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
-      var a:mutable.Set[(RouteValidity, BgpAnnouncement,
-        DateTime, DateTime)] = mutable.Set.empty
-      filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y=> a.add(y)));
-      return a.toIndexedSeq
-    }
-//    roaBgpIssuesSet.roaBgpIssuesSet //change
-    IndexedSeq.empty
-  }
+//  def isBgpIssueOld(recordValidationDate: DateTime):Boolean = {
+//    val currentTime = DateTime.now()
+//    val timeDifference = new Period(currentTime, recordValidationDate)
+//    if(timeDifference.getDays() >= userPreferences.conflictCertDays ){
+//      return false
+//    }
+//    true
+//  }
+//  private def getBGPConflictsFiltered(): IndexedSeq[(RouteValidity, BgpAnnouncement,
+//    DateTime, DateTime)]={
+//    if(userPreferences.roaBgpConflictLearnMode){
+//      val safeDays = userPreferences.conflictCertDays
+//      roaBgpIssuesSet.roaBgpIssuesSet.foreach(x => x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
+//      val filteredIssueSet = roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
+//      var a:mutable.Set[(RouteValidity, BgpAnnouncement,
+//        DateTime, DateTime)] = mutable.Set.empty
+//      filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y=> a.add(y)));
+//      return a.toIndexedSeq
+//    }
+////    roaBgpIssuesSet.roaBgpIssuesSet //change
+//    IndexedSeq.empty
+//  }
 
 }

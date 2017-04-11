@@ -34,7 +34,6 @@ import net.ripe.ipresource.Asn
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.util.TrustAnchorLocator
 
-import scala.collection.mutable
 import scalaz.Validation
 
 case class MemoryImage(filters: Filters,
@@ -47,10 +46,11 @@ case class MemoryImage(filters: Filters,
                        suggestedRoaFilterList: SuggestedRoaFilterList,
                        pathEndTable: PathEndTable,
                        localPathEndNeighbors: LocalPathEndNeighbors,
+                       suggestedWhitelistASN: SuggestedWhitelist,
                        version: Int = 0) {
 
   private lazy val distinctRtrPrefixes =
-    (Set.empty[RtrPrefix] ++ whitelist.entries ++ filters.filter(validatedObjects.getValidatedRtrPrefixes)).toSeq
+    (Set.empty[RtrPrefix] ++ whitelist.entries ++ suggestedWhitelistASN.entries ++ filters.filter(validatedObjects.getValidatedRtrPrefixes)).toSeq
 
   def startProcessingTrustAnchor(locator: TrustAnchorLocator, description: String) =
     copy(trustAnchors = trustAnchors.startProcessing(locator, description))
@@ -67,6 +67,10 @@ case class MemoryImage(filters: Filters,
     }
   }
 
+  def updateSuggestedWhitelistASN(newSuggestedWhitelistASN: SuggestedWhitelist) = {
+    copy(version = version + 1, suggestedWhitelistASN = newSuggestedWhitelistASN)
+  }
+
   def addBlocklistEntry(filter: BlockFilter) = copy(version = version + 1, blockList = blockList.addBlockListEntry(filter))
 
   def removeBlocklistEntry(filter: BlockFilter) = copy(version = version + 1, blockList = blockList.removeBlockListEntry(filter))
@@ -79,9 +83,14 @@ case class MemoryImage(filters: Filters,
 
   def removeWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, whitelist = whitelist.removeEntry(entry))
 
-  def getDistinctRtrPrefixes: Seq[RtrPrefix] = distinctRtrPrefixes
+  def removeSuggestedWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, suggestedWhitelistASN = suggestedWhitelistASN.removeEntry(entry))
 
-//  def getRoaIssues: mutable.HashMap[Asn, Boolean] with mutable.SynchronizedMap[Asn, Boolean] = roaIssues
+  def addSuggestedWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, suggestedWhitelistASN = suggestedWhitelistASN.addEntry(entry))
+
+  def clearSuggestedWhitelistEntry(entry: RtrPrefix) = copy(version = version + 1, suggestedWhitelistASN = SuggestedWhitelist())
+
+
+  def getDistinctRtrPrefixes: Seq[RtrPrefix] = distinctRtrPrefixes
 
   def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = copy(version = version + 1, suggestedRoaFilterList = suggestedRoaFilterList.addSuggestedRoaFilter(filter))
 
