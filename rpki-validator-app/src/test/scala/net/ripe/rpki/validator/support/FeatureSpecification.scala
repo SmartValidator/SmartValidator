@@ -71,6 +71,7 @@ abstract class FeatureSpecification extends ScalatraFeatureSpec with JunitLoggin
     override protected def validatedAnnouncements = sys.error("TODO")
     override protected def validatedIanaSets = sys.error("TODO")
     override protected def getRtrPrefixes = sys.error("TODO")
+    override protected def suggestedWhitelistASN = sys.error("TBD")
     override protected def sessionData = sys.error("TBD")
     override lazy val trustAnchors = sys.error("TBD")
     override lazy val validatedObjects = sys.error("TBD")

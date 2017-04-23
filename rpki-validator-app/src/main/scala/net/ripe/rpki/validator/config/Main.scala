@@ -157,7 +157,7 @@ class Main extends Http with Logging { main =>
   val rtrServer = runRtrServer()
   runWebServer()
 //  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
-  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 10.minutes) { updateSuggestedWhitelistRecords() }
+  actorSystem.scheduler.schedule(initialDelay = 100.seconds, interval = 2.minutes) { updateSuggestedWhitelistRecords() }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
@@ -184,6 +184,7 @@ class Main extends Http with Logging { main =>
   }
 
   private def updateSuggestedWhitelistRecords() {
+    //TODO try to move to += now the set is mutable
       //See if the user wants automatic whitelisting of long term conflicting ROA's
       if(userPreferences.single.get.roaBgpConflictLearnMode){
         val safeDays = userPreferences.single.get.conflictCertDays
@@ -191,7 +192,9 @@ class Main extends Http with Logging { main =>
         val filteredIssueSet = bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
         memoryImage.single.get.suggestedWhitelistASN.clearEntries
         filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y => {
-         memoryImage.single.get.suggestedWhitelistASN.addEntry(new RtrPrefix(y._2.asn, y._2.prefix))
+          //memoryImage.single.get.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix))
+          updateMemoryImage(_.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix)))
+          //addSuggestedWhitelistEntry
         }))
 //        updateMemoryImage(_.updateSuggestedWhitelistASN(suggestedWhitelistASN))
       }
@@ -349,6 +352,7 @@ class Main extends Http with Logging { main =>
       override protected def addWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.addWhitelistEntry(entry)) }
       override protected def removeWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeWhitelistEntry(entry)) }
 
+
       override protected def blockList = memoryImage.single.get.blockList
       override protected def blockAsList = memoryImage.single.get.blockAsList
 
@@ -385,7 +389,7 @@ class Main extends Http with Logging { main =>
       override def userPreferences = main.userPreferences.single.get
       override def updateUserPreferences(userPreferences: UserPreferences) = {
         if(!userPreferences.roaBgpConflictLearnMode){
-          memoryImage.single.get.suggestedWhitelistASN.copy(Set.empty[RtrPrefix])
+          memoryImage.single.get.suggestedWhitelistASN.copy(scala.collection.mutable.Set.empty[RtrPrefix])
         }
         updateAndPersist { implicit transaction => main.userPreferences.set(userPreferences) }
       }

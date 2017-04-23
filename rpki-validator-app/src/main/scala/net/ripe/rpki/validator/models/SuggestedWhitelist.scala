@@ -29,11 +29,11 @@
  */
 package net.ripe.rpki.validator.models
 
-case class SuggestedWhitelist(var entries: Set[RtrPrefix] = Set.empty[RtrPrefix]) {
+case class SuggestedWhitelist(var entries: scala.collection.mutable.Set[RtrPrefix] =scala.collection.mutable.Set.empty[RtrPrefix]) {
   def addEntry(entry: RtrPrefix) = copy(entries + entry)
   def removeEntry(entry: RtrPrefix) = copy(entries - entry)
 
   def clearEntries = {
-    entries = Set.empty[RtrPrefix]
+    entries = scala.collection.mutable.Set.empty[RtrPrefix]
   }
 }

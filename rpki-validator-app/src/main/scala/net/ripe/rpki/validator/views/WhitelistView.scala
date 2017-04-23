@@ -93,7 +93,7 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
           </fieldset>
         </form>
       </div>
-      <div>{
+      <div>
         <h2>Whitlisted ASN due to prolonged ROA - BGP conflicts</h2>
         if (collisions.entries.isEmpty){
           <div class="alert-message block-message">
@@ -103,7 +103,7 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
         <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
           <thead>
             <tr>
-              <th>Invalidaty reason</th> <th>asn</th> <th>prefix</th> <th>conflict time span</th> <th>last time spotted</th>
+              <th>Asn</th><th>Prefix</th>
             </tr>
           </thead>
           <tbody>
@@ -119,14 +119,14 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
           }}
           </tbody>
         </table>
-      }}
+      }
           <script>
             <!--
               $(document).ready(function() {
               $('#suggestedRoas-table').dataTable({
                 "sPaginationType": "full_numbers",
                 "aoColumns": [
-                  null, null,
+                  null,
                   { "bSortable": false }
                 ]
               }).show();
@@ -141,8 +141,8 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
               });
               // -->
           </script>
-        }}</div>
 
+        </div>
 
     <div>
       <h2>Current entries</h2>{if (whitelist.entries.isEmpty)

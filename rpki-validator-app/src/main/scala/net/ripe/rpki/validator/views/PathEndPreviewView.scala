@@ -63,13 +63,10 @@ class PathEndPreviewView(pathEndTable: PathEndTable,localPathEndNeighbors: Local
               <div class="span4"></div>
             </div>
             <div class="span4">
-              <input id="announcement-asn" type="text" name="asn" value={ params.getOrElse("asn", "") } placeholder="ASN (required)"/>
+              <input id="announcement-asn" type="text" name="asn" value={ params.getOrElse("myAsn", myAsn.getValue.toString()) } placeholder="ASN (required)"/>
             </div>
             <div class="span4">
               <input id="announcement-prefix" type="text" name="prefix" value={ params.getOrElse("prefix", "") } placeholder="IPv4 or IPv6 prefix (required)"/>
-            </div>
-            <div class="span4">
-              <input id="announcement-maxprefixlen" type="text" name="maxPrefixLength" value={ params.getOrElse("maxPrefixLength", "") } placeholder="Number (optional)"/>
             </div>
             <div class="span2">
               <input type="submit" class="btn primary" value="Add"/>
@@ -117,7 +114,7 @@ class PathEndPreviewView(pathEndTable: PathEndTable,localPathEndNeighbors: Local
                   </table>
                 }
                 <tr>
-                  <td>myAsn.getValue</td>
+                  <td>myAsn.getValue.toString</td>
                   <td>{entry.getValue}</td>
                   <td>
                     <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(validated)) } data-original-title="Details">{ validated.size + " announcement(s)" }</span>
