@@ -34,6 +34,7 @@ package controllers
 import net.liftweb.json._
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
 import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncementSet, BgpValidatedAnnouncement}
+import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.views.BlockAsListView
 
@@ -59,10 +60,22 @@ trait BlockAsListController extends ApplicationController {
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
     var sumInvalidAsn = 0
-    var test = roaBgpIssuesSet.roaBgpIssuesSet(0).bgpAnnouncements
-    roaBgpIssuesSet.roaBgpIssuesSet.foreach(x=> sumInvalidAsn ++ x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidAsn)))
+    val issuesSet = roaBgpIssuesSet.roaBgpIssuesSet
+    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidAsn += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidAsn)))
     var sumInvalidLength = 0
-    roaBgpIssuesSet.roaBgpIssuesSet.foreach(x=> sumInvalidLength ++ x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidLength)))
+    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidLength += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidLength)))
+//    for(annoList <- issuesSet){
+//      val bgpAnnouncementsCheck = annoList.bgpAnnouncements.toList
+//      for(anno <- bgpAnnouncementsCheck){
+//        if(anno._1.equals(RouteValidity.InvalidAsn)){
+//          sumInvalidAsn += 1
+//        }
+//        else if(anno._1.equals(RouteValidity.InvalidLength)) {
+//          sumInvalidLength += 1
+//        }
+//      }
+//
+//    }
     val labels = List("Invalid ASN","Invalid Length", "Loose Roa")
     val values = List(sumInvalidAsn,sumInvalidLength,12456)
     val json = ("labels" -> labels) ~ ("series" -> values)

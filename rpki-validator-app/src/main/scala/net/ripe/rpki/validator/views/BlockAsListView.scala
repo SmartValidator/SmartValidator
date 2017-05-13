@@ -54,8 +54,10 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
       <h4> </h4>
     </div>
     <div id="bgpAnnouncements"></div>
-    <div id="roaIssues"></div>
-    <div id="roaPerTrustAnchor">    </div>
+    <div id="roaIssues">
+      <h1 id = "RoaIssueHead" style ="font-weight: bold;font-size: 21px;">Roa Issues Status</h1>
+      <h4> </h4></div>
+    <div id="roaPerTrustAnchor"></div>
     <div class="ct-chart"></div>
     <div class="ct-chart-pie"></div>
 
@@ -71,7 +73,9 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
             distributeSeries: true
           });
 
+
         });
+
 
 
               $.getJSON( "/bgpAnnouncements.json", function(bgpAnnouncements) {
