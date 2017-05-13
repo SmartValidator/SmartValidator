@@ -58,19 +58,16 @@ trait BlockAsListController extends ApplicationController {
     contentType = "text/json"
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
+    var sumInvalidAsn = 0
+    var test = roaBgpIssuesSet.roaBgpIssuesSet(0).bgpAnnouncements
+    roaBgpIssuesSet.roaBgpIssuesSet.foreach(x=> sumInvalidAsn ++ x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidAsn)))
+    var sumInvalidLength = 0
+    roaBgpIssuesSet.roaBgpIssuesSet.foreach(x=> sumInvalidLength ++ x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidLength)))
+    val labels = List("Invalid ASN","Invalid Length", "Loose Roa")
+    val values = List(sumInvalidAsn,sumInvalidLength,12456)
+    val json = ("labels" -> labels) ~ ("series" -> values)
 
-    val roas = getRtrPrefixes.map(rtr =>
-      ("asn" -> rtr.asn.toString) ~
-        ("prefix" -> rtr.prefix.toString) ~
-        ("maxLength" -> rtr.maxPrefixLength.getOrElse(rtr.prefix.getPrefixLength)) ~
-        ("ta" -> rtr.getCaName)
-    )
-
-    val validRoaSize = getRtrPrefixes.size
-    val bgpAnnoucmentCount = bgpAnnouncementSet.size
-    val roaBgpCollisons = roaBgpIssuesSet.roaBgpIssuesSet.size
-
-    response.getWriter.write(compactRender("roas" -> roas))
+    response.getWriter.write(pretty(render(json)))
   }
 
 

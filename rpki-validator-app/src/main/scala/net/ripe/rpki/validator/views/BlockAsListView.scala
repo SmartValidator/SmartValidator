@@ -48,21 +48,31 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
       <h1 id = "ConflictRoasHead" style ="font-weight: bold;font-size: 21px;">Conflicted ROAs</h1>
       <h2> </h2>
     </div>
-    <div id="validatedRoasVSfilters">
-    </div>
+    <div id="validatedRoasVSfilters"></div>
     <div id="bgpAnnouncementsheaddiv">
-      <h3 id = "BGPannHead" style ="font-weight: bold;font-size: 21px;">BGP's Annoucments Status</h3>
+      <h1 id = "BGPannHead" style ="font-weight: bold;font-size: 21px;">BGP's Annoucments Status</h1>
       <h4> </h4>
     </div>
-    <div id="bgpAnnouncements">
-    </div>
-    <div id="roaBgpCollisionsByType">    </div>
+    <div id="bgpAnnouncements"></div>
+    <div id="roaIssues"></div>
     <div id="roaPerTrustAnchor">    </div>
     <div class="ct-chart"></div>
     <div class="ct-chart-pie"></div>
 
       <script src="/javascript/chartist/access-plugin/chartist-plugin-accessibility.js"></script>
       <script type="text/javascript" charset="utf-8"><!--
+             $.getJSON( "/roaIssues.json", function(roaIssues) {
+        console.log( "Working..." );
+      })
+        .done(function(roaIssues) {
+          console.log( "second success" );
+          console.log( roaIssues );
+          new Chartist.Bar('#roaIssues',roaIssues, {
+            distributeSeries: true
+          });
+
+        });
+
 
               $.getJSON( "/bgpAnnouncements.json", function(bgpAnnouncements) {
         console.log( "Working..." );
