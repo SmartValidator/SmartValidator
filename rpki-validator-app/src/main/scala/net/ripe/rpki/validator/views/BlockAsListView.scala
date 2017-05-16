@@ -69,9 +69,30 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
         .done(function(roaIssues) {
           console.log( "second success" );
           console.log( roaIssues );
-          new Chartist.Bar('#roaIssues',roaIssues, {
-            distributeSeries: true
+          var roaIssueChart = new Chartist.Bar('#roaIssues',roaIssues, {
+            distributeSeries: true,
+          // distance between bars
+            seriesBarDistance: 10
           });
+
+          roaIssueChart.on('draw', function(data) {
+          if(data.type === 'bar') {
+            data.element.animate({
+              y2: {
+                dur: 1000,
+                from: data.y1,
+                to: data.y2,
+                easing: Chartist.Svg.Easing.easeOutQuint
+              },
+              opacity: {
+                dur: 1000,
+                from: 0,
+                to: 1,
+                easing: Chartist.Svg.Easing.easeOutQuint
+              }
+            });
+          }
+        });
 
 
         });
@@ -84,7 +105,7 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
         .done(function(bgpAnnouncements) {
           console.log( "second success" );
           console.log( bgpAnnouncements );
-          var chart = new Chartist.Pie('#bgpAnnouncements', bgpAnnouncements, {
+          var chartbgpAnnouncements = new Chartist.Pie('#bgpAnnouncements', bgpAnnouncements, {
             showLabel: false,
             dount: true,
             plugins: [
@@ -93,7 +114,7 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
         })
                ]
           });
-            chart.on('draw', function(data) {
+            chartbgpAnnouncements.on('draw', function(data) {
               if(data.type === 'slice') {
                 // Get the total path length in order to use for dash array animation
                 var pathLength = data.element._node.getTotalLength();
@@ -133,12 +154,12 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
             });
 
             // For the sake of the example we update the chart every time it's created with a delay of 8 seconds
-            chart.on('created', function() {
+            chartbgpAnnouncements.on('created', function() {
               if(window.__anim21278907124) {
                 clearTimeout(window.__anim21278907124);
                 window.__anim21278907124 = null;
               }
-              window.__anim21278907124 = setTimeout(chart.update.bind(chart), 500000);
+              window.__anim21278907124 = setTimeout(chartbgpAnnouncements.update.bind(chartbgpAnnouncements), 15000);
             });
 
         });
@@ -211,7 +232,7 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
                 clearTimeout(window.__anim21278907124);
                 window.__anim21278907124 = null;
               }
-              window.__anim21278907124 = setTimeout(chart.update.bind(chart), 500000);
+              window.__anim21278907124 = setTimeout(chart.update.bind(chart), 15000);
             });
           });
 
