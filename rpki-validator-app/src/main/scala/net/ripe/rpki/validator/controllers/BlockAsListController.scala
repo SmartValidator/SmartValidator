@@ -37,6 +37,11 @@ import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncementSet, BgpValidatedAnno
 import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.views.BlockAsListView
+import org.joda.time.DateTime
+import sun.util.calendar.LocalGregorianCalendar.Date
+
+import scala.collection.immutable.SortedMap
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait BlockAsListController extends ApplicationController {
   private def baseUrl = views.Tabs.BlockAsListTab.url
@@ -53,7 +58,7 @@ trait BlockAsListController extends ApplicationController {
     new BlockAsListView(messages = feedbackMessages)
   }
 
-  get("/roaIssues.json") {
+  get("/conflitsTimeline.json") {
     import net.liftweb.json.JsonDSL._
 
     contentType = "text/json"
@@ -61,28 +66,38 @@ trait BlockAsListController extends ApplicationController {
     response.addHeader("Cache-Control", "no-cache")
     var sumInvalidAsn = 0
     val issuesSet = roaBgpIssuesSet.roaBgpIssuesSet
-    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidAsn += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidAsn)))
-    var sumInvalidLength = 0
-    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidLength += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidLength)))
-//    for(annoList <- issuesSet){
-//      val bgpAnnouncementsCheck = annoList.bgpAnnouncements.toList
-//      for(anno <- bgpAnnouncementsCheck){
-//        if(anno._1.equals(RouteValidity.InvalidAsn)){
-//          sumInvalidAsn += 1
-//        }
-//        else if(anno._1.equals(RouteValidity.InvalidLength)) {
-//          sumInvalidLength += 1
-//        }
-//      }
-//
-//    }
-    val labels = List("Invalid ASN","Invalid Length", "Loose Roa")
-    val values = List(sumInvalidAsn,sumInvalidLength,12456)
-    val json = ("labels" -> labels) ~ ("series" -> values)
+    //TODO delete timelinelist
+    var timeLineList = List[Long]()
+    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(y._4.toDate.getTime)))
+    val timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
+    val sorted = SortedMap[Long, Int]() ++ timeLineMap
+    val values =  sorted.valuesIterator.toList
+    val labels1 = sorted.keysIterator.toList
+
+    val labels = List("Day1","Day2", "Day3")
+    val json = ("labels" -> labels) ~ ("series" -> List(List(20,30,60)))
 
     response.getWriter.write(pretty(render(json)))
   }
 
+
+    get("/roaIssues.json") {
+      import net.liftweb.json.JsonDSL._
+
+      contentType = "text/json"
+      response.addHeader("Pragma", "public")
+      response.addHeader("Cache-Control", "no-cache")
+      var sumInvalidAsn = 0
+      val timeLineList = List()
+      roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidAsn += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidAsn)))
+      var sumInvalidLength = 0
+      roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidLength += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidLength)))
+      val labels = List("Invalid ASN","Invalid Length", "Loose Roa")
+      val values = List(sumInvalidAsn,sumInvalidLength,12456)
+      val json = ("labels" -> labels) ~ ("series" -> values)
+
+      response.getWriter.write(pretty(render(json)))
+    }
 
   get("/validatedRoasVSfilters.json") {
     import net.liftweb.json.JsonDSL._

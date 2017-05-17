@@ -1,4 +1,32 @@
 @import "settings/chartist-settings";
+$blue: #094a8e;
+$red: #E4393D;
+$green: #29A099;
+$purple: #813988;
+$yellow: #F49813;
+
+$chart1-bar1: $blue;
+$chart1-bar2: $red;
+$chart1-bar3: $green;
+$chart1-bar4: $purple;
+
+#roaIssues {
+  .ct-bar {
+    stroke-width: 48;
+    &:nth-child(1) {
+      stroke: $chart1-bar1;
+    }
+    &:nth-child(2) {
+      stroke: $chart1-bar2;
+    }
+    &:nth-child(2) {
+      stroke: $chart1-bar3;
+    }
+    &:nth-child(4) {
+      stroke: $chart1-bar4;
+    }
+  }
+}
 
 @mixin ct-responsive-svg-container($width: 100%, $ratio: $ct-container-ratio) {
   display: block;
