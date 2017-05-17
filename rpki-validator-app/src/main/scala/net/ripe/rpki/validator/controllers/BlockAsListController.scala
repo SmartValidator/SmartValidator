@@ -68,14 +68,15 @@ trait BlockAsListController extends ApplicationController {
     val issuesSet = roaBgpIssuesSet.roaBgpIssuesSet
     //TODO delete timelinelist
     var timeLineList = List[Long]()
-    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(y._4.toDate.getTime)))
-    val timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
-    val sorted = SortedMap[Long, Int]() ++ timeLineMap
-    val values =  sorted.valuesIterator.toList
-    val labels1 = sorted.keysIterator.toList
+    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._4.toDate.getTime)/10)*10)))
+    var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
+    var sorted = SortedMap[Long, Int]() ++ timeLineMap
+    var values =  sorted.valuesIterator.toList
+    var labels_long = sorted.keysIterator.toList
+    var labels = List[String]()
+    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString()))
 
-    val labels = List("Day1","Day2", "Day3")
-    val json = ("labels" -> labels) ~ ("series" -> List(List(20,30,60)))
+    val json = ("labels" -> labels.takeRight(20)) ~ ("series" -> List(values.takeRight(20)))
 
     response.getWriter.write(pretty(render(json)))
   }

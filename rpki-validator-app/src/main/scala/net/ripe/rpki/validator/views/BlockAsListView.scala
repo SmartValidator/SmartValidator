@@ -57,7 +57,9 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
     <div id="roaIssues">
       <h1 id = "RoaIssueHead" style ="font-weight: bold;font-size: 21px;">Roa Issues Status</h1>
       <h4> </h4></div>
-    <div id="conflitsTimeline"></div>
+    <div id="conflitsTimeline">
+      <h1 id = "conflitsTimelineHead" style ="font-weight: bold;font-size: 21px;">Roa Issues Status</h1>
+      <h4> </h4></div>
     <div class="ct-chart"></div>
     <div class="ct-chart-pie"></div>
 
@@ -196,6 +198,7 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
         .done(function(roaIssues) {
           console.log( "second success" );
           console.log( roaIssues );
+           $(".ct-series-a .ct-bar").css('stroke', 'black');
           var roaIssueChart = new Chartist.Bar('#roaIssues',roaIssues, {
             distributeSeries: true,
           // distance between bars
