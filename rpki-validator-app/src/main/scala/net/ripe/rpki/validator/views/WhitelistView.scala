@@ -94,16 +94,16 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
         </form>
       </div>
       <div>
-        <h2>Whitlisted ASN due to prolonged ROA - BGP conflicts</h2>
-        if (collisions.entries.isEmpty){
-          <div class="alert-message block-message">
-            <p>No suggested ASN whitelist exist or feature is devatiavted.</p>
-          </div>
-         } else {
+        {<h2>Whitlisted ASN due to prolonged ROA - BGP conflicts</h2>
+      if (collisions.entries.isEmpty) {
+        <div class="alert-message block-message">
+          <p>No suggested ASN whitelist exist or feature is devatiavted.</p>
+        </div>
+      } else {
         <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
           <thead>
             <tr>
-              <th>Asn</th><th>Prefix</th>
+              <th>Asn</th> <th>Prefix</th>
             </tr>
           </thead>
           <tbody>
@@ -119,7 +119,7 @@ class WhitelistView(whitelist: Whitelist, validatedAnnouncements: Seq[BgpValidat
           }}
           </tbody>
         </table>
-      }
+      }}
           <script>
             <!--
               $(document).ready(function() {

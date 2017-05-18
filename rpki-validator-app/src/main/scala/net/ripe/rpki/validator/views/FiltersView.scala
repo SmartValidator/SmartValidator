@@ -73,16 +73,44 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
           <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-                <th>Asn</th><th>prefix</th><th>maxLength</th><th>&nbsp;</th>
+                <th>Asn</th><th>prefix</th><th>maxLength</th><th>Affected BGP-Annoucments</th><th>&nbsp;</th>
               </tr>
             </thead>
             <tbody>{
               for (filter <- suggestedRoaFilters.entries) yield {
                 if(filters.entries.find(_.prefix == filter.prefix).getOrElse(None) == None){
+                  val filteredOut = currentRtrPrefixes.filter((new IgnoreFilter(filter.prefix)).shouldIgnore(_))
+                  def filteredOutDetails = {
+                    <table>
+                      <thead>
+                        <tr><th>ASN</th><th>Prefix</th><th>Maximum Length</th></tr>
+                      </thead>
+                      {
+                      for { rtrPrefix <- filteredOut } yield {
+                        <tr>
+                          <td> { rtrPrefix.asn.getValue.toString } </td>
+                          <td> { rtrPrefix.prefix.toString } </td>
+                          <td> { if (rtrPrefix.maxPrefixLength.isDefined) {
+                            rtrPrefix.maxPrefixLength.get.toString
+                          } else {
+                            rtrPrefix.prefix.getPrefixLength.toString
+                          }
+                            }
+                          </td>
+                        </tr>
+                      }
+                      }
+                    </table>
+                  }
+
+
                   <tr>
                     <td>{ filter.asn }</td>
                     <td>{ filter.prefix }</td>
                     <td>{ filter.maxLength }</td>
+                    <td>
+                      <span rel="popover" data-content={ Xhtml.toXhtml(filteredOutDetails) } data-original-title="Details">{ filteredOut.size + " prefix(es)" }</span>
+                    </td>
                     <td>
                       <form method="POST" action="/filters" style="padding:0;margin:0;">
                         <input type="hidden" name="_method" value="POST"/>
@@ -104,7 +132,7 @@ $(document).ready(function() {
   $('#suggestedRoas-table').dataTable({
       "sPaginationType": "full_numbers",
       "aoColumns": [
-        null, null,null,
+        null, null,null,null,
         { "bSortable": false }
       ]
     }).show();
