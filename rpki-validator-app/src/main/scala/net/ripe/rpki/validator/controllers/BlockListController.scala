@@ -55,7 +55,7 @@ trait BlockListController extends ApplicationController {
   protected def addBlockListEntry(entry: BlockFilter): Unit
   protected def removeBlockListEntry(entry: BlockFilter): Unit
   protected def blockListEntryExists(entry: BlockFilter): Boolean = blockList.entries.contains(entry)
-  private def baseUrl = views.Tabs.BlockListTab.url
+  private def baseUrl = views.Tabs.PrefixWatchListTab.url
 
 
 

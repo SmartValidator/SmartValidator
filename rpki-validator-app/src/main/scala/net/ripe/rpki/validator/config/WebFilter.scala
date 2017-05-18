@@ -50,7 +50,6 @@ abstract class WebFilter extends ScalatraFilter
   with ExportController
   with RtrSessionsController
   with RoAlertController
-  with SuggestedRoaFiltersController
   with PathEndController
   with UserPreferencesController
   {

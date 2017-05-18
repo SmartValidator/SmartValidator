@@ -42,8 +42,8 @@ class BlockListView(blockList: BlockList, validatedIanaBlockFilter: Set[BlockFil
   private val fieldNameToText = Map("prefix" -> "Prefix")
   //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
-  def tab = Tabs.BlockListTab
-  def title = Text("Blocklist")
+  def tab = Tabs.PrefixWatchListTab
+  def title = Text("Prefix Watchlist")
   def body = {
     <div>{ renderMessages(messages, fieldNameToText) }</div>
       <div class="alert-message block-message info" data-alert="alert">
@@ -86,7 +86,7 @@ class BlockListView(blockList: BlockList, validatedIanaBlockFilter: Set[BlockFil
                 <td>{ entry.prefix }</td>
                 <td>{entry.origin}</td>
                 <td>
-                  <form method="POST" action="/blockList" style="padding:0;margin:0;">
+                  <form method="POST" action="/prefixWatchList" style="padding:0;margin:0;">
                     <input type="hidden" name="_method" value="DELETE"/>
                     <input type="hidden" name="prefix" value={ entry.prefix.toString }/>
                     <input type="hidden" name="origin" value={ entry.origin }/>
