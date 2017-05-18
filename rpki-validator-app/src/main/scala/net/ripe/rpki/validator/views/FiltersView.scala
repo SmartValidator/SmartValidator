@@ -157,7 +157,7 @@ $(document).ready(function() {
           <table id="filters-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-                <th>Prefix</th><th>Filtered ROA prefixes</th><th>&nbsp;</th>
+                <th>Prefix</th><th>Affected BGP-Annoucments</th><th>&nbsp;</th>
               </tr>
             </thead>
             <tbody>{
