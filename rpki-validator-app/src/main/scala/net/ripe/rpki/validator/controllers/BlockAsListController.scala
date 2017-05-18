@@ -68,7 +68,7 @@ trait BlockAsListController extends ApplicationController {
     val issuesSet = roaBgpIssuesSet.roaBgpIssuesSet
     //TODO delete timelinelist
     var timeLineList = List[Long]()
-    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._4.toDate.getTime)/10)*10)))
+    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._4.toDate.getTime)/1000)*1000)))
     var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
     var sorted = SortedMap[Long, Int]() ++ timeLineMap
     var values =  sorted.valuesIterator.toList
@@ -107,10 +107,10 @@ trait BlockAsListController extends ApplicationController {
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
 
-    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.size - getRtrPrefixes.size
-    val validRoaSize = getRtrPrefixes.size
+    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.asInstanceOf[::].distinct.size - getRtrPrefixes.size
+    val validRoaSize = getRtrPrefixes.size //the roas that are sent to the router
 
-    var labels = List("Total number of ROAs", "Filtered ROAs")
+    var labels = List("Total number of validated ROAs", "Filtered ROAs")
     val values = List(validRoaSize, filteredRoas)
     val json = ("labels" -> labels) ~ ("series" -> values)
 
