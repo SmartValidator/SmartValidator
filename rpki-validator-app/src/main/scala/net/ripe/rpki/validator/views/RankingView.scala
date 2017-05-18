@@ -123,7 +123,7 @@ class RankingView(asRankings: AsRankings, asRankingSets : Seq[RankingSet],getCur
                       <input type="hidden" name="asn" value={ entry.asn.toString }/>
                       <input type="hidden" name="name" value={ entry.name.toString }/>
                       <input type="hidden" name="rank" value={ entry.rank.toString }/>
-                      <input type="submit" class="btn" value="Block"/>
+                      <input style="background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(0%, #ffffff), to(#FF6347));background-color:#FF6347; " type="submit" class="btn" value="Block"/>
                     </form>
                   </td>
                 </tr>
