@@ -49,6 +49,7 @@ trait BlockAsListController extends ApplicationController {
   protected def getRtrPrefixes: Seq[RtrPrefix]
   protected def validatedObjects: ValidatedObjects
   protected def bgpAnnouncementSet: Seq[BgpAnnouncementSet]
+  protected def suggestedRoaFilters : SuggestedRoaFilterList
   protected def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement]
   protected def roaBgpIssuesSet: RoaBgpCollisions
   protected def filters: Filters
@@ -107,11 +108,12 @@ trait BlockAsListController extends ApplicationController {
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
 
-    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.asInstanceOf[::].distinct.size - getRtrPrefixes.size
+    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.toList.distinct.size - getRtrPrefixes.size
     val validRoaSize = getRtrPrefixes.size //the roas that are sent to the router
+    val roasToBeFiltered = suggestedRoaFilters.entries.toList.distinct.size
 
-    var labels = List("Total number of validated ROAs", "Filtered ROAs")
-    val values = List(validRoaSize, filteredRoas)
+    var labels = List("Total number of validated ROAs", "Filtered ROAs", "ROAs in conflict")
+    val values = List(validRoaSize, filteredRoas, roasToBeFiltered)
     val json = ("labels" -> labels) ~ ("series" -> values)
 
     response.getWriter.write(pretty(render(json)))
