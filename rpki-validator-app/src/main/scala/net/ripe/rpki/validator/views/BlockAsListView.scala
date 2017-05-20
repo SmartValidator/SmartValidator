@@ -41,7 +41,7 @@ class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[Fee
   private val fieldNameToText = Map("asn" -> "Asn")
   //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
-  def tab = Tabs.BlockAsListTab
+  def tab = Tabs.HomeTab
   def title = Text("BlockAslist")
   def body = {
     <div id="validatedroasdiv">

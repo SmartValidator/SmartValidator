@@ -44,7 +44,7 @@ import scala.collection.immutable.SortedMap
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait BlockAsListController extends ApplicationController {
-  private def baseUrl = views.Tabs.BlockAsListTab.url
+  private def baseUrl = views.Tabs.HomeTab.url
 
   protected def getRtrPrefixes: Seq[RtrPrefix]
   protected def validatedObjects: ValidatedObjects

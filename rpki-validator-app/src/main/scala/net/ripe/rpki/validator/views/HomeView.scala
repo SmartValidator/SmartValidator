@@ -34,7 +34,7 @@ import scala.xml.Text
 
 class HomeView extends View with ViewHelpers {
 
-  def tab = views.Tabs.HomeTab
+  def tab = views.Tabs.HelpTab
   def title = Text("Quick Overview of BGP Origin Validation")
   def body = {
 

@@ -38,7 +38,7 @@ import views.HomeView
 import net.ripe.rpki.validator.authentication.AuthenticationSupport
 
 trait ApplicationController extends ScalatraBase with FlashMapSupport with MethodOverride with AuthenticationSupport {
-  get("/") {
+  get("/help") {
     new HomeView()
   }
 
