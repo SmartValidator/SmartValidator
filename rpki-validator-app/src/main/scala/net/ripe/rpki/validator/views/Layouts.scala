@@ -98,7 +98,7 @@ object Layouts {
 
             newVersionNotify match {
               case NodeSeq.Empty => NodeSeq.Empty
-              case messages => 
+              case messages =>
               <div class="alert-message block-message"  data-alert="alert">
                   <a class="close" href="#">×</a>
                   { messages }

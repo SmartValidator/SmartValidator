@@ -32,12 +32,11 @@ package views
 
 import scala.xml.Text
 
-class HomeView extends View with ViewHelpers {
+class HelpView extends View with ViewHelpers {
 
   def tab = views.Tabs.HelpTab
-  def title = Text("Quick Overview of BGP Origin Validation")
+  def title = Text("Help Page")
   def body = {
-
 
     <br/>
 
@@ -192,7 +191,8 @@ class HomeView extends View with ViewHelpers {
                       <tr><td>65004</td><td>192.168.0.0/24</td><td>UNKNOWN</td><td>No matches</td></tr>
                   </table>
                   </div>
-            } data-original-title="Example"><a href="#">See an example ...</a></span>
+            }
+          data-original-title="Example"><a href="#">See an example ...</a></span>
       </p>
       <br />
       <p>

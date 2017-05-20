@@ -43,7 +43,7 @@ import sun.util.calendar.LocalGregorianCalendar.Date
 import scala.collection.immutable.SortedMap
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-trait BlockAsListController extends ApplicationController {
+trait HomeController extends ApplicationController {
   private def baseUrl = views.Tabs.HomeTab.url
 
   protected def getRtrPrefixes: Seq[RtrPrefix]
@@ -75,9 +75,9 @@ trait BlockAsListController extends ApplicationController {
     var values =  sorted.valuesIterator.toList
     var labels_long = sorted.keysIterator.toList
     var labels = List[String]()
-    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString()))
+    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
 
-    val json = ("labels" -> labels.takeRight(20)) ~ ("series" -> List(values.takeRight(20)))
+    val json = ("labels" -> labels.takeRight(7)) ~ ("series" -> List(values.takeRight(7)))
 
     response.getWriter.write(pretty(render(json)))
   }

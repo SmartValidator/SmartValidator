@@ -34,12 +34,12 @@ import scalaz._,Scalaz._
 
 import org.scalatra._
 import lib.Validation._
-import views.HomeView
+import views.HelpView
 import net.ripe.rpki.validator.authentication.AuthenticationSupport
 
 trait ApplicationController extends ScalatraBase with FlashMapSupport with MethodOverride with AuthenticationSupport {
   get("/help") {
-    new HomeView()
+    new HelpView()
   }
 
   protected[this] def feedbackMessages: Seq[FeedbackMessage] = flash.get("feedback").map(_.asInstanceOf[Seq[FeedbackMessage]]).getOrElse(Seq.empty)
