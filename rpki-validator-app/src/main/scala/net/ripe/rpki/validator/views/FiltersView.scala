@@ -46,7 +46,9 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
     <div>{ renderMessages(messages, fieldNameToText) }</div>
     <div class="alert-message block-message info" data-alert="alert">
     <a class="close" href="#">×</a>
-    <p>By adding a filter the validator will ignore any RPKI prefixes that overlap with the filter's prefix.</p>
+    <p>By adding a filter the validator will ignore any RPKI prefixes that overlap with the filter's prefix.
+      Once you add a filter, an entry will be added to "Current filters" table.
+      </p>
     </div>
     <h2>Add filter</h2>
     <div class="well">
@@ -73,7 +75,7 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
           <table id="suggestedRoas-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-                <th>Asn</th><th>prefix</th><th>maxLength</th><th>Affected BGP-Annoucments</th><th>&nbsp;</th>
+                <th>Asn</th><th>prefix</th><th>maxLength</th><th>Affected ROAs</th><th>&nbsp;</th>
               </tr>
             </thead>
             <tbody>{
@@ -157,7 +159,7 @@ $(document).ready(function() {
           <table id="filters-table" class="zebra-striped" style="display: none;">
             <thead>
               <tr>
-                <th>Prefix</th><th>Affected BGP-Annoucments</th><th>&nbsp;</th>
+                <th>Prefix</th><th>Affected ROAs</th><th>&nbsp;</th>
               </tr>
             </thead>
             <tbody>{

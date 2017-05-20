@@ -37,7 +37,7 @@ import scala.xml.Text
 /**
   * Created by fimka on 14/10/16.
   */
-class BlockAsListView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
+class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMessage] = Seq.empty) extends View with ViewHelpers {
   private val fieldNameToText = Map("asn" -> "Asn")
   //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 

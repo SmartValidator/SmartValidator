@@ -36,7 +36,7 @@ import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
 import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncementSet, BgpValidatedAnnouncement}
 import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
-import net.ripe.rpki.validator.views.BlockAsListView
+import net.ripe.rpki.validator.views.HomeView
 import org.joda.time.DateTime
 import sun.util.calendar.LocalGregorianCalendar.Date
 
@@ -56,7 +56,7 @@ trait HomeController extends ApplicationController {
 
 
   get(baseUrl) {
-    new BlockAsListView(messages = feedbackMessages)
+    new HomeView(messages = feedbackMessages)
   }
 
   get("/conflitsTimeline.json") {
