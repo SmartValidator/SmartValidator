@@ -49,6 +49,10 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
     <p>By adding a filter the validator will ignore any RPKI prefixes that overlap with the filter's prefix.
       Once you add a filter, an entry will be added to "Current filters" table.
       </p>
+      <p>Suggested Roa Filters - Calculated by SaferHop, this table holds a suggestive filters of ROAs which are in conflict with BGP Annoucments.
+        This ROAs may affect your network activity badly. Click on the 'Filter' button will remove this ROA and any other ROA afiliated with it, this will eliminate
+        any possibility to network issue resulted from this ROA. For more information got to [Help] page.
+      </p>
     </div>
     <h2>Add filter</h2>
     <div class="well">

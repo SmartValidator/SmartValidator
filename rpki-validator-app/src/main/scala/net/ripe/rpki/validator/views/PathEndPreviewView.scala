@@ -195,7 +195,7 @@ $(document).ready(function() {
                   <td>
                     <span rel="popover" data-content={ Xhtml.toXhtml(makeDetailsTable(trustedAsns)) } data-original-title="Details">{ trustedAsns.size + " Trusted Asns(s)" }</span>
                   </td>
-                  <td>BGPSafe PathEnd server</td>
+                  <td>SaferHop PathEnd server</td>
                 </tr>
               }
               }</tbody>

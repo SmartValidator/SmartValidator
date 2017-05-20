@@ -69,7 +69,7 @@ trait HomeController extends ApplicationController {
     val issuesSet = roaBgpIssuesSet.roaBgpIssuesSet
     //TODO delete timelinelist
     var timeLineList = List[Long]()
-    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._4.toDate.getTime)/1000)*1000)))
+    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._3.toDate.getTime)/10000)*10000)))
     var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
     var sorted = SortedMap[Long, Int]() ++ timeLineMap
     var values =  sorted.valuesIterator.toList
@@ -132,7 +132,8 @@ trait HomeController extends ApplicationController {
     val invalidBgpAsize = bgpASize - validBgpASize - unknownBgpASize
     val labels = List("Valid","Invalid", "Unknown")
     val values = List(validBgpASize,invalidBgpAsize,unknownBgpASize )
-    val json = ("labels" -> labels) ~ ("series" -> values)
+    val colors = List("#333", "#222", "#813988")
+    val json = ("labels" -> labels) ~ ("series" -> values) ~ ("colors" -> colors)
 
     response.getWriter.write(pretty(render(json)))
   }

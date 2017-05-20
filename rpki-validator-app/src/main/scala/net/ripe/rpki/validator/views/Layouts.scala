@@ -48,7 +48,7 @@ object Layouts {
     <html lang="en">
       <head>
         <meta charset="utf-8"/>
-        <title>BGPSafe - { view.title }</title>
+        <title>SaferHop - { view.title }</title>
         <link rel="stylesheet" href="/stylesheets/bootstrap/1.3.0/bootstrap.css"/>
         <link rel="stylesheet" href="/stylesheets/application.css"/>
         <script src="/javascript/datatables/1.8.2/jquery.js"/>
@@ -76,7 +76,7 @@ object Layouts {
         <div class="topbar">
           <div class="fill">
             <div class="container">
-              <a class="brand" href="/">BGPSafe</a>
+              <a class="brand" href="/">SaferHop</a>
               <ul class="nav">
                 {
                   for (tab <- Tabs.visibleTabs) yield {

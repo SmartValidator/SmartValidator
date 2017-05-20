@@ -42,7 +42,7 @@ class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMe
   //  val currentRtrPrefixes = getCurrentRtrPrefixes()
 
   def tab = Tabs.HomeTab
-  def title = Text("BlockAslist")
+  def title = Text("Home")
   def body = {
     <div id="validatedroasdiv">
       <h1 id = "ConflictRoasHead" style ="font-weight: bold;font-size: 21px;">Conflicted ROAs</h1>
