@@ -47,6 +47,7 @@ trait HomeController extends ApplicationController {
   private def baseUrl = views.Tabs.HomeTab.url
 
   protected def getRtrPrefixes: Seq[RtrPrefix]
+  protected def suggestedWhitelistASN: SuggestedWhitelist
   protected def validatedObjects: ValidatedObjects
   protected def bgpAnnouncementSet: Seq[BgpAnnouncementSet]
   protected def suggestedRoaFilters : SuggestedRoaFilterList
@@ -106,7 +107,7 @@ trait HomeController extends ApplicationController {
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
 
-    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.toList.distinct.size - getRtrPrefixes.size
+    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.toList.distinct.size - getRtrPrefixes.size + suggestedWhitelistASN.entries.toSeq.distinct.size
     val validRoaSize = getRtrPrefixes.size //the roas that are sent to the router
     val roasToBeFiltered = suggestedRoaFilters.entries.toList.distinct.size
 
