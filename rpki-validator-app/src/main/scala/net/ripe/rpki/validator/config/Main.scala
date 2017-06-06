@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory
 
 import scala.Predef._
 import scala.collection.JavaConverters._
+import scala.collection.SortedMap
 import scala.concurrent.Future
 import scala.concurrent.stm._
 import scala.math.Ordering.Implicits._
@@ -84,7 +85,6 @@ class Main extends Http with Logging { main =>
 
   implicit val actorSystem = akka.actor.ActorSystem()
   import actorSystem.dispatcher
-
   val startedAt = System.currentTimeMillis
 
   logger.info(s"Prefer RRDP=${ApplicationOptions.preferRrdp}")
@@ -122,6 +122,8 @@ class Main extends Http with Logging { main =>
 
   val rankingDumpDownloader = new RankingDumpDownloader(http)
 
+  var timlineConflictsRecords = (List("No Data"),List(List(0)))
+
   protected var lastState: RoaOperationMode = null;
 
 
@@ -152,18 +154,32 @@ class Main extends Http with Logging { main =>
     }
   }
 
+
   wipeRsyncDiskCache()
 
   val rtrServer = runRtrServer()
   runWebServer()
 //  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
+  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 2.minutes) { updateFilters(true) }
   actorSystem.scheduler.schedule(initialDelay = 100.seconds, interval = 2.minutes) { updateSuggestedWhitelistRecords() }
+  actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 3.minutes) { updateTimeLine() }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
 
-
+  private def updateTimeLine(): Unit ={
+    bgpAnnouncementValidator.roaBgpIssuesSet
+    var timeLineList = List[Long]()
+    bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._3.toDate.getTime)/10000)*10000)))
+    var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
+    var sorted = SortedMap[Long, Int]() ++ timeLineMap
+    var values =  sorted.valuesIterator.toList
+    var labels_long = sorted.keysIterator.toList
+    var labels = List[String]()
+    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
+    timlineConflictsRecords = (labels.takeRight(7),List(values.takeRight(7)))
+  }
   private def connectToRouter(): Unit = {
     try {
       val shell = new SSHByPassword("bgpsafe", 22, "fima", "1987");
@@ -233,6 +249,29 @@ class Main extends Http with Logging { main =>
       }
     }
   }
+   private def updateFilters(forceUpdate: Boolean = false) = {
+    if(lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate){
+      if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode){
+        memoryImage.single.get.suggestedRoaFilterList.entries =  scala.collection.mutable.Set.empty
+        memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
+        var defaultMaxLen: Int = 0
+        for(entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet){
+          memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
+          lastState =  RoaOperationMode.ManualMode
+        }
+      }
+      if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
+        for(entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
+          if(!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))){
+            entry.block = true
+            memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
+          }
+        }
+        lastState =  RoaOperationMode.AutoModeRemoveBadROA
+      }
+    }
+  }
+
 
   private def runValidator(forceNewFetch: Boolean) {
     import lib.DateAndTime._
@@ -363,6 +402,7 @@ class Main extends Http with Logging { main =>
       override protected def removeBlockAsListEntry(entry: BlockAsFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlockAslistEntry(entry)) }
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
+      override protected def timelineConflicts = main.timlineConflictsRecords
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements
       override protected def roaBgpIssuesSet = bgpAnnouncementValidator.roaBgpIssuesSet
 
@@ -396,28 +436,7 @@ class Main extends Http with Logging { main =>
 
 
 
-      override protected def updateFilters() = {
-        if(lastState == null || main.userPreferences.single.get.roaOperationMode != lastState){
-          if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode){
-            memoryImage.single.get.suggestedRoaFilterList.entries =  scala.collection.mutable.Set.empty
-            memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
-            var defaultMaxLen: Int = 0
-            for(entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet){
-              memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
-              lastState =  RoaOperationMode.ManualMode
-            }
-          }
-          if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
-            for(entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
-              if(!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))){
-                entry.block = true
-                memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
-              }
-            }
-            lastState =  RoaOperationMode.AutoModeRemoveBadROA
-          }
-        }
-      }
+      override protected def updateFilters(forceUpdate: Boolean = false) = main.updateFilters(forceUpdate)
 
       override protected def updateTrustAnchorState(locator: TrustAnchorLocator, enabled: Boolean) = updateAndPersist { implicit transaction =>
         memoryImage.transform(_.updateTrustAnchorState(locator, enabled))

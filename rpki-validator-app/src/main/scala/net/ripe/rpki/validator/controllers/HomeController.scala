@@ -51,6 +51,7 @@ trait HomeController extends ApplicationController {
   protected def bgpAnnouncementSet: Seq[BgpAnnouncementSet]
   protected def suggestedRoaFilters : SuggestedRoaFilterList
   protected def validatedAnnouncements: IndexedSeq[BgpValidatedAnnouncement]
+  protected def timelineConflicts: (List[String],List[List[Int]])
   protected def roaBgpIssuesSet: RoaBgpCollisions
   protected def filters: Filters
 
@@ -65,19 +66,16 @@ trait HomeController extends ApplicationController {
     contentType = "text/json"
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
-    var sumInvalidAsn = 0
-    val issuesSet = roaBgpIssuesSet.roaBgpIssuesSet
-    //TODO delete timelinelist
-    var timeLineList = List[Long]()
-    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._3.toDate.getTime)/10000)*10000)))
-    var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
-    var sorted = SortedMap[Long, Int]() ++ timeLineMap
-    var values =  sorted.valuesIterator.toList
-    var labels_long = sorted.keysIterator.toList
-    var labels = List[String]()
-    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
+//    var timeLineList = List[Long]()
+//    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._3.toDate.getTime)/10000)*10000)))
+//    var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
+//    var sorted = SortedMap[Long, Int]() ++ timeLineMap
+//    var values =  sorted.valuesIterator.toList
+//    var labels_long = sorted.keysIterator.toList
+//    var labels = List[String]()
+//    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
 
-    val json = ("labels" -> labels.takeRight(7)) ~ ("series" -> List(values.takeRight(7)))
+    val json = ("labels" -> timelineConflicts._1) ~ ("series" -> timelineConflicts._2)
 
     response.getWriter.write(pretty(render(json)))
   }

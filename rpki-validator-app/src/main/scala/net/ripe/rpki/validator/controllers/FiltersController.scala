@@ -42,7 +42,7 @@ import scalaz.Scalaz._
 import scalaz._
 
 trait FiltersController extends ApplicationController {
-  protected def updateFilters
+  protected def updateFilters(forceUpdate: Boolean = false)
   protected def filters: Filters
   protected def roaBgpIssuesSet: RoaBgpCollisions
   protected def suggestedRoaFilters : SuggestedRoaFilterList
@@ -84,7 +84,7 @@ trait FiltersController extends ApplicationController {
 //  }
 
   get(baseUrl) {
-    updateFilters
+    updateFilters(false)
     new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, messages = feedbackMessages)
   }
 
