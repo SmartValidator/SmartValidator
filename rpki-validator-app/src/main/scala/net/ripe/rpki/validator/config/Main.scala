@@ -147,7 +147,6 @@ class Main extends Http with Logging { main =>
             refreshRisDumps() //TODO: make some kind of failure rule to disengage in-case it's stuck and repetitive
           }
           bgpAnnouncementValidator.startUpdate(bgpAnnouncements, distinctRtrPrefixes.toSeq)
-          bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
           rtrServer.notify(newVersion)
         }
       }
@@ -161,7 +160,8 @@ class Main extends Http with Logging { main =>
   runWebServer()
 //  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
   actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 2.minutes) { updateFilters(true) }
-  actorSystem.scheduler.schedule(initialDelay = 100.seconds, interval = 2.minutes) { updateSuggestedWhitelistRecords() }
+  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = (userPreferences.single.get.conflictCertDays).days) { bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)}
+  actorSystem.scheduler.schedule(initialDelay = 600.seconds, interval = 12.hours) { updateSuggestedWhitelistRecords() }
   actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 3.minutes) { updateTimeLine() }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
   actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
@@ -250,27 +250,29 @@ class Main extends Http with Logging { main =>
     }
   }
    private def updateFilters(forceUpdate: Boolean = false) = {
-    if(lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate){
-      if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode){
-        memoryImage.single.get.suggestedRoaFilterList.entries =  scala.collection.mutable.Set.empty
-        memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
-        var defaultMaxLen: Int = 0
-        for(entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet){
-          memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
-          lastState =  RoaOperationMode.ManualMode
-        }
-      }
-      if(main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
-        for(entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
-          if(!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))){
-            entry.block = true
-            memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
-          }
-        }
-        lastState =  RoaOperationMode.AutoModeRemoveBadROA
-      }
-    }
-  }
+     Future {
+       if (lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate) {
+         if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) {
+           memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
+           memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
+           var defaultMaxLen: Int = 0
+           for (entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet) {
+             memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0))
+             lastState = RoaOperationMode.ManualMode
+           }
+         }
+         if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA) {
+           for (entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
+             if (!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))) {
+               entry.block = true
+               memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
+             }
+           }
+           lastState = RoaOperationMode.AutoModeRemoveBadROA
+         }
+       }
+     }
+   }
 
 
   private def runValidator(forceNewFetch: Boolean) {

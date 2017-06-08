@@ -84,7 +84,7 @@ trait FiltersController extends ApplicationController {
 //  }
 
   get(baseUrl) {
-    updateFilters(false)
+//    updateFilters(false)
     new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, messages = feedbackMessages)
   }
 
