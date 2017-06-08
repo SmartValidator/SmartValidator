@@ -1,32 +1,32 @@
 /**
- * The BSD License
- *
- * Copyright (c) 2010-2012 RIPE NCC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *   - Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *   - Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the documentation
- *     and/or other materials provided with the distribution.
- *   - Neither the name of the RIPE NCC nor the names of its contributors may be
- *     used to endorse or promote products derived from this software without
- *     specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+  * The BSD License
+  *
+  * Copyright (c) 2010-2012 RIPE NCC
+  * All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions are met:
+  *   - Redistributions of source code must retain the above copyright notice,
+  * this list of conditions and the following disclaimer.
+  *   - Redistributions in binary form must reproduce the above copyright notice,
+  * this list of conditions and the following disclaimer in the documentation
+  * and/or other materials provided with the distribution.
+  *   - Neither the name of the RIPE NCC nor the names of its contributors may be
+  * used to endorse or promote products derived from this software without
+  * specific prior written permission.
+  *
+  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
 package net.ripe.rpki.validator
 package config
 
@@ -80,15 +80,19 @@ object Main {
   }
 }
 
-class Main extends Http with Logging { main =>
+class Main extends Http with Logging {
+  main =>
+
   import scala.concurrent.duration._
 
   implicit val actorSystem = akka.actor.ActorSystem()
+
   import actorSystem.dispatcher
+
   val startedAt = System.currentTimeMillis
 
   logger.info(s"Prefer RRDP=${ApplicationOptions.preferRrdp}")
-  
+
   val bgpAnnouncementSets = Ref(Seq(
     BgpAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv4.gz"),
     BgpAnnouncementSet("http://www.ris.ripe.net/dumps/riswhoisdump.IPv6.gz")))
@@ -122,15 +126,15 @@ class Main extends Http with Logging { main =>
 
   val rankingDumpDownloader = new RankingDumpDownloader(http)
 
-  var timlineConflictsRecords = (List("No Data"),List(List(0)))
+  var timlineConflictsRecords = (List("No Data"), List(List(0)))
 
   protected var lastState: RoaOperationMode = null;
 
 
   val memoryImage = Ref(
-    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings,data.blockAsList,data.suggestedRoaFilterList,data.pathEndTable,data.localPathEndNeighbors, data.suggestedWhitelistASN))
+    MemoryImage(data.filters, data.whitelist, new TrustAnchors(trustAnchors), roas, data.blockList, data.asRankings, data.blockAsList, data.suggestedRoaFilterList, data.pathEndTable, data.localPathEndNeighbors, data.suggestedWhitelistASN))
 
-  var store : CacheStore = _
+  var store: CacheStore = _
 
   def updateMemoryImage(f: MemoryImage => MemoryImage)(implicit transaction: MaybeTxn) {
     atomic { implicit transaction =>
@@ -143,7 +147,7 @@ class Main extends Http with Logging { main =>
 
       Txn.afterCommit { _ =>
         if (oldVersion != newVersion) {
-          if(bgpAnnouncements.isEmpty){
+          if (bgpAnnouncements.isEmpty) {
             refreshRisDumps() //TODO: make some kind of failure rule to disengage in-case it's stuck and repetitive
           }
           bgpAnnouncementValidator.startUpdate(bgpAnnouncements, distinctRtrPrefixes.toSeq)
@@ -158,42 +162,60 @@ class Main extends Http with Logging { main =>
 
   val rtrServer = runRtrServer()
   runWebServer()
-//  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
-  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 2.minutes) { updateFilters(true) }
-  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = (userPreferences.single.get.conflictCertDays).days) { bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)}
-  actorSystem.scheduler.schedule(initialDelay = 600.seconds, interval = 12.hours) { updateSuggestedWhitelistRecords() }
-  actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 3.minutes) { updateTimeLine() }
-  actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) { refreshRankingDumps() }
-  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) { refreshIanaDumps() }
-  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) { runValidator(false) }
-  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) { refreshRisDumps() }
+  //  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
+  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 2.minutes) {
+    updateFilters(true)
+  }
+  actorSystem.scheduler.schedule(initialDelay = 600.seconds, interval = 5.minutes) {
+    bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
+  }
+  actorSystem.scheduler.schedule(initialDelay = 720.seconds, interval = 12.hours) {
+    updateSuggestedWhitelistRecords()
+  }
+  actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 3.minutes) {
+    updateTimeLine()
+  }
+  actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) {
+    refreshRankingDumps()
+  }
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 4.hours) {
+    refreshIanaDumps()
+  }
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 10.seconds) {
+    runValidator(false)
+  }
+  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 2.hours) {
+    refreshRisDumps()
+  }
 
-  private def updateTimeLine(): Unit ={
-    bgpAnnouncementValidator.roaBgpIssuesSet
-    var timeLineList = List[Long]()
-    bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._3.toDate.getTime)/10000)*10000)))
-    var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
-    var sorted = SortedMap[Long, Int]() ++ timeLineMap
-    var values =  sorted.valuesIterator.toList
-    var labels_long = sorted.keysIterator.toList
-    var labels = List[String]()
-    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
-    timlineConflictsRecords = (labels.takeRight(7),List(values.takeRight(7)))
+  private def updateTimeLine(): Unit = {
+    Future {
+      bgpAnnouncementValidator.roaBgpIssuesSet
+      var timeLineList = List[Long]()
+      bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x => x.bgpAnnouncements.foreach(y => timeLineList ++= List(((y._3.toDate.getTime) / 10000) * 10000)))
+      val timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
+      val sorted = SortedMap[Long, Int]() ++ timeLineMap
+      val values = sorted.valuesIterator.toList
+      val labels_long = sorted.keysIterator.toList
+      var labels = List[String]()
+      labels_long.foreach(x => labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
+      timlineConflictsRecords = (labels.takeRight(7), List(values.takeRight(7)))
+    }
   }
   private def connectToRouter(): Unit = {
     try {
       val shell = new SSHByPassword("bgpsafe", 22, "fima", "1987");
       val stdout = new Shell.Plain(shell).exec("show ip interface brief");
       logger.info(stdout);
-    }catch {
+    } catch {
       case e: Exception => println("Error: " + e);
     }
   }
 
-  private def isBgpIssueOld(recordValidationDate: DateTime):Boolean = {
+  private def isBgpIssueOld(recordValidationDate: DateTime): Boolean = {
     val currentTime = DateTime.now()
     val timeDifference = new Period(currentTime, recordValidationDate)
-    if(timeDifference.getDays() >= userPreferences.single.get.conflictCertDays ){
+    if (timeDifference.getDays() >= userPreferences.single.get.conflictCertDays) {
       return false
     }
     true
@@ -201,19 +223,21 @@ class Main extends Http with Logging { main =>
 
   private def updateSuggestedWhitelistRecords() {
     //TODO try to move to += now the set is mutable
-      //See if the user wants automatic whitelisting of long term conflicting ROA's
-      if(userPreferences.single.get.roaBgpConflictLearnMode){
+    //See if the user wants automatic whitelisting of long term conflicting ROA's
+    Future {
+      if (userPreferences.single.get.roaBgpConflictLearnMode) {
         val safeDays = userPreferences.single.get.conflictCertDays
         bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.foreach(x => x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
         val filteredIssueSet = bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
         memoryImage.single.get.suggestedWhitelistASN.clearEntries
         filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y => {
-          //memoryImage.single.get.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix))
-          updateMemoryImage(_.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix)))
+          memoryImage.single.get.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix))
+//          updateMemoryImage(_.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix)))
           //addSuggestedWhitelistEntry
         }))
-//        updateMemoryImage(_.updateSuggestedWhitelistASN(suggestedWhitelistASN))
+                updateMemoryImage(_.updateSuggestedWhitelistASN(suggestedWhitelistASN))
       }
+    }
   }
 
   private def loadTrustAnchors(): TrustAnchors = {
@@ -242,37 +266,38 @@ class Main extends Http with Logging { main =>
   }
 
   private def refreshIanaDumps() {
-    Future.traverse(ianaSets.single.get) (ianaDumpDownloader.download) foreach { dumps =>
+    Future.traverse(ianaSets.single.get)(ianaDumpDownloader.download) foreach { dumps =>
       atomic { implicit transaction =>
-            ianaSets() = dumps
-//            ianaAnnouncementValidator.startUpdate(ianaSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
+        ianaSets() = dumps
+        //            ianaAnnouncementValidator.startUpdate(ianaSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
       }
     }
   }
-   private def updateFilters(forceUpdate: Boolean = false) = {
-     Future {
-       if (lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate) {
-         if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) {
-           memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
-           memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
-           var defaultMaxLen: Int = 0
-           for (entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet) {
-             memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0))
-             lastState = RoaOperationMode.ManualMode
-           }
-         }
-         if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA) {
-           for (entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
-             if (!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))) {
-               entry.block = true
-               memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
-             }
-           }
-           lastState = RoaOperationMode.AutoModeRemoveBadROA
-         }
-       }
-     }
-   }
+
+  private def updateFilters(forceUpdate: Boolean = false) = {
+    Future {
+      if (lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate) {
+        if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) {
+          memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
+          memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
+          var defaultMaxLen: Int = 0
+          for (entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet) {
+            memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0))
+            lastState = RoaOperationMode.ManualMode
+          }
+        }
+        if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA) {
+          for (entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
+            if (!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))) {
+              entry.block = true
+              memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
+            }
+          }
+          lastState = RoaOperationMode.AutoModeRemoveBadROA
+        }
+      }
+    }
+  }
 
 
   private def runValidator(forceNewFetch: Boolean) {
@@ -363,6 +388,7 @@ class Main extends Http with Logging { main =>
 
     val webFilter = new WebFilter {
       private val dataFileLock = new Object()
+
       private def updateAndPersist(f: InTxn => Unit) {
         dataFileLock synchronized {
           val (image, userPreferences) = atomic { implicit transaction =>
@@ -374,38 +400,56 @@ class Main extends Http with Logging { main =>
               trustAnchorData = image.trustAnchors.all.map(ta => ta.name -> TrustAnchorData(ta.enabled))(collection.breakOut)), dataFile)
         }
       }
+
       override protected def startTrustAnchorValidation(trustAnchors: Seq[String]) = main.runValidator(trustAnchors, true)
 
       override protected def trustAnchors = memoryImage.single.get.trustAnchors
+
       override protected def validatedObjects = memoryImage.single.get.validatedObjects
 
       override protected def filters = memoryImage.single.get.filters
+
       override protected def addSuggestedRoaFilter(filter: SuggestedRoaFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.addSuggestedRoaFilter(filter)) }
+
       override protected def removeSuggestedRoaFilter(filter: SuggestedRoaFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeSuggestedRoaFilter(filter)) }
+
       override protected def addPathEndRecord(filter: PathEndRecord) = updateAndPersist { implicit transaction => updateMemoryImage(_.addPathEndRecord(filter)) }
+
       override protected def removePathEndRecord(filter: PathEndRecord) = updateAndPersist { implicit transaction => updateMemoryImage(_.removePathEndRecord(filter)) }
+
       override protected def addPathEndNeighbor(entry: Asn) = updateAndPersist { implicit transaction => updateMemoryImage(_.addPathEndNeighbor(entry)) }
+
       override protected def removePathEndNeighbor(entry: Asn) = updateAndPersist { implicit transaction => updateMemoryImage(_.removePathEndNeighbor(entry)) }
+
       override protected def addFilter(filter: IgnoreFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.addFilter(filter)) }
+
       override protected def removeFilter(filter: IgnoreFilter) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeFilter(filter)) }
 
       override protected def whitelist = memoryImage.single.get.whitelist
+
       override protected def addWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.addWhitelistEntry(entry)) }
+
       override protected def removeWhitelistEntry(entry: RtrPrefix) = updateAndPersist { implicit transaction => updateMemoryImage(_.removeWhitelistEntry(entry)) }
 
 
       override protected def blockList = memoryImage.single.get.blockList
+
       override protected def blockAsList = memoryImage.single.get.blockAsList
 
       override protected def addBlockListEntry(entry: BlockFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlocklistEntry(entry)) }
+
       override protected def removeBlockListEntry(entry: BlockFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlocklistEntry(entry)) }
 
       override protected def addBlockAsListEntry(entry: BlockAsFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.addBlockAslistEntry(entry)) }
+
       override protected def removeBlockAsListEntry(entry: BlockAsFilter): Unit = updateAndPersist { implicit transaction => updateMemoryImage(_.removeBlockAslistEntry(entry)) }
 
       override protected def bgpAnnouncementSet = main.bgpAnnouncementSets.single.get
+
       override protected def timelineConflicts = main.timlineConflictsRecords
+
       override protected def validatedAnnouncements = bgpAnnouncementValidator.validatedAnnouncements
+
       override protected def roaBgpIssuesSet = bgpAnnouncementValidator.roaBgpIssuesSet
 
       override protected def validatedIanaSets = ianaSets.single.get
@@ -419,7 +463,6 @@ class Main extends Http with Logging { main =>
       protected def sessionData = rtrServer.rtrSessions.allClientData
 
 
-
       // Software Update checker
       override def newVersionDetailFetcher = new OnlineNewVersionDetailFetcher(ReleaseInfo.version,
         () => {
@@ -429,13 +472,13 @@ class Main extends Http with Logging { main =>
 
       // UserPreferences
       override def userPreferences = main.userPreferences.single.get
+
       override def updateUserPreferences(userPreferences: UserPreferences) = {
-        if(!userPreferences.roaBgpConflictLearnMode){
+        if (!userPreferences.roaBgpConflictLearnMode) {
           memoryImage.single.get.suggestedWhitelistASN.copy(scala.collection.mutable.Set.empty[RtrPrefix])
         }
         updateAndPersist { implicit transaction => main.userPreferences.set(userPreferences) }
       }
-
 
 
       override protected def updateFilters(forceUpdate: Boolean = false) = main.updateFilters(forceUpdate)
@@ -444,11 +487,14 @@ class Main extends Http with Logging { main =>
         memoryImage.transform(_.updateTrustAnchorState(locator, enabled))
       }
 
-      override protected def asRankings: AsRankings =  memoryImage.single.get.asRankings
+      override protected def asRankings: AsRankings = memoryImage.single.get.asRankings
+
       //TODO bring back roa blacklist.
-      override protected def suggestedRoaFilters: SuggestedRoaFilterList =  memoryImage.single.get.suggestedRoaFilterList
-      override protected def pathEndTable: PathEndTable =  memoryImage.single.get.pathEndTable
-      override protected def localPathEndNeighbors: LocalPathEndNeighbors =  memoryImage.single.get.localPathEndNeighbors
+      override protected def suggestedRoaFilters: SuggestedRoaFilterList = memoryImage.single.get.suggestedRoaFilterList
+
+      override protected def pathEndTable: PathEndTable = memoryImage.single.get.pathEndTable
+
+      override protected def localPathEndNeighbors: LocalPathEndNeighbors = memoryImage.single.get.localPathEndNeighbors
 
     }
 
@@ -457,7 +503,6 @@ class Main extends Http with Logging { main =>
 
       override protected def getCachedObjects = store.getAllObjects
     }
-
 
 
     val root = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS)
@@ -495,9 +540,6 @@ class Main extends Http with Logging { main =>
       FileUtils.cleanDirectory(diskCache)
     }
   }
-
-
-
 
 
 }

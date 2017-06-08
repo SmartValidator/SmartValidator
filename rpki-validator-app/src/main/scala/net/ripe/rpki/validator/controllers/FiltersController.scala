@@ -59,30 +59,6 @@ trait FiltersController extends ApplicationController {
   
   private def getCurrentRtrPrefixes(): Iterable[RtrPrefix] = validatedObjects.getValidatedRtrPrefixes
 
-//  def updateByUserPreference = {
-//    if(lastState == null || userPreferences.roaOperationMode != lastState){
-//      if(userPreferences.roaOperationMode == RoaOperationMode.ManualMode){
-//        suggestedRoaFilters.entries =  scala.collection.mutable.Set.empty
-//        filters.entries = scala.collection.mutable.Set.empty
-//        var defaultMaxLen: Int = 0
-//        for(entry <- roaBgpIssuesSet.roaBgpIssuesSet){
-//          suggestedRoaFilters.entries += new SuggestedRoaFilter(entry.roa.asn,entry.roa.prefix,entry.roa.maxPrefixLength.getOrElse[Int](0))
-//          lastState =  RoaOperationMode.ManualMode
-//        }
-//      }
-//      if(userPreferences.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA){
-//        for(entry <- suggestedRoaFilters.entries) {
-//          if(!filterExists(new IgnoreFilter(entry.prefix))){
-//            entry.block = true
-//            filters.entries += new IgnoreFilter(entry.prefix)
-//          }
-//        }
-//        lastState =  RoaOperationMode.AutoModeRemoveBadROA
-//      }
-//    }
-//
-//  }
-
   get(baseUrl) {
 //    updateFilters(false)
     new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, messages = feedbackMessages)

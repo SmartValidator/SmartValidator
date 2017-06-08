@@ -34,14 +34,8 @@ package controllers
 import net.liftweb.json._
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpCollisions
 import net.ripe.rpki.validator.bgp.preview.{BgpAnnouncementSet, BgpValidatedAnnouncement}
-import net.ripe.rpki.validator.models.RouteValidity.RouteValidity
 import net.ripe.rpki.validator.models._
 import net.ripe.rpki.validator.views.HomeView
-import org.joda.time.DateTime
-import sun.util.calendar.LocalGregorianCalendar.Date
-
-import scala.collection.immutable.SortedMap
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait HomeController extends ApplicationController {
   private def baseUrl = views.Tabs.HomeTab.url
@@ -67,15 +61,6 @@ trait HomeController extends ApplicationController {
     contentType = "text/json"
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
-//    var timeLineList = List[Long]()
-//    roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> x.bgpAnnouncements.foreach(y=> timeLineList ++= List(((y._3.toDate.getTime)/10000)*10000)))
-//    var timeLineMap = timeLineList.groupBy(identity).mapValues(_.size)
-//    var sorted = SortedMap[Long, Int]() ++ timeLineMap
-//    var values =  sorted.valuesIterator.toList
-//    var labels_long = sorted.keysIterator.toList
-//    var labels = List[String]()
-//    labels_long.foreach(x=> labels ++= List((new DateTime(x)).toString("d/MM/yy - kk:mm")))
-
     val json = ("labels" -> timelineConflicts._1) ~ ("series" -> timelineConflicts._2)
 
     response.getWriter.write(pretty(render(json)))
