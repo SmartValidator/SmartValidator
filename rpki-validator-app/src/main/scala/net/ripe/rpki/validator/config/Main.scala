@@ -231,11 +231,11 @@ class Main extends Http with Logging {
         val filteredIssueSet = bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
         memoryImage.single.get.suggestedWhitelistASN.clearEntries
         filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y => {
-//          memoryImage.single.get.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix))
-          updateMemoryImage(_.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix)))
+          memoryImage.single.get.suggestedWhitelistASN.entries += new RtrPrefix(y._2.asn, y._2.prefix)
+//          updateMemoryImage(_.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix)))
           //addSuggestedWhitelistEntry
         }))
-//                updateMemoryImage(_.updateSuggestedWhitelistASN(suggestedWhitelistASN))
+        updateMemoryImage(_.updateSuggestedWhitelistASN(memoryImage.single.get.suggestedWhitelistASN))
       }
     }
   }
