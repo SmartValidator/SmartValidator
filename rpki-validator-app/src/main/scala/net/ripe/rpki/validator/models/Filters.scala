@@ -32,7 +32,7 @@ package models
 
 import net.ripe.ipresource.IpRange
 
-case class IgnoreFilter(prefix: IpRange) {
+case class IgnoreFilter(prefix: IpRange,affectedRoas: Iterable[RtrPrefix] = Iterable.empty) {
   def shouldIgnore(rtrPrefix: RtrPrefix): Boolean = prefix.overlaps(rtrPrefix.prefix)
 }
 

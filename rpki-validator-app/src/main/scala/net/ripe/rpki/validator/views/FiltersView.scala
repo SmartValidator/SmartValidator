@@ -85,14 +85,14 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
             <tbody>{
               for (filter <- suggestedRoaFilters.entries) yield {
                 if(filters.entries.find(_.prefix == filter.prefix).getOrElse(None) == None){
-                  val filteredOut = currentRtrPrefixes.filter((new IgnoreFilter(filter.prefix)).shouldIgnore(_))
+
                   def filteredOutDetails = {
                     <table>
                       <thead>
                         <tr><th>ASN</th><th>Prefix</th><th>Maximum Length</th></tr>
                       </thead>
                       {
-                      for { rtrPrefix <- filteredOut } yield {
+                      for { rtrPrefix <- filter.affectedRoas } yield {
                         <tr>
                           <td> { rtrPrefix.asn.getValue.toString } </td>
                           <td> { rtrPrefix.prefix.toString } </td>
@@ -115,7 +115,7 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
                     <td>{ filter.prefix }</td>
                     <td>{ filter.maxLength }</td>
                     <td>
-                      <span rel="popover" data-content={ Xhtml.toXhtml(filteredOutDetails) } data-original-title="Details">{ filteredOut.size + " prefix(es)" }</span>
+                      <span rel="popover" data-content={ Xhtml.toXhtml(filteredOutDetails) } data-original-title="Details">{ filter.affectedRoas.size + " prefix(es)" }</span>
                     </td>
                     <td>
                       <form method="POST" action="/filters" style="padding:0;margin:0;">
@@ -168,14 +168,13 @@ $(document).ready(function() {
             </thead>
             <tbody>{
               for (filter <- filters.entries) yield {
-                val filteredOut = currentRtrPrefixes.filter(filter.shouldIgnore(_))
                 def filteredOutDetails = {
                   <table>
                     <thead>
                       <tr><th>ASN</th><th>Prefix</th><th>Maximum Length</th></tr>
                     </thead>
                     {
-                      for { rtrPrefix <- filteredOut } yield {
+                      for { rtrPrefix <- filter.affectedRoas } yield {
                         <tr>
                           <td> { rtrPrefix.asn.getValue.toString } </td>
                           <td> { rtrPrefix.prefix.toString } </td>
@@ -195,7 +194,7 @@ $(document).ready(function() {
                 <tr>
                   <td>{ filter.prefix }</td>
                   <td>
-                    <span rel="popover" data-content={ Xhtml.toXhtml(filteredOutDetails) } data-original-title="Details">{ filteredOut.size + " prefix(es)" }</span>
+                    <span rel="popover" data-content={ Xhtml.toXhtml(filteredOutDetails) } data-original-title="Details">{ filter.affectedRoas.size + " prefix(es)" }</span>
                   </td>
                   <td>
                     <form method="POST" action="/filters" style="padding:0;margin:0;">

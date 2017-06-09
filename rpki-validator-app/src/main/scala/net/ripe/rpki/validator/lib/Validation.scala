@@ -34,6 +34,7 @@ import Scalaz._
 import net.ripe.ipresource.Asn
 import net.ripe.ipresource.IpRange
 import net.ripe.rpki.validator.lib.RoaOperationMode.RoaOperationMode
+import net.ripe.rpki.validator.models.RtrPrefix
 
 object Validation {
 
@@ -110,6 +111,13 @@ object Validation {
   def parseIpPrefix(s: String): Validation[String, IpRange] = try {
     val rangeOrPrefix = IpRange.parse(s)
     if (rangeOrPrefix.isLegalPrefix) rangeOrPrefix.success
+    else (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
+  } catch {
+    case _: Exception => (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
+  }
+  def parseIgnoreFilter(s: String): Validation[String, (IpRange,Iterable[RtrPrefix])] = try {
+    val rangeOrPrefix = IpRange.parse(s)
+    if (rangeOrPrefix.isLegalPrefix) (rangeOrPrefix,Iterable.empty).success
     else (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail
   } catch {
     case _: Exception => (quote(s) + " is not a valid IPv4 or IPv6 prefix").fail

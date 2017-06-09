@@ -163,16 +163,16 @@ class Main extends Http with Logging {
   val rtrServer = runRtrServer()
   runWebServer()
   //  actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = 60  .seconds) { connectToRouter() }
-  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 2.minutes) {
+  actorSystem.scheduler.schedule(initialDelay = 300.seconds, interval = 5.minutes) {
     updateFilters(true)
   }
-  actorSystem.scheduler.schedule(initialDelay = 600.seconds, interval = 5.minutes) {
+  actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 4.minutes) {
     bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
   }
-  actorSystem.scheduler.schedule(initialDelay = 720.seconds, interval = 12.hours) {
+  actorSystem.scheduler.schedule(initialDelay = 720.seconds, interval = 1.hours) {
     updateSuggestedWhitelistRecords()
   }
-  actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 3.minutes) {
+  actorSystem.scheduler.schedule(initialDelay = 200.seconds, interval = 17.minutes) {
     updateTimeLine()
   }
   actorSystem.scheduler.schedule(initialDelay = 120.seconds, interval = 0.5.hours) {
@@ -250,7 +250,7 @@ class Main extends Http with Logging {
       atomic { implicit transaction =>
         bgpAnnouncementSets() = dumps
         bgpAnnouncementValidator.startUpdate(bgpAnnouncementSets().flatMap(_.entries), memoryImage().getDistinctRtrPrefixes.toSeq)
-        bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
+        //bgpAnnouncementValidator.updateRoaBgpConflictsSet(userPreferences.single.get.maxConflictedBgpStaleDays)
 
       }
     }
@@ -280,16 +280,20 @@ class Main extends Http with Logging {
           memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
           memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
           var defaultMaxLen: Int = 0
+          val currentRtrPrefixes = memoryImage.single.get.validatedObjects.getValidatedRtrPrefixes
           for (entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet) {
-            memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0))
+            val affectedRoa = (currentRtrPrefixes.filter((IgnoreFilter(entry.roa.prefix)).shouldIgnore(_))).takeRight(100)
+            memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0),false,false,affectedRoa)
             lastState = RoaOperationMode.ManualMode
           }
         }
         if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA) {
+          val currentRtrPrefixes = memoryImage.single.get.validatedObjects.getValidatedRtrPrefixes
           for (entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
             if (!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))) {
+              val affectedRoa = (currentRtrPrefixes.filter((IgnoreFilter(entry.prefix)).shouldIgnore(_))).takeRight(100)
               entry.block = true
-              memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix)
+              memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix,affectedRoa)
             }
           }
           lastState = RoaOperationMode.AutoModeRemoveBadROA

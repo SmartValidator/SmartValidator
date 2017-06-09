@@ -67,7 +67,7 @@ trait FiltersController extends ApplicationController {
   post(baseUrl) {
     submitedSuggestedRoaFilter match {
       case Success(entry) =>
-        if (filterExists(new IgnoreFilter(entry.prefix)))
+        if (filterExists(new IgnoreFilter(entry.prefix,entry.affectedRoas)))
           new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, Seq(ErrorMessage("filter already exists")))
         else {
           addFilter(new IgnoreFilter(entry.prefix))
@@ -82,8 +82,9 @@ trait FiltersController extends ApplicationController {
   delete(baseUrl) {
     submittedFilter match {
       case Success(entry) =>
-        if (filterExists(entry)) {
-          removeFilter(entry)
+        val filter = IgnoreFilter(entry)
+        if (filterExists(filter)) {
+          removeFilter(filter)
           redirectWithFeedbackMessages(baseUrl, Seq(SuccessMessage("The prefix has been removed from the filters.")))
         } else {
           new FiltersView(filters, getCurrentRtrPrefixes,suggestedRoaFilters, params, Seq(ErrorMessage("filter no longer exists")))
@@ -94,8 +95,9 @@ trait FiltersController extends ApplicationController {
     }
   }
 
-  private def submittedFilter: ValidationNEL[FeedbackMessage, IgnoreFilter] = {
-    validateParameter("prefix", required(parseIpPrefix)) map IgnoreFilter
+  private def submittedFilter: ValidationNEL[FeedbackMessage, IpRange] = {
+    val prefix = validateParameter("prefix", required(parseIpPrefix))
+    prefix
   }
   private def validate(asn: Asn, prefix: IpRange, maxLength: Int, block: Boolean, fix: Boolean): ValidationNEL[FeedbackMessage, SuggestedRoaFilter] = {
     if (!prefix.isLegalPrefix) {
