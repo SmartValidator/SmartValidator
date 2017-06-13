@@ -63,6 +63,7 @@ import scala.concurrent.Future
 import scala.concurrent.stm._
 import scala.math.Ordering.Implicits._
 import scalaz.{Failure, Success}
+import scala.util.control.Breaks._
 
 object Main {
   private val sessionId: Pdu.SessionId = Pdu.randomSessionid
@@ -149,8 +150,9 @@ class Main extends Http with Logging {
         if (oldVersion != newVersion) {
           if (bgpAnnouncements.isEmpty) {
             refreshRisDumps() //TODO: make some kind of failure rule to disengage in-case it's stuck and repetitive
+          } else {
+            bgpAnnouncementValidator.startUpdate(bgpAnnouncements, distinctRtrPrefixes.toSeq)
           }
-          bgpAnnouncementValidator.startUpdate(bgpAnnouncements, distinctRtrPrefixes.toSeq)
           rtrServer.notify(newVersion)
         }
       }
@@ -202,6 +204,7 @@ class Main extends Http with Logging {
       timlineConflictsRecords = (labels.takeRight(7), List(values.takeRight(7)))
     }
   }
+
   private def connectToRouter(): Unit = {
     try {
       val shell = new SSHByPassword("bgpsafe", 22, "fima", "1987");
@@ -224,17 +227,28 @@ class Main extends Http with Logging {
   private def updateSuggestedWhitelistRecords() {
     //TODO try to move to += now the set is mutable
     //See if the user wants automatic whitelisting of long term conflicting ROA's
-    Future {
-      if (userPreferences.single.get.roaBgpConflictLearnMode) {
+    if (userPreferences.single.get.roaBgpConflictLearnMode) {
+      Future {
         val safeDays = userPreferences.single.get.conflictCertDays
-        bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.foreach(x => x.bgpAnnouncements --= x.bgpAnnouncements.filter(y => isBgpIssueOld(y._3)))
+        val curRtrPrefixes = memoryImage.single.get.getDistinctRtrPrefixes
         val filteredIssueSet = bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet.filterNot(x => x.bgpAnnouncements.isEmpty)
         memoryImage.single.get.suggestedWhitelistASN.clearEntries
-        filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(y => {
-          memoryImage.single.get.suggestedWhitelistASN.entries += new RtrPrefix(y._2.asn, y._2.prefix)
-//          updateMemoryImage(_.addSuggestedWhitelistEntry(new RtrPrefix(y._2.asn, y._2.prefix)))
-          //addSuggestedWhitelistEntry
+        filteredIssueSet.foreach(x => x.bgpAnnouncements.foreach(anonucmentPair => {
+          var foundOverlappingRoa = false
+          breakable {
+            for (curRtrPrefix <- curRtrPrefixes) {
+              if (curRtrPrefix.asn == anonucmentPair._2.asn && curRtrPrefix.prefix == anonucmentPair._2.prefix &&
+                curRtrPrefix.maxPrefixLength.getOrElse(24) == anonucmentPair._2.prefix.getPrefixLength) {
+                foundOverlappingRoa = true
+                break
+              }
+            }
+          }
+          if (!foundOverlappingRoa) {
+            memoryImage.single.get.suggestedWhitelistASN.entries += new RtrPrefix(anonucmentPair._2.asn, anonucmentPair._2.prefix, Option(anonucmentPair._2.prefix.getPrefixLength))
+          }
         }))
+
         updateMemoryImage(_.updateSuggestedWhitelistASN(memoryImage.single.get.suggestedWhitelistASN))
       }
     }
@@ -275,30 +289,30 @@ class Main extends Http with Logging {
   }
 
   private def updateFilters(forceUpdate: Boolean = false) = {
-      if (lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate) {
-        if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) {
-          memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
-          memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
-          var defaultMaxLen: Int = 0
-          val currentRtrPrefixes = memoryImage.single.get.validatedObjects.getValidatedRtrPrefixes
-          for (entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet) {
-            val affectedRoa = (currentRtrPrefixes.filter((IgnoreFilter(entry.roa.prefix)).shouldIgnore(_))).takeRight(100)
-            memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0),false,false,affectedRoa)
-            lastState = RoaOperationMode.ManualMode
-          }
-        }
-        if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA) {
-          val currentRtrPrefixes = memoryImage.single.get.validatedObjects.getValidatedRtrPrefixes
-          for (entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
-            if (!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))) {
-              val affectedRoa = (currentRtrPrefixes.filter((IgnoreFilter(entry.prefix)).shouldIgnore(_))).takeRight(100)
-              entry.block = true
-              memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix,affectedRoa)
-            }
-          }
-          lastState = RoaOperationMode.AutoModeRemoveBadROA
+    if (lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate) {
+      if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) {
+        memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
+        memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
+        var defaultMaxLen: Int = 0
+        val currentRtrPrefixes = memoryImage.single.get.validatedObjects.getValidatedRtrPrefixes
+        for (entry <- bgpAnnouncementValidator.roaBgpIssuesSet.roaBgpIssuesSet) {
+          val affectedRoa = (currentRtrPrefixes.filter((IgnoreFilter(entry.roa.prefix)).shouldIgnore(_))).takeRight(100)
+          memoryImage.single.get.suggestedRoaFilterList.entries += new SuggestedRoaFilter(entry.roa.asn, entry.roa.prefix, entry.roa.maxPrefixLength.getOrElse[Int](0), false, false, affectedRoa)
+          lastState = RoaOperationMode.ManualMode
         }
       }
+      if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.AutoModeRemoveBadROA) {
+        val currentRtrPrefixes = memoryImage.single.get.validatedObjects.getValidatedRtrPrefixes
+        for (entry <- memoryImage.single.get.suggestedRoaFilterList.entries) {
+          if (!memoryImage.single.get.filters.entries.contains(new IgnoreFilter(entry.prefix))) {
+            val affectedRoa = (currentRtrPrefixes.filter((IgnoreFilter(entry.prefix)).shouldIgnore(_))).takeRight(100)
+            entry.block = true
+            memoryImage.single.get.filters.entries += new IgnoreFilter(entry.prefix, affectedRoa)
+          }
+        }
+        lastState = RoaOperationMode.AutoModeRemoveBadROA
+      }
+    }
   }
 
 
