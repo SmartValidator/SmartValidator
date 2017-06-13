@@ -225,8 +225,6 @@ class Main extends Http with Logging {
   }
 
   private def updateSuggestedWhitelistRecords() {
-    //TODO try to move to += now the set is mutable
-    //See if the user wants automatic whitelisting of long term conflicting ROA's
     if (userPreferences.single.get.roaBgpConflictLearnMode) {
       Future {
         val safeDays = userPreferences.single.get.conflictCertDays
@@ -238,7 +236,7 @@ class Main extends Http with Logging {
           breakable {
             for (curRtrPrefix <- curRtrPrefixes) {
               if (curRtrPrefix.asn == anonucmentPair._2.asn && curRtrPrefix.prefix == anonucmentPair._2.prefix &&
-                curRtrPrefix.maxPrefixLength.getOrElse(24) == anonucmentPair._2.prefix.getPrefixLength) {
+                curRtrPrefix.maxPrefixLength.getOrElse(24) == anonucmentPair._2.prefix.getPrefixLength) { //TODO: might have issues with ipv6 due to prefix
                 foundOverlappingRoa = true
                 break
               }

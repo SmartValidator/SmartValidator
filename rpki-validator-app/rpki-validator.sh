@@ -177,7 +177,7 @@ case ${FIRST_ARG} in
         CLASSPATH=:"$LIB_DIR/*"
         MEM_OPTIONS="-Xms$JVM_XMS -Xmx$JVM_XMX"
 
-        CMDLINE="${JAVA_CMD} -agentlib:jdwp=transport=dt_socket,server=y,address=8123,suspend=y ${JVM_OPTIONS} ${MEM_OPTIONS} ${JAVA_OPTS} \
+        CMDLINE="${JAVA_CMD} -XX:+UseParallelGC -agentlib:jdwp=transport=dt_socket,server=y,address=8123,suspend=y ${JVM_OPTIONS} ${MEM_OPTIONS} ${JAVA_OPTS} \
                  -Dapp.name=${APP_NAME} -Dconfig.file=${CONFIG_FILE} \
                  -classpath ${CLASSPATH} net.ripe.rpki.validator.config.Main"
 
