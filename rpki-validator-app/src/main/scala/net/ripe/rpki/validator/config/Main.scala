@@ -243,7 +243,7 @@ class Main extends Http with Logging {
             }
           }
           if (!foundOverlappingRoa) {
-            memoryImage.single.get.suggestedWhitelistASN.entries += new RtrPrefix(anonucmentPair._2.asn, anonucmentPair._2.prefix, Option(anonucmentPair._2.prefix.getPrefixLength))
+            memoryImage.single.get.suggestedWhitelistASN.entries += RtrPrefix(anonucmentPair._2.asn, anonucmentPair._2.prefix, Option(anonucmentPair._2.prefix.getPrefixLength))
           }
         }))
 
@@ -288,7 +288,7 @@ class Main extends Http with Logging {
 
   private def updateFilters(forceUpdate: Boolean = false) = {
     if (lastState == null || main.userPreferences.single.get.roaOperationMode != lastState || forceUpdate) {
-      if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) {
+      if (main.userPreferences.single.get.roaOperationMode == RoaOperationMode.ManualMode) { //TODO: will always enter here due since last state isn't checked
         memoryImage.single.get.suggestedRoaFilterList.entries = scala.collection.mutable.Set.empty
         memoryImage.single.get.filters.entries = scala.collection.mutable.Set.empty
         var defaultMaxLen: Int = 0
