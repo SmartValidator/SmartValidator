@@ -243,7 +243,7 @@ class Main extends Http with Logging {
             }
           }
           if (!foundOverlappingRoa) {
-            memoryImage.single.get.suggestedWhitelistASN.entries += RtrPrefix(anonucmentPair._2.asn, anonucmentPair._2.prefix, Option(anonucmentPair._2.prefix.getPrefixLength))
+            memoryImage.single.get.suggestedWhitelistASN.entries += new RtrPrefix(anonucmentPair._2.asn, anonucmentPair._2.prefix, Option(anonucmentPair._2.prefix.getPrefixLength))
           }
         }))
 

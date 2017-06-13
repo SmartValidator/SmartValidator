@@ -42,6 +42,7 @@ trait HomeController extends ApplicationController {
 
   protected def getRtrPrefixes: Seq[RtrPrefix]
   protected def suggestedWhitelistASN: SuggestedWhitelist
+  protected def whitelist: Whitelist
   protected def validatedObjects: ValidatedObjects
   protected def bgpAnnouncementSet: Seq[BgpAnnouncementSet]
   protected def suggestedRoaFilters : SuggestedRoaFilterList
@@ -73,13 +74,10 @@ trait HomeController extends ApplicationController {
       contentType = "text/json"
       response.addHeader("Pragma", "public")
       response.addHeader("Cache-Control", "no-cache")
-      var sumInvalidAsn = 0
-      val timeLineList = List()
-      roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidAsn += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidAsn)))
-      var sumInvalidLength = 0
-      roaBgpIssuesSet.roaBgpIssuesSet.toArray.foreach(x=> sumInvalidLength += x.bgpAnnouncements.count(_._1.equals(RouteValidity.InvalidLength)))
+      var sumInvalidAsn = validatedAnnouncements.count(_.validity.equals(RouteValidity.InvalidAsn))
+      var sumInvalidLength = validatedAnnouncements.count(_.validity.equals(RouteValidity.InvalidLength))
       val labels = List("Invalid ASN","Invalid Length", "Loose Roa")
-      val values = List(sumInvalidAsn,sumInvalidLength,12456)
+      val values = List(sumInvalidAsn,sumInvalidLength,6237)
       val json = ("labels" -> labels) ~ ("series" -> values)
 
       response.getWriter.write(pretty(render(json)))
@@ -92,9 +90,13 @@ trait HomeController extends ApplicationController {
     response.addHeader("Pragma", "public")
     response.addHeader("Cache-Control", "no-cache")
 
-    val filteredRoas = validatedObjects.getValidatedRtrPrefixes.toList.distinct.size - getRtrPrefixes.size + suggestedWhitelistASN.entries.toSeq.distinct.size
+    val filteredRoas = filters.entries.size
     val validRoaSize = getRtrPrefixes.size //the roas that are sent to the router
-    val roasToBeFiltered = suggestedRoaFilters.entries.toList.distinct.size
+    var checkConflictedRoas = validatedAnnouncements.filterNot(x=> {x.validity.equals(RouteValidity.Valid) || x.validity.equals(RouteValidity.Unknown)})
+    var roasToBeFiltered = 0
+    checkConflictedRoas.foreach(x=> {roasToBeFiltered += x.prefixes.count(y => {y._1.equals(RouteValidity.InvalidAsn) || y._1.equals(RouteValidity.InvalidLength)})})
+    var papo = 0
+    checkConflictedRoas.foreach(x=> {papo += x.prefixes.size})
 
     var labels = List("Total number of validated ROAs", "Filtered ROAs", "ROAs in conflict")
     val values = List(validRoaSize, filteredRoas, roasToBeFiltered)

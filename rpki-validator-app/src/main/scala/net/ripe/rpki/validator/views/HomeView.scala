@@ -58,7 +58,7 @@ class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMe
       <h1 id = "RoaIssueHead" style ="font-weight: bold;font-size: 21px;">Roa Issues Status</h1>
       <h4> </h4></div>
     <div id="conflitsTimeline">
-      <h1 id = "conflitsTimelineHead" style ="font-weight: bold;font-size: 21px;">Roa Issues Status</h1>
+      <h1 id = "conflitsTimelineHead" style ="font-weight: bold;font-size: 21px;">Conflict Detection Timeline</h1>
       <h4> </h4></div>
     <div class="ct-chart"></div>
     <div class="ct-chart-pie"></div>
