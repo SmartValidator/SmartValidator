@@ -34,7 +34,7 @@ import java.io.{File, PrintStream}
 import java.util.EnumSet
 import javax.servlet.DispatcherType
 
-import com.jcabi.ssh.{SSHByPassword, Shell}
+import com.jcabi.ssh.{SshByPassword, Shell}
 import grizzled.slf4j.Logging
 import net.ripe.ipresource.Asn
 import net.ripe.rpki.validator.RoaBgpIssues.RoaBgpIssueSeeker
@@ -207,7 +207,7 @@ class Main extends Http with Logging {
 
   private def connectToRouter(): Unit = {
     try {
-      val shell = new SSHByPassword("bgpsafe", 22, "fima", "1987");
+      val shell = new SshByPassword("bgpsafe", 22, "fima", "1987");
       val stdout = new Shell.Plain(shell).exec("show ip interface brief");
       logger.info(stdout);
     } catch {

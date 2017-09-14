@@ -50,12 +50,12 @@ class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMe
     </div>
     <div id="validatedRoasVSfilters"></div>
     <div id="bgpAnnouncementsheaddiv">
-      <h1 id = "BGPannHead" style ="font-weight: bold;font-size: 21px;">BGP's Annoucments Status</h1>
+      <h1 id = "BGPannHead" style ="font-weight: bold;font-size: 21px;">BGP Announcements Status</h1>
       <h4> </h4>
     </div>
     <div id="bgpAnnouncements"></div>
     <div id="roaIssues">
-      <h1 id = "RoaIssueHead" style ="font-weight: bold;font-size: 21px;">Roa Issues Status</h1>
+      <h1 id = "RoaIssueHead" style ="font-weight: bold;font-size: 21px;">ROA Issues Status</h1>
       <h4> </h4></div>
     <div id="conflitsTimeline">
       <h1 id = "conflitsTimelineHead" style ="font-weight: bold;font-size: 21px;">Conflict Detection Timeline</h1>

@@ -108,7 +108,7 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
               <label class="radio">
                 Current protection level is:
                 {Text(userPreferences.roaOperationMode.toString)}
-                choose protection level -
+                - choose protection level
                 {if (isRoaOperationMode(RoaOperationMode.ManualMode)) {
                 <ul>
                   <li>
@@ -116,10 +116,10 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                     Manual mode</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveBadROA.toString)}/>
-                    Automatically remove ROA's which invalidate BGP anonucments</li>
+                    Automatically remove ROA which invalidate BGP announcements</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)}/>
-                    Automatically preserve ROA's which invalidate BGP anonucments</li>
+                    Automatically preserve ROA which invalidate BGP announcements</li>
                 </ul>
               } else if (isRoaOperationMode(RoaOperationMode.AutoModeRemoveBadROA)) {
                 <ul>
@@ -128,10 +128,10 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                     Manual mode</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveBadROA.toString)} checked="checked"/>
-                    Automatically remove ROA's which invalidate BGP anonucments</li>
+                    Automatically remove ROA which invalidate BGP announcements</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)}/>
-                    Automatically preserve ROA's which invalidate BGP anonucments</li>
+                    Automatically preserve ROA which invalidate BGP announcements</li>
                 </ul>
               }
               else {
@@ -141,10 +141,10 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                     Manual mode</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveBadROA.toString)}/>
-                    Automatically remove ROA's which invalidate BGP anonucments</li>
+                    Automatically remove ROA which invalidate BGP announcements</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked="checked"/>
-                    Automatically preserve ROA's which invalidate BGP anonucments</li>
+                    Automatically preserve ROA which invalidate BGP announcements</li>
                 </ul>
 
               }}
@@ -154,9 +154,9 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                 case true => <input name="BGP-ROA-CONFLICT-LEARN-MODE" type="checkbox" checked="checked"/>
                 case false => <input name="BGP-ROA-CONFLICT-LEARN-MODE" type="checkbox"/>
               }}
-                Enable to learn ROA - BGP Anoucment conflict and automatically approve conflicted BGP Anouncmetns after specific amount of time.
+                Enable to learn ROA - BGP announcement conflicts and automatically approve conflicted BGP announcements after a specific amount of time.
                 <span rel="twipsy" data-original-title="Increasing this number increases the certinty rate that a BGP-ROA conflict is a mistake">
-                  time:
+                  Time:
                   <input type="number" class="span2" min="0" name="fake-conflict-certinty-rate" value={Text(userPreferences.conflictCertDays.toString)}/>
                 </span>
               </label>

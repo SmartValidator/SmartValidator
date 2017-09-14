@@ -47,11 +47,11 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
     <div class="alert-message block-message info" data-alert="alert">
     <a class="close" href="#">×</a>
     <p>By adding a filter the validator will ignore any RPKI prefixes that overlap with the filter's prefix.
-      Once you add a filter, an entry will be added to "Current filters" table.
+      Once you add a filter, an entry will be added to the "Current filters" table.
       </p>
-      <p>Suggested Roa Filters - Calculated by SaferHop, this table holds a suggestive filters of ROAs which are in conflict with BGP Annoucments.
-        This ROAs may affect your network activity badly. Click on the 'Filter' button will remove this ROA and any other ROA afiliated with it, this will eliminate
-        any possibility to network issue resulted from this ROA. For more information got to [Help] page.
+      <p>Suggested ROA Filters - Calculated by SaferHop, this table holds  suggestive filters of ROAs which are in conflict with BGP Announcements.
+        This ROAs may affect your network activity badly. Clicking on the 'Filter' button will remove this ROA and any other ROA afiliated with it, this will eliminate
+        any possibility of network issues resulting from this ROA. For more information visit the [Help] page.
       </p>
     </div>
     <h2>Add filter</h2>
@@ -72,7 +72,7 @@ class FiltersView(filters: Filters, getCurrentRtrPrefixes: () => Iterable[RtrPre
       </form>
     </div>
       <div>
-        <h2>Suggested Roa Filters</h2>{
+        <h2>Suggested ROA Filters</h2>{
         if (suggestedRoaFilters.entries.isEmpty)
           <div class="alert-message block-message"><p>No suggested Roa filter exist.</p></div>
         else {
