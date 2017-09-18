@@ -91,15 +91,26 @@ trait HomeController extends ApplicationController {
     response.addHeader("Cache-Control", "no-cache")
 
     val filteredRoas = filters.entries.size
-    val validRoaSize = getRtrPrefixes.size //the roas that are sent to the router
+    
+    // Old version:
+    /*val validRoaSize = getRtrPrefixes.size //the roas that are sent to the router
     var checkConflictedRoas = validatedAnnouncements.filterNot(x=> {x.validity.equals(RouteValidity.Valid) || x.validity.equals(RouteValidity.Unknown)})
     var roasToBeFiltered = 0
     checkConflictedRoas.foreach(x=> {roasToBeFiltered += x.prefixes.count(y => {y._1.equals(RouteValidity.InvalidAsn) || y._1.equals(RouteValidity.InvalidLength)})})
     var papo = 0
     checkConflictedRoas.foreach(x=> {papo += x.prefixes.size})
-
+    
     var labels = List("Total number of validated ROAs", "Filtered ROAs", "ROAs in conflict")
-    val values = List(validRoaSize, filteredRoas, roasToBeFiltered)
+    val values = List(validRoaSize, filteredRoas, roasToBeFiltered)*/
+    
+    // New version:
+    var checkConflictedRoas = validatedAnnouncements.filterNot(x=> {x.validity.equals(RouteValidity.Valid) || x.validity.equals(RouteValidity.Unknown)})
+    var roasToBeFiltered = 0
+    checkConflictedRoas.foreach(x=> {roasToBeFiltered += x.prefixes.count(y => {y._1.equals(RouteValidity.InvalidAsn) || y._1.equals(RouteValidity.InvalidLength)})})
+    val validRoaSize = getRtrPrefixes.size - roasToBeFiltered - filteredRoas
+
+    var labels = List("Non-troubling ROAs", "ROAs in conflict", "Filtered ROAs")
+    val values = List(validRoaSize, roasToBeFiltered, filteredRoas)
     val json = ("labels" -> labels) ~ ("series" -> values)
 
     response.getWriter.write(pretty(render(json)))

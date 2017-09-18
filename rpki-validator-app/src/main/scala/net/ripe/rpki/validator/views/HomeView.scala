@@ -244,7 +244,7 @@ class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMe
           console.log( bgpAnnouncements );
           var chartbgpAnnouncements = new Chartist.Pie('#bgpAnnouncements', bgpAnnouncements, {
             showLabel: false,
-            dount: true,
+            donut: true,
             plugins: [
                        Chartist.plugins.legend({
             legendNames: ['Valid ' + bgpAnnouncements.series[0].toString(), 'Invalid ' + bgpAnnouncements.series[1].toString(), 'Unknown ' + bgpAnnouncements.series[2].toString()]
@@ -309,7 +309,13 @@ class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMe
             console.log( "second success" );
             console.log( validatedRoasVSfilters );
             var data = validatedRoasVSfilters
-            var percent = ((data.series[2] / data.series[0])*100).toString()
+            var totalRoas = data.series[0] + data.series[1] + data.series[2]
+            var percent;
+            if(totalRoas == 0){
+                percent = 0
+            } else {
+                percent = ((data.series[1] / totalRoas)*100).toString()
+            }
             percent = Math.round(percent*100)/100;
             document.getElementById('ConflictRoasHead').innerHTML = "Conflicted ROAs - Currently  " + percent + "% ROAs are in conflict"
 
@@ -318,7 +324,7 @@ class HomeView(params: Map[String, String] = Map.empty, messages: Seq[FeedbackMe
               showLabel: false,
               plugins: [
                    Chartist.plugins.legend({
-            legendNames: ['Total number of ROAs ' + validatedRoasVSfilters.series[0].toString(), 'Filtered ROAs ' + validatedRoasVSfilters.series[1].toString(),'ROAs in conflict ' + validatedRoasVSfilters.series[2].toString()]
+            legendNames: ['Non-Troubling ROAs ' + validatedRoasVSfilters.series[0].toString(), 'ROAs in conflict ' + validatedRoasVSfilters.series[1].toString(),'Filtered ROAs ' + validatedRoasVSfilters.series[2].toString()]
             })
               ]
 

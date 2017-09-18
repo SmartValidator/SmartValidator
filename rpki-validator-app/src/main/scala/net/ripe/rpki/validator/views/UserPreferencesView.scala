@@ -116,10 +116,10 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                     Manual mode</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveBadROA.toString)}/>
-                    Automatically remove ROA which invalidate BGP announcements</li>
+                    Automatically remove ROAs which invalidate BGP announcements</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)}/>
-                    Automatically preserve ROA which invalidate BGP announcements</li>
+                    Automatically preserve ROAs which invalidate BGP announcements</li>
                 </ul>
               } else if (isRoaOperationMode(RoaOperationMode.AutoModeRemoveBadROA)) {
                 <ul>
@@ -128,10 +128,10 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                     Manual mode</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveBadROA.toString)} checked="checked"/>
-                    Automatically remove ROA which invalidate BGP announcements</li>
+                    Automatically remove ROAs which invalidate BGP announcements</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)}/>
-                    Automatically preserve ROA which invalidate BGP announcements</li>
+                    Automatically preserve ROAs which invalidate BGP announcements</li>
                 </ul>
               }
               else {
@@ -141,10 +141,10 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                     Manual mode</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveBadROA.toString)}/>
-                    Automatically remove ROA which invalidate BGP announcements</li>
+                    Automatically remove ROAs which invalidate BGP announcements</li>
                   <li>
                     <input type="radio" name="ROA-operation-mode" value={Text(RoaOperationMode.AutoModeRemoveGoodROA.toString)} checked="checked"/>
-                    Automatically preserve ROA which invalidate BGP announcements</li>
+                    Automatically preserve ROAs which invalidate BGP announcements</li>
                 </ul>
 
               }}
@@ -154,14 +154,14 @@ class UserPreferencesView(val userPreferences: UserPreferences, val messages: Se
                 case true => <input name="BGP-ROA-CONFLICT-LEARN-MODE" type="checkbox" checked="checked"/>
                 case false => <input name="BGP-ROA-CONFLICT-LEARN-MODE" type="checkbox"/>
               }}
-                Enable to learn ROA - BGP announcement conflicts and automatically approve conflicted BGP announcements after a specific amount of time.
+                Enable to learn ROA - BGP announcement conflicts and automatically approve conflicted BGP announcements after
                 <span rel="twipsy" data-original-title="Increasing this number increases the certinty rate that a BGP-ROA conflict is a mistake">
-                  Time:
                   <input type="number" class="span2" min="0" name="fake-conflict-certinty-rate" value={Text(userPreferences.conflictCertDays.toString)}/>
+                  days.
                 </span>
               </label>
               <label class="checkbox">
-                The number of days to hold BGP-ROA conflicted values that weren't validated
+                The number of days to hold ROA - BGP conflicted values that weren't validated
                 <span rel="twipsy" data-original-title="Increasing this number means that you would like to hold ROA-BGP conflicted that weren't validated fot this number of days.">
                   <input type="number" class="span2" min="0" name="max-conflicted-bgp-stale-days" value={Text(userPreferences.maxConflictedBgpStaleDays.toString)}/>
                 </span>
