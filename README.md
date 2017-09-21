@@ -1,4 +1,6 @@
-Smart RPKI - Validator
+Smart RPKI - Validator 
+
+Build status: [![Build Status](https://travis-ci.org/SmartValidator/SmartValidator.svg?branch=master)](https://travis-ci.org/SmartValidator/SmartValidator)
 ======================
 
 License
