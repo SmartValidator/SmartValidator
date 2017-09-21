@@ -1,4 +1,4 @@
 language: scala
 
 
-scirpt: "mvn package -DskipTests -Dmaven.javadoc.skip=false"
+scirpt: "mvn package -Dmaven.test.skip=true -Dmaven.javadoc.skip=false"
