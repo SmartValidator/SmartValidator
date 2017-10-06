@@ -27,4 +27,15 @@ Though actually, it is not active, so she/you can asses how valuable the Validat
 Installation
 ------------
 
-...
+- Prerequisite: Java 8
+- The package (either downloaded pre-compiled package or own build result) contains the full
+   application and necessary libraries to run the validator
+- Steps to run the package are:
+    ```
+    tar zxf rpki-validator-app-2.24-SNAPSHOT-dist.tar.gz 
+    cd rpki-validator-app-2.24-SNAPSHOT/
+    ./rpki-validator.sh start
+    ```
+- After that the validator web interface shoud be accessible on
+   http://localhost:8080
+- For more details, see the "Installation" Wiki page
